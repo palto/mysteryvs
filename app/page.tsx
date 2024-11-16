@@ -1,6 +1,7 @@
-"use client"
+"use client";
 import Image from "next/image";
-import {Timer} from "@/components/ui/timer";
+import { Timer } from "@/components/ui/timer";
+import { Participants } from "@/components/ui/participants";
 
 export default function Home() {
   return (
@@ -11,6 +12,8 @@ export default function Home() {
         <h2>Ajastin!</h2>
         <Timer></Timer>
 
+        <h2>Osallistujat</h2>
+        <Participants />
       </main>
       <footer className="row-start-3 flex gap-6 flex-wrap items-center justify-center">
         <a
