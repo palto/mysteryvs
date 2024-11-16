@@ -49,14 +49,38 @@ export function Participants() {
     form.reset({ name: "" });
   }
 
-  function onCompleted(participantId: string) {
+  function onCompleted(id: string) {
     setParticipants(
       produce((draft) => {
-        const participant = draft.find((p) => p.id === participantId);
+        const participant = draft.find((p) => p.id === id);
         if (!participant) {
-          throw new Error("Participant not found with id " + participantId);
+          throw new Error("Participant not found with id " + id);
         }
         participant.completedTime = Date.now();
+      }),
+    );
+  }
+
+  function onCancel(id: string) {
+    setParticipants(
+      produce((draft) => {
+        const participant = draft.find((p) => p.id === id);
+        if (!participant) {
+          throw new Error("Participant not found with id " + id);
+        }
+        participant.completedTime = undefined;
+      }),
+    );
+  }
+
+  function onDelete(id: string) {
+    setParticipants(
+      produce((draft) => {
+        const index = draft.findIndex((p) => p.id === id);
+        if (index === undefined) {
+          throw new Error("Participant not found with id " + id);
+        }
+        draft.splice(index, 1);
       }),
     );
   }
@@ -89,7 +113,24 @@ export function Participants() {
                       </span>
                     )}
                   </TableCell>
-                  <TableCell></TableCell>
+                  <TableCell>
+                    {participant.completedTime && (
+                      <Button
+                        variant="link"
+                        onClick={() => onCancel(participant.id)}
+                      >
+                        Huijasi!
+                      </Button>
+                    )}
+                    {!participant.completedTime && (
+                      <Button
+                        variant="link"
+                        onClick={() => onDelete(participant.id)}
+                      >
+                        Poista!
+                      </Button>
+                    )}
+                  </TableCell>
                 </TableRow>
               );
             })}
