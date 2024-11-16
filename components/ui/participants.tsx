@@ -163,14 +163,14 @@ export function Participants() {
                         {participant.name.toUpperCase()}!!!
                       </Button>
                     )}
-
                     {participant.completedTime && (
                       <>
                         {participant.name}&nbsp;
-                        {format(
-                          participant.completedTime - startTime!,
-                          "mm:ss:SSS",
-                        )}
+                        {startTime &&
+                          format(
+                            participant.completedTime - startTime,
+                            "mm:ss:SSS",
+                          )}
                       </>
                     )}
                   </TableCell>
