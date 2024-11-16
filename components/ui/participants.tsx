@@ -2,10 +2,8 @@ import { useState } from "react";
 import {
   Form,
   FormControl,
-  FormDescription,
   FormField,
   FormItem,
-  FormLabel,
   FormMessage,
 } from "@/components/ui/form";
 import { z } from "zod";
@@ -23,10 +21,13 @@ import {
   TableHeader,
   TableRow,
 } from "@/components/ui/table";
+import { produce } from "immer";
+import { Check } from "lucide-react";
 
 type Participant = {
   id: string;
   name: string;
+  completedTime?: number;
 };
 
 const participantFormSchema = z.object({
@@ -48,6 +49,18 @@ export function Participants() {
     form.reset({ name: "" });
   }
 
+  function onCompleted(participantId: string) {
+    setParticipants(
+      produce((draft) => {
+        const participant = draft.find((p) => p.id === participantId);
+        if (!participant) {
+          throw new Error("Participant not found with id " + participantId);
+        }
+        participant.completedTime = Date.now();
+      }),
+    );
+  }
+
   return (
     <div>
       {participants.length > 0 && (
@@ -63,8 +76,20 @@ export function Participants() {
             {participants.map((participant) => {
               return (
                 <TableRow key={participant.id}>
-                  <TableCell>{participant.name}</TableCell>
-                  <TableCell>Poista</TableCell>
+                  <TableCell>
+                    {!participant.completedTime && (
+                      <Button onClick={() => onCompleted(participant.id)}>
+                        {participant.name.toUpperCase()}!!!
+                      </Button>
+                    )}
+
+                    {participant.completedTime && (
+                      <span>
+                        <Check /> {participant.name}
+                      </span>
+                    )}
+                  </TableCell>
+                  <TableCell></TableCell>
                 </TableRow>
               );
             })}
