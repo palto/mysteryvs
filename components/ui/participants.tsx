@@ -1,4 +1,3 @@
-import { useState } from "react";
 import {
   Form,
   FormControl,
@@ -22,11 +21,12 @@ import {
   TableRow,
 } from "@/components/ui/table";
 import { produce } from "immer";
-import { Check } from "lucide-react";
 import _ from "lodash";
 import { useLocalStorage } from "usehooks-ts";
+import { START_TIME_KEY } from "@/components/ui/timer";
+import { format } from "date-fns";
 
-type Participant = {
+export type Participant = {
   id: string;
   name: string;
   completedTime?: number;
@@ -36,9 +36,11 @@ const participantFormSchema = z.object({
   name: z.string().min(2).max(100),
 });
 
+export const PARTICIPANTS_KEY = "participants";
+
 export function Participants() {
   const [participants, setParticipants] = useLocalStorage<Participant[]>(
-    "participants",
+    PARTICIPANTS_KEY,
     [],
     {
       initializeWithValue: false,
@@ -93,6 +95,8 @@ export function Participants() {
     );
   }
 
+  const startTime = useStartTime();
+
   return (
     <div>
       {participants.length > 0 && (
@@ -100,50 +104,52 @@ export function Participants() {
           <TableCaption>A list of your recent invoices.</TableCaption>
           <TableHeader>
             <TableRow>
-              <TableHead className="w-[100px]">Nimi</TableHead>
+              <TableHead className="w-[300px]">Nimi</TableHead>
               <TableHead>Toiminnot</TableHead>
             </TableRow>
           </TableHeader>
           <TableBody>
-            {_.sortBy(participants, ["completedTime", "id"]).map(
-              (participant) => {
-                return (
-                  <TableRow key={participant.id}>
-                    <TableCell>
-                      {!participant.completedTime && (
-                        <Button onClick={() => onCompleted(participant.id)}>
-                          {participant.name.toUpperCase()}!!!
-                        </Button>
-                      )}
+            {_.sortBy(participants, ["completedTime"]).map((participant) => {
+              return (
+                <TableRow key={participant.id}>
+                  <TableCell>
+                    {!participant.completedTime && (
+                      <Button onClick={() => onCompleted(participant.id)}>
+                        {participant.name.toUpperCase()}!!!
+                      </Button>
+                    )}
 
-                      {participant.completedTime && (
-                        <span>
-                          <Check /> {participant.name}
-                        </span>
-                      )}
-                    </TableCell>
-                    <TableCell>
-                      {participant.completedTime && (
-                        <Button
-                          variant="link"
-                          onClick={() => onCancel(participant.id)}
-                        >
-                          Huijasi!
-                        </Button>
-                      )}
-                      {!participant.completedTime && (
-                        <Button
-                          variant="link"
-                          onClick={() => onDelete(participant.id)}
-                        >
-                          Poista!
-                        </Button>
-                      )}
-                    </TableCell>
-                  </TableRow>
-                );
-              },
-            )}
+                    {participant.completedTime && (
+                      <>
+                        {participant.name}&nbsp;
+                        {format(
+                          participant.completedTime - startTime!,
+                          "mm:ss:SSS",
+                        )}
+                      </>
+                    )}
+                  </TableCell>
+                  <TableCell>
+                    {participant.completedTime && (
+                      <Button
+                        variant="link"
+                        onClick={() => onCancel(participant.id)}
+                      >
+                        Huijasi!
+                      </Button>
+                    )}
+                    {!participant.completedTime && (
+                      <Button
+                        variant="link"
+                        onClick={() => onDelete(participant.id)}
+                      >
+                        Poista!
+                      </Button>
+                    )}
+                  </TableCell>
+                </TableRow>
+              );
+            })}
           </TableBody>
         </Table>
       )}
@@ -171,4 +177,11 @@ export function Participants() {
       </Form>
     </div>
   );
+}
+
+function useStartTime() {
+  const [startTime] = useLocalStorage(START_TIME_KEY, undefined, {
+    initializeWithValue: false,
+  });
+  return startTime;
 }
