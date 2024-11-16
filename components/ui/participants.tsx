@@ -38,10 +38,55 @@ const participantFormSchema = z.object({
 
 export const PARTICIPANTS_KEY = "participants";
 
+const defaultSeedTime = Date.parse("2024-11-16T20:00:00").valueOf();
+
+export const defaultParticipants: Participant[] = [
+  {
+    id: ulid(defaultSeedTime),
+    name: "Anssi",
+  },
+  {
+    id: ulid(defaultSeedTime),
+    name: "Antti",
+  },
+  {
+    id: ulid(defaultSeedTime),
+    name: "Eetu",
+  },
+  {
+    id: ulid(defaultSeedTime),
+    name: "Jarkko",
+  },
+  {
+    id: ulid(defaultSeedTime),
+    name: "Jussi",
+  },
+  {
+    id: ulid(defaultSeedTime),
+    name: "Juuso",
+  },
+  {
+    id: ulid(defaultSeedTime),
+    name: "Jörö",
+  },
+  {
+    id: ulid(defaultSeedTime),
+    name: "Lauri",
+  },
+  {
+    id: ulid(defaultSeedTime),
+    name: "Pyry",
+  },
+  {
+    id: ulid(defaultSeedTime),
+    name: "Toni",
+  },
+];
+
 export function Participants() {
   const [participants, setParticipants] = useLocalStorage<Participant[]>(
     PARTICIPANTS_KEY,
-    [],
+    defaultParticipants,
     {
       initializeWithValue: false,
     },

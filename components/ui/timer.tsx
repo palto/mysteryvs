@@ -2,7 +2,7 @@ import { useState } from "react";
 import { format } from "date-fns";
 import { useInterval, useLocalStorage } from "usehooks-ts";
 import { Button } from "@/components/ui/button";
-import { Participant } from "@/components/ui/participants";
+import { defaultParticipants, Participant } from "@/components/ui/participants";
 import { produce } from "immer";
 
 export const START_TIME_KEY = "startTime";
@@ -62,7 +62,7 @@ export function Timer() {
 function useParticipants() {
   const [participants, setParticipants] = useLocalStorage<
     Participant[] | undefined
-  >("participants", undefined, {
+  >("participants", defaultParticipants, {
     initializeWithValue: false,
   });
 
