@@ -14,9 +14,18 @@ import { zodResolver } from "@hookform/resolvers/zod";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { ulid } from "ulid";
+import {
+  Table,
+  TableBody,
+  TableCaption,
+  TableCell,
+  TableHead,
+  TableHeader,
+  TableRow,
+} from "@/components/ui/table";
 
 type Participant = {
-  ulid: string;
+  id: string;
   name: string;
 };
 
@@ -35,12 +44,38 @@ export function Participants() {
   });
 
   function onSubmit(values: z.infer<typeof participantFormSchema>) {
-    setParticipants([...participants, { ulid: ulid(), ...values }]);
+    setParticipants([...participants, { id: ulid(), ...values }]);
     form.reset({ name: "" });
   }
 
   return (
     <div>
+      {participants.length > 0 && (
+        <Table>
+          <TableCaption>A list of your recent invoices.</TableCaption>
+          <TableHeader>
+            <TableRow>
+              <TableHead className="w-[100px]">Nimi</TableHead>
+              <TableHead>Toiminnot</TableHead>
+            </TableRow>
+          </TableHeader>
+          <TableBody>
+            {participants.map((participant) => {
+              return (
+                <TableRow key={participant.id}>
+                  <TableCell>{participant.name}</TableCell>
+                  <TableCell>Poista</TableCell>
+                </TableRow>
+              );
+            })}
+          </TableBody>
+        </Table>
+      )}
+
+      {participants.length === 0 && (
+        <div>Ei vielä yhtään osallistujaa. Lisää alla olevasta lomakkeesta</div>
+      )}
+
       <Form {...form}>
         <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-8">
           <FormField
@@ -48,11 +83,9 @@ export function Participants() {
             name="name"
             render={({ field }) => (
               <FormItem>
-                <FormLabel>Pelaajan nimi</FormLabel>
                 <FormControl>
-                  <Input placeholder="syötä nimi tähän" {...field} />
+                  <Input placeholder="Uuden pelaajan nimi" {...field} />
                 </FormControl>
-                <FormDescription>Tämä on pelaajan nimi</FormDescription>
                 <FormMessage />
               </FormItem>
             )}
@@ -60,13 +93,6 @@ export function Participants() {
           <Button type="submit">Lisää</Button>
         </form>
       </Form>
-      <div>
-        <ol>
-          {participants.map((participant) => (
-            <li key={participant.ulid}>{participant.name}</li>
-          ))}
-        </ol>
-      </div>
     </div>
   );
 }
