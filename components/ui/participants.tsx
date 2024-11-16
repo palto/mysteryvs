@@ -23,6 +23,7 @@ import {
 } from "@/components/ui/table";
 import { produce } from "immer";
 import { Check } from "lucide-react";
+import _ from "lodash";
 
 type Participant = {
   id: string;
@@ -97,43 +98,45 @@ export function Participants() {
             </TableRow>
           </TableHeader>
           <TableBody>
-            {participants.map((participant) => {
-              return (
-                <TableRow key={participant.id}>
-                  <TableCell>
-                    {!participant.completedTime && (
-                      <Button onClick={() => onCompleted(participant.id)}>
-                        {participant.name.toUpperCase()}!!!
-                      </Button>
-                    )}
+            {_.sortBy(participants, ["completedTime", "id"]).map(
+              (participant) => {
+                return (
+                  <TableRow key={participant.id}>
+                    <TableCell>
+                      {!participant.completedTime && (
+                        <Button onClick={() => onCompleted(participant.id)}>
+                          {participant.name.toUpperCase()}!!!
+                        </Button>
+                      )}
 
-                    {participant.completedTime && (
-                      <span>
-                        <Check /> {participant.name}
-                      </span>
-                    )}
-                  </TableCell>
-                  <TableCell>
-                    {participant.completedTime && (
-                      <Button
-                        variant="link"
-                        onClick={() => onCancel(participant.id)}
-                      >
-                        Huijasi!
-                      </Button>
-                    )}
-                    {!participant.completedTime && (
-                      <Button
-                        variant="link"
-                        onClick={() => onDelete(participant.id)}
-                      >
-                        Poista!
-                      </Button>
-                    )}
-                  </TableCell>
-                </TableRow>
-              );
-            })}
+                      {participant.completedTime && (
+                        <span>
+                          <Check /> {participant.name}
+                        </span>
+                      )}
+                    </TableCell>
+                    <TableCell>
+                      {participant.completedTime && (
+                        <Button
+                          variant="link"
+                          onClick={() => onCancel(participant.id)}
+                        >
+                          Huijasi!
+                        </Button>
+                      )}
+                      {!participant.completedTime && (
+                        <Button
+                          variant="link"
+                          onClick={() => onDelete(participant.id)}
+                        >
+                          Poista!
+                        </Button>
+                      )}
+                    </TableCell>
+                  </TableRow>
+                );
+              },
+            )}
           </TableBody>
         </Table>
       )}
