@@ -24,6 +24,7 @@ import {
 import { produce } from "immer";
 import { Check } from "lucide-react";
 import _ from "lodash";
+import { useLocalStorage } from "usehooks-ts";
 
 type Participant = {
   id: string;
@@ -36,7 +37,13 @@ const participantFormSchema = z.object({
 });
 
 export function Participants() {
-  const [participants, setParticipants] = useState<Participant[]>([]);
+  const [participants, setParticipants] = useLocalStorage<Participant[]>(
+    "participants",
+    [],
+    {
+      initializeWithValue: false,
+    },
+  );
 
   const form = useForm<z.infer<typeof participantFormSchema>>({
     resolver: zodResolver(participantFormSchema),
