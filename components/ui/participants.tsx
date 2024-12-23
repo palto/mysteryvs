@@ -146,7 +146,7 @@ export function Participants() {
     <div>
       {participants.length > 0 && (
         <Table>
-          <TableCaption>A list of your recent invoices.</TableCaption>
+          <TableCaption>Lisää uusi pelaaja</TableCaption>
           <TableHeader>
             <TableRow>
               <TableHead className="w-[300px]">Nimi</TableHead>
