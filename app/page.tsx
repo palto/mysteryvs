@@ -2,8 +2,24 @@
 import Image from "next/image";
 import { Timer } from "@/components/ui/timer";
 import { Participants } from "@/components/ui/participants";
+import { contextType, store } from "@/app/mysterystore";
+import { useEffect } from "react";
+import { useLocalStorage } from "usehooks-ts";
 
 export default function Home() {
+  const [, setPersistedState] = useLocalStorage<contextType | undefined>(
+    "snapshot",
+    undefined,
+  );
+
+  // Persist store with every update
+  useEffect(() => {
+    const subscription = store.subscribe((snapshot) => {
+      setPersistedState(snapshot.context);
+    });
+    return subscription.unsubscribe;
+  }, [setPersistedState]);
+
   return (
     <div className="grid grid-rows-[20px_1fr_20px] items-center justify-items-center min-h-screen p-8 pb-20 gap-16 sm:p-20 font-[family-name:var(--font-geist-sans)]">
       <main className="flex flex-col gap-8 row-start-2 items-center sm:items-start">

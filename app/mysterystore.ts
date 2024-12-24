@@ -3,13 +3,22 @@ import { useSelector } from "@xstate/store/react";
 import { defaultParticipants, Participant } from "@/components/ui/participants";
 import { produce } from "immer";
 
+const defaultContext = {
+  startTime: undefined as number | undefined,
+  completedTime: undefined as number | undefined,
+  participants: defaultParticipants,
+  participantTimes: {} as Record<string, number>,
+};
+
+export type contextType = typeof defaultContext;
+
+const snapshotStr = localStorage.getItem("snapshot");
+const initialContext = snapshotStr
+  ? (JSON.parse(snapshotStr) as contextType)
+  : undefined;
+
 export const store = createStoreWithProducer(produce, {
-  context: {
-    startTime: undefined as number | undefined,
-    completedTime: undefined as number | undefined,
-    participants: defaultParticipants,
-    participantTimes: {} as Record<string, number>,
-  },
+  context: initialContext ?? defaultContext,
   on: {
     start: (context) => {
       context.startTime = Date.now();
@@ -54,9 +63,6 @@ export const useIsRunning = () =>
 
 export const useParticipants = () =>
   useSelector(store, (state) => state.context.participants);
-
-export const useParticipantTimes = () =>
-  useSelector(store, (state) => state.context.participantTimes);
 
 export const useParticipantTime = (id: string) =>
   useSelector(store, (state) => state.context.participantTimes[id]);

@@ -21,8 +21,6 @@ import {
   TableRow,
 } from "@/components/ui/table";
 import _ from "lodash";
-import { useLocalStorage } from "usehooks-ts";
-import { START_TIME_KEY } from "@/components/ui/timer";
 import { store, useParticipants } from "@/app/mysterystore";
 import { ParticipantNameButton } from "@/components/ui/ParticipantNameButton";
 import { ParticipantActionButton } from "@/components/ui/ParticipantActionButton";
@@ -36,8 +34,6 @@ export type Participant = {
 const participantFormSchema = z.object({
   name: z.string().min(2).max(100),
 });
-
-export const PARTICIPANTS_KEY = "participants";
 
 const defaultSeedTime = Date.parse("2024-11-16T20:00:00").valueOf();
 

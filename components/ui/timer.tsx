@@ -9,8 +9,6 @@ import {
   useStartTime,
 } from "@/app/mysterystore";
 
-export const START_TIME_KEY = "startTime";
-
 export function Timer() {
   const [timerText, setTimerText] = useState("");
 
