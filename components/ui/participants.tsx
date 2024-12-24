@@ -20,11 +20,12 @@ import {
   TableHeader,
   TableRow,
 } from "@/components/ui/table";
-import { produce } from "immer";
 import _ from "lodash";
 import { useLocalStorage } from "usehooks-ts";
 import { START_TIME_KEY } from "@/components/ui/timer";
-import { format } from "date-fns";
+import { store, useParticipants } from "@/app/mysterystore";
+import { ParticipantNameButton } from "@/components/ui/ParticipantNameButton";
+import { ParticipantActionButton } from "@/components/ui/ParticipantActionButton";
 
 export type Participant = {
   id: string;
@@ -84,13 +85,7 @@ export const defaultParticipants: Participant[] = [
 ];
 
 export function Participants() {
-  const [participants, setParticipants] = useLocalStorage<Participant[]>(
-    PARTICIPANTS_KEY,
-    defaultParticipants,
-    {
-      initializeWithValue: false,
-    },
-  );
+  const participants = useParticipants();
 
   const form = useForm<z.infer<typeof participantFormSchema>>({
     resolver: zodResolver(participantFormSchema),
@@ -100,47 +95,12 @@ export function Participants() {
   });
 
   function onSubmit(values: z.infer<typeof participantFormSchema>) {
-    setParticipants([...participants, { id: ulid(), ...values }]);
+    store.send({
+      type: "addParticipant",
+      participant: { id: ulid(), ...values },
+    });
     form.reset({ name: "" });
   }
-
-  function onCompleted(id: string) {
-    setParticipants(
-      produce((draft) => {
-        const participant = draft.find((p) => p.id === id);
-        if (!participant) {
-          throw new Error("Participant not found with id " + id);
-        }
-        participant.completedTime = Date.now();
-      }),
-    );
-  }
-
-  function onCancel(id: string) {
-    setParticipants(
-      produce((draft) => {
-        const participant = draft.find((p) => p.id === id);
-        if (!participant) {
-          throw new Error("Participant not found with id " + id);
-        }
-        participant.completedTime = undefined;
-      }),
-    );
-  }
-
-  function onDelete(id: string) {
-    setParticipants(
-      produce((draft) => {
-        const index = draft.findIndex((p) => p.id === id);
-        if (index === undefined) {
-          throw new Error("Participant not found with id " + id);
-        }
-        draft.splice(index, 1);
-      }),
-    );
-  }
-
-  const startTime = useStartTime();
 
   return (
     <div>
@@ -158,39 +118,10 @@ export function Participants() {
               return (
                 <TableRow key={participant.id}>
                   <TableCell>
-                    {!participant.completedTime && (
-                      <Button onClick={() => onCompleted(participant.id)}>
-                        {participant.name.toUpperCase()}!!!
-                      </Button>
-                    )}
-                    {participant.completedTime && (
-                      <>
-                        {participant.name}&nbsp;
-                        {startTime &&
-                          format(
-                            participant.completedTime - startTime,
-                            "mm:ss:SSS",
-                          )}
-                      </>
-                    )}
+                    <ParticipantNameButton participant={participant} />
                   </TableCell>
                   <TableCell>
-                    {participant.completedTime && (
-                      <Button
-                        variant="link"
-                        onClick={() => onCancel(participant.id)}
-                      >
-                        Huijasi!
-                      </Button>
-                    )}
-                    {!participant.completedTime && (
-                      <Button
-                        variant="link"
-                        onClick={() => onDelete(participant.id)}
-                      >
-                        Poista!
-                      </Button>
-                    )}
+                    <ParticipantActionButton participant={participant} />
                   </TableCell>
                 </TableRow>
               );
@@ -222,11 +153,4 @@ export function Participants() {
       </Form>
     </div>
   );
-}
-
-function useStartTime() {
-  const [startTime] = useLocalStorage(START_TIME_KEY, undefined, {
-    initializeWithValue: false,
-  });
-  return startTime;
 }

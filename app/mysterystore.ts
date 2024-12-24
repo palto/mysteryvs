@@ -1,6 +1,6 @@
 import { createStoreWithProducer } from "@xstate/store";
 import { useSelector } from "@xstate/store/react";
-import { defaultParticipants } from "@/components/ui/participants";
+import { defaultParticipants, Participant } from "@/components/ui/participants";
 import { produce } from "immer";
 
 export const store = createStoreWithProducer(produce, {
@@ -25,6 +25,18 @@ export const store = createStoreWithProducer(produce, {
     cancel: (context, event: { participantId: string }) => {
       delete context.participantTimes[event.participantId];
     },
+    addParticipant: (context, event: { participant: Participant }) => {
+      context.participants.push(event.participant);
+    },
+    removeParticipant: (context, event: { participantId: string }) => {
+      const index = context.participants.findIndex(
+        (p) => p.id === event.participantId,
+      );
+      if (index === undefined) {
+        throw new Error("Participant not found with id " + event.participantId);
+      }
+      context.participants.splice(index, 1);
+    },
   },
 });
 
@@ -40,6 +52,11 @@ export const useIsRunning = () =>
     (state) => !!(state.context.startTime && !state.context.completedTime),
   );
 
-export const useParticipants = () => {
+export const useParticipants = () =>
   useSelector(store, (state) => state.context.participants);
-};
+
+export const useParticipantTimes = () =>
+  useSelector(store, (state) => state.context.participantTimes);
+
+export const useParticipantTime = (id: string) =>
+  useSelector(store, (state) => state.context.participantTimes[id]);
