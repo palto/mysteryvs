@@ -12,10 +12,13 @@ const defaultContext = {
 
 export type contextType = typeof defaultContext;
 
-const snapshotStr = localStorage.getItem("snapshot");
-const initialContext = snapshotStr
-  ? (JSON.parse(snapshotStr) as contextType)
-  : undefined;
+let initialContext: undefined | contextType = undefined;
+if (typeof window !== "undefined") {
+  const snapshotStr = localStorage.getItem("snapshot");
+  initialContext = snapshotStr
+    ? (JSON.parse(snapshotStr) as contextType)
+    : undefined;
+}
 
 export const store = createStoreWithProducer(produce, {
   context: initialContext ?? defaultContext,
