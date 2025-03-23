@@ -1,9 +1,11 @@
+"use client";
 import { useLocalStorage } from "usehooks-ts";
 import { contextType, store } from "@/app/mysterystore";
 import { useEffect } from "react";
 import { Timer } from "@/components/ui/timer";
 import { Participants } from "@/components/ui/participants";
 import Image from "next/image";
+import { useOthers } from "@liveblocks/react/suspense";
 
 export function MysteryRoundPage() {
   const [, setPersistedState] = useLocalStorage<contextType | undefined>(
@@ -22,6 +24,8 @@ export function MysteryRoundPage() {
     return subscription.unsubscribe;
   }, [setPersistedState]);
 
+  const others = useOthers();
+
   return (
     <div className="grid grid-rows-[20px_1fr_20px] items-center justify-items-center min-h-screen p-8 pb-20 gap-16 sm:p-20 font-[family-name:var(--font-geist-sans)]">
       <main className="flex flex-col gap-8 row-start-2 items-center sm:items-start">
@@ -29,6 +33,9 @@ export function MysteryRoundPage() {
 
         <h2>Ajastin!</h2>
         <Timer></Timer>
+
+        <h2>Pelaajia!</h2>
+        <div>{others.length} pelaajaa linjoilla!</div>
 
         <h2>Osallistujat</h2>
         <Participants />
