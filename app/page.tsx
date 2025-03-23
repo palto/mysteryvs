@@ -1,7 +1,7 @@
 import { Room } from "@/app/Room";
-import { MysteryRoundPageDynamicWrapper } from "@/app/MysteryRoundPageDynamicWrapper";
 import { getUsername } from "@/app/login/getUsername";
 import { redirect } from "next/navigation";
+import { MysteryRoundPage } from "@/app/MysteryRoundPage";
 
 export default async function Home() {
   const username = await getUsername();
@@ -10,7 +10,7 @@ export default async function Home() {
   }
   return (
     <Room>
-      <MysteryRoundPageDynamicWrapper />
+      <MysteryRoundPage username={username} />
     </Room>
   );
 }
