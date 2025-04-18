@@ -34,6 +34,7 @@ The app is deployed using Vercel. The deployment is triggered automatically when
 
 This is a list of features that are planned for the future.
 
+- [x] Sync state between clients
 - [x] Manage / Admin players
 - [x] User should know who they are
 - [x] Round states: Starting, In progress, Finished
