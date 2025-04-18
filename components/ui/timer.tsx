@@ -11,8 +11,10 @@ import {
 } from "@/app/mysteryhooks";
 import { LiveMap } from "@liveblocks/client";
 
+const roundLength = 20 * 60 * 1000;
+
 export function Timer() {
-  const [timerText, setTimerText] = useState("");
+  const [elapsedTime, setElapsedTime] = useState<number>(0);
 
   const running = useIsRunning();
 
@@ -28,7 +30,7 @@ export function Timer() {
     const currentTime = Date.now();
     const difference = currentTime - startTime;
 
-    setTimerText(format(difference, "mm:ss:SSS"));
+    setElapsedTime(difference);
   }, 10);
 
   const completeRound = useCompleteRound();
@@ -37,8 +39,24 @@ export function Timer() {
 
   return (
     <>
-      {running && timerText}
-      {completedTime && format(completedTime - startTime!, "mm:ss:SSS")}
+      {running && (
+        <div>
+          Aikaa kulunut: {format(elapsedTime, "mm:ss:SSS")} /{" "}
+          {format(roundLength, "mm:ss:SSS")}
+        </div>
+      )}
+      {running && (
+        <div>
+          Aikaa jäljellä:{" "}
+          {format(Math.max(roundLength - elapsedTime, 0), "mm:ss:SSS")}
+        </div>
+      )}
+      {completedTime && (
+        <div>
+          Kierros päättyi: {format(completedTime - startTime!, "mm:ss:SSS")} /{" "}
+          {format(roundLength, "mm:ss:SSS")}
+        </div>
+      )}
       {!startTime && host && (
         <Button onClick={startRound}>AIKA ALKAA NYT!</Button>
       )}
