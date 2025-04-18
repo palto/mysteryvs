@@ -5,6 +5,7 @@ import { Participants } from "@/app/Participants";
 import { Button } from "@/components/ui/button";
 import { logout } from "@/app/login/actions";
 import { useHost, useStartTime } from "@/app/mysteryhooks";
+import { WakeLock } from "@/app/WakeLock";
 
 export function MysteryRoundPage({ username }: { username: string }) {
   const tournamentName = useStorage((root) => root.name);
@@ -37,6 +38,8 @@ export function MysteryRoundPage({ username }: { username: string }) {
         <Timer />
 
         <Participants />
+
+        <WakeLock />
       </main>
     </div>
   );
