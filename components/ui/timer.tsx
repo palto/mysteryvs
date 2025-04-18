@@ -5,6 +5,7 @@ import { Button } from "@/components/ui/button";
 import { useMutation } from "@liveblocks/react/suspense";
 import {
   useCompletedTime,
+  useHost,
   useIsRunning,
   useStartTime,
 } from "@/app/mysteryhooks";
@@ -17,6 +18,7 @@ export function Timer() {
 
   const startTime = useStartTime();
   const completedTime = useCompletedTime();
+  const host = useHost();
 
   useInterval(() => {
     if (!running || !startTime) {
@@ -37,7 +39,9 @@ export function Timer() {
     <>
       {running && timerText}
       {completedTime && format(completedTime - startTime!, "mm:ss:SSS")}
-      {!startTime && <Button onClick={startRound}>AIKA ALKAA NYT!</Button>}
+      {!startTime && host && (
+        <Button onClick={startRound}>AIKA ALKAA NYT!</Button>
+      )}
       {running && <Button onClick={completeRound}>AIKA PÄÄTTYI!</Button>}
       {startTime && !running && (
         <Button onClick={resetRound}>Aloita uusi kierros!</Button>
@@ -68,6 +72,7 @@ function useResetRound() {
       startTime: null,
       completedTime: null,
       participantTimes: new LiveMap(),
+      host: null,
     });
   }, []);
 }

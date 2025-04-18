@@ -10,9 +10,12 @@ import _ from "lodash";
 import { ParticipantNameButton } from "@/app/ParticipantNameButton";
 import { ParticipantActionButton } from "@/app/ParticipantActionButton";
 import { shallow, useStorage } from "@liveblocks/react/suspense";
+import { useHost } from "@/app/mysteryhooks";
 
 export function Participants() {
-  const participants = useParticipants();
+  const host = useHost();
+  let participants = useParticipants();
+  participants = participants.filter((p) => p.id !== host);
 
   return (
     <div>

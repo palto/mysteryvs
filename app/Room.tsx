@@ -33,6 +33,7 @@ export function Room({ children }: { children: ReactNode }) {
           startTime: null,
           completedTime: null,
           participantTimes: new LiveMap(),
+          host: null,
         }}
       >
         <ClientSideSuspense fallback={<div>Loading…</div>}>

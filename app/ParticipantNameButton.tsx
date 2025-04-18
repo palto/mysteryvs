@@ -1,6 +1,6 @@
 import { Button } from "@/components/ui/button";
 import { format } from "date-fns";
-import { Participant } from "@/app/participants";
+import { Participant } from "@/app/Participants";
 import { useMutation } from "@liveblocks/react/suspense";
 import {
   useIsRunning,
