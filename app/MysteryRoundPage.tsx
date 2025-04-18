@@ -6,6 +6,7 @@ import { Button } from "@/components/ui/button";
 import { logout } from "@/app/login/actions";
 import { useHost, useStartTime } from "@/app/mysteryhooks";
 import { WakeLock } from "@/app/WakeLock";
+import Link from "next/link";
 
 export function MysteryRoundPage({ username }: { username: string }) {
   const tournamentName = useStorage((root) => root.name);
@@ -21,6 +22,12 @@ export function MysteryRoundPage({ username }: { username: string }) {
             Vaihda pelaajaa!
           </Button>
         </h1>
+        <div>
+          Seuraa tapahtumaa turnauksen edistymistä{" "}
+          <Link href="https://docs.google.com/spreadsheets/d/1JrWPjSZtmCmkkn_kQBsOIBLFFg3S3aIqGSbEQ2NVwDM/edit?usp=sharing">
+            Google sheetsistä
+          </Link>
+        </div>
 
         {host && (
           <h2>
