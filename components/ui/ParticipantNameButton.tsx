@@ -1,7 +1,8 @@
 import { Button } from "@/components/ui/button";
 import { format } from "date-fns";
-import { store, useParticipantTime, useStartTime } from "@/app/mysterystore";
 import { Participant } from "@/components/ui/participants";
+import { useMutation } from "@liveblocks/react/suspense";
+import { useParticipantTime, useStartTime } from "@/app/mysteryhooks";
 
 export function ParticipantNameButton({
   participant,
@@ -11,14 +12,12 @@ export function ParticipantNameButton({
   const completedTime = useParticipantTime(participant.id);
   const startTime = useStartTime();
 
+  const participantFinish = useParticipantFinish(participant.id);
+
   return (
     <>
       {!completedTime && (
-        <Button
-          onClick={() =>
-            store.send({ type: "finish", participantId: participant.id })
-          }
-        >
+        <Button onClick={participantFinish}>
           {participant.name.toUpperCase()}!!!
         </Button>
       )}
@@ -29,5 +28,14 @@ export function ParticipantNameButton({
         </>
       )}
     </>
+  );
+}
+
+function useParticipantFinish(id: string) {
+  return useMutation(
+    ({ storage }) => {
+      storage.get("participantTimes").set(id, Date.now());
+    },
+    [id],
   );
 }

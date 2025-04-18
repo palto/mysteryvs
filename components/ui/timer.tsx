@@ -2,7 +2,13 @@ import { useState } from "react";
 import { format } from "date-fns";
 import { useInterval } from "usehooks-ts";
 import { Button } from "@/components/ui/button";
-import { useMutation, useStorage } from "@liveblocks/react/suspense";
+import { useMutation } from "@liveblocks/react/suspense";
+import {
+  useCompletedTime,
+  useIsRunning,
+  useStartTime,
+} from "@/app/mysteryhooks";
+import { LiveMap } from "@liveblocks/client";
 
 export function Timer() {
   const [timerText, setTimerText] = useState("");
@@ -36,18 +42,6 @@ export function Timer() {
   );
 }
 
-function useIsRunning() {
-  return useStorage((root) => !!root.startTime && !root.completedTime);
-}
-
-function useStartTime() {
-  return useStorage((root) => root.startTime);
-}
-
-function useCompletedTime() {
-  return useStorage((root) => root.completedTime);
-}
-
 function useCompleteRound() {
   return useMutation(({ storage }) => {
     storage.set("completedTime", Date.now());
@@ -59,6 +53,7 @@ function useStartRound() {
     storage.update({
       startTime: Date.now(),
       completedTime: null,
+      participantTimes: new LiveMap(),
     });
   }, []);
 }

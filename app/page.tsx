@@ -10,7 +10,7 @@ export default async function Home() {
   }
   return (
     <Room>
-      <MysteryRoundPage username={username} />
+      <MysteryRoundPage />
     </Room>
   );
 }

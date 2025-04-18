@@ -1,19 +1,10 @@
 "use client";
-import { useMutation, useStorage } from "@liveblocks/react/suspense";
-import { Button } from "@/components/ui/button";
+import { useStorage } from "@liveblocks/react/suspense";
 import { Timer } from "@/components/ui/timer";
+import { Participants } from "@/components/ui/participants";
 
-export function MysteryRoundPage(props: { username: string }) {
-  const username = props.username;
+export function MysteryRoundPage() {
   const tournamentName = useStorage((root) => root.name);
-  const participants = useStorage((root) => root.participants);
-  const addParticipant = useMutation(
-    ({ storage }) => {
-      storage.get("participants").push(username);
-    },
-    [username],
-  );
-  const isParticipated = participants.includes(username);
 
   return (
     <div className="grid grid-rows-[20px_1fr_20px] items-center justify-items-center min-h-screen p-8 pb-20 gap-16 sm:p-20 font-[family-name:var(--font-geist-sans)]">
@@ -24,12 +15,7 @@ export function MysteryRoundPage(props: { username: string }) {
         <Timer />
 
         <h2>Osallistujat</h2>
-        {participants.map((participant) => (
-          <div key={participant}>{participant}</div>
-        ))}
-        <Button disabled={isParticipated} onClick={addParticipant}>
-          Osallistu!
-        </Button>
+        <Participants />
       </main>
     </div>
   );

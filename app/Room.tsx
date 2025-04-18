@@ -6,7 +6,7 @@ import {
   RoomProvider,
   ClientSideSuspense,
 } from "@liveblocks/react/suspense";
-import { LiveList } from "@liveblocks/client";
+import { LiveList, LiveMap } from "@liveblocks/client";
 
 const defaultParticipants = [
   "Anssi",
@@ -31,6 +31,7 @@ export function Room({ children }: { children: ReactNode }) {
           participants: new LiveList(defaultParticipants),
           startTime: null,
           completedTime: null,
+          participantTimes: new LiveMap(),
         }}
       >
         <ClientSideSuspense fallback={<div>Loading…</div>}>

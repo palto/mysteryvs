@@ -1,6 +1,7 @@
 import { Participant } from "@/components/ui/participants";
 import { Button } from "@/components/ui/button";
-import { store, useParticipantTime } from "@/app/mysterystore";
+import { useIsRunning, useParticipantTime } from "@/app/mysteryhooks";
+import { useMutation } from "@liveblocks/react/suspense";
 
 export function ParticipantActionButton({
   participant,
@@ -8,31 +9,23 @@ export function ParticipantActionButton({
   participant: Participant;
 }) {
   const completedTime = useParticipantTime(participant.id);
+  const unFinish = useParticipantUnFinish(participant.id);
+  const isRunning = useIsRunning();
+  if (!isRunning || !completedTime) {
+    return null;
+  }
   return (
-    <>
-      {completedTime && (
-        <Button
-          variant="link"
-          onClick={() =>
-            store.send({ type: "cancel", participantId: participant.id })
-          }
-        >
-          Huijasi!
-        </Button>
-      )}
-      {!completedTime && (
-        <Button
-          variant="link"
-          onClick={() =>
-            store.send({
-              type: "removeParticipant",
-              participantId: participant.id,
-            })
-          }
-        >
-          Poista!
-        </Button>
-      )}
-    </>
+    <Button variant="link" onClick={unFinish}>
+      Huijasi!
+    </Button>
+  );
+}
+
+function useParticipantUnFinish(id: string) {
+  return useMutation(
+    ({ storage }) => {
+      storage.get("participantTimes").delete(id);
+    },
+    [id],
   );
 }

@@ -1,6 +1,6 @@
 // Define Liveblocks types for your application
 // https://liveblocks.io/docs/api-reference/liveblocks-react#Typing-your-data
-import { LiveList, LiveMap, LiveObject } from "@liveblocks/client";
+import { LiveList, LiveMap } from "@liveblocks/client";
 
 declare global {
   interface Liveblocks {
@@ -16,6 +16,7 @@ declare global {
       participants: LiveList<string>;
       startTime: number | null;
       completedTime: number | null;
+      participantTimes: LiveMap<string, number>;
     };
 
     // Custom user info set when authenticating with a secret key
