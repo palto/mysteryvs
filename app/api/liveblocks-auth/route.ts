@@ -3,13 +3,7 @@ import { getUsername } from "@/app/login/getUsername";
 import { liveblocks } from "@/app/liveblocks/liveblocks";
 
 export async function POST() {
-  const username = await getUsername();
-  if (!username) {
-    return new Response(null, {
-      status: 401,
-      statusText: "Authentication failed",
-    });
-  }
+  const username = (await getUsername()) ?? "anonymous";
 
   // Start an auth session inside your endpoint
   const session = liveblocks.prepareSession(username);
