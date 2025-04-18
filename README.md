@@ -35,7 +35,7 @@ The app is deployed using Vercel. The deployment is triggered automatically when
 This is a list of features that are planned for the future.
 
 - [x] Manage / Admin players
-- [ ] User should know who they are
+- [x] User should know who they are
 - [ ] Round states: Starting, In progress, Finished
 - [ ] Live cursors
 - [ ] DNF should show for player that did not finish
