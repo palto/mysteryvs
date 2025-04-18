@@ -29,6 +29,8 @@ export function Room({ children }: { children: ReactNode }) {
         initialStorage={{
           name: "Lanit 2025",
           participants: new LiveList(defaultParticipants),
+          startTime: null,
+          completedTime: null,
         }}
       >
         <ClientSideSuspense fallback={<div>Loading…</div>}>

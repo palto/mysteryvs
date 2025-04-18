@@ -1,6 +1,7 @@
 "use client";
 import { useMutation, useStorage } from "@liveblocks/react/suspense";
 import { Button } from "@/components/ui/button";
+import { Timer } from "@/components/ui/timer";
 
 export function MysteryRoundPage(props: { username: string }) {
   const username = props.username;
@@ -20,6 +21,7 @@ export function MysteryRoundPage(props: { username: string }) {
         <h1>{tournamentName}</h1>
 
         <h2>Ajastin!</h2>
+        <Timer />
 
         <h2>Osallistujat</h2>
         {participants.map((participant) => (
