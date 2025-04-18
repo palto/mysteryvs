@@ -1,7 +1,7 @@
 "use client";
 import { useStorage } from "@liveblocks/react/suspense";
 import { Timer } from "@/components/ui/timer";
-import { Participants } from "@/components/ui/participants";
+import { Participants } from "@/app/participants";
 import { Button } from "@/components/ui/button";
 import { logout } from "@/app/login/actions";
 

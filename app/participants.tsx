@@ -1,15 +1,14 @@
 import {
   Table,
   TableBody,
-  TableCaption,
   TableCell,
   TableHead,
   TableHeader,
   TableRow,
 } from "@/components/ui/table";
 import _ from "lodash";
-import { ParticipantNameButton } from "@/components/ui/ParticipantNameButton";
-import { ParticipantActionButton } from "@/components/ui/ParticipantActionButton";
+import { ParticipantNameButton } from "@/app/ParticipantNameButton";
+import { ParticipantActionButton } from "@/app/ParticipantActionButton";
 import { shallow, useStorage } from "@liveblocks/react/suspense";
 
 export function Participants() {
@@ -19,7 +18,6 @@ export function Participants() {
     <div>
       {participants.length > 0 && (
         <Table>
-          <TableCaption>Lisää uusi pelaaja</TableCaption>
           <TableHeader>
             <TableRow>
               <TableHead className="w-[300px]">Nimi</TableHead>
@@ -27,18 +25,20 @@ export function Participants() {
             </TableRow>
           </TableHeader>
           <TableBody>
-            {_.sortBy(participants, ["completedTime"]).map((participant) => {
-              return (
-                <TableRow key={participant.id}>
-                  <TableCell>
-                    <ParticipantNameButton participant={participant} />
-                  </TableCell>
-                  <TableCell>
-                    <ParticipantActionButton participant={participant} />
-                  </TableCell>
-                </TableRow>
-              );
-            })}
+            {_.sortBy(participants, ["completedTime", "id"]).map(
+              (participant) => {
+                return (
+                  <TableRow key={participant.id}>
+                    <TableCell>
+                      <ParticipantNameButton participant={participant} />
+                    </TableCell>
+                    <TableCell>
+                      <ParticipantActionButton participant={participant} />
+                    </TableCell>
+                  </TableRow>
+                );
+              },
+            )}
           </TableBody>
         </Table>
       )}

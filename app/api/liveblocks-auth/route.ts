@@ -1,9 +1,6 @@
-import { Liveblocks } from "@liveblocks/node";
 import { getUsername } from "@/app/login/getUsername";
 
-export const liveblocks = new Liveblocks({
-  secret: process.env.LIVEBLOCKS_SECRET!,
-});
+import { liveblocks } from "@/app/liveblocks/liveblocks";
 
 export async function POST() {
   const username = await getUsername();

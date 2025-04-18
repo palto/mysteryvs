@@ -1,6 +1,6 @@
 import { Button } from "@/components/ui/button";
 import { format } from "date-fns";
-import { Participant } from "@/components/ui/participants";
+import { Participant } from "@/app/participants";
 import { useMutation } from "@liveblocks/react/suspense";
 import { useParticipantTime, useStartTime } from "@/app/mysteryhooks";
 

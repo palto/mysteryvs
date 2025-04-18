@@ -1,4 +1,4 @@
-import { Participant } from "@/components/ui/participants";
+import { Participant } from "@/app/participants";
 import { Button } from "@/components/ui/button";
 import { useIsRunning, useParticipantTime } from "@/app/mysteryhooks";
 import { useMutation } from "@liveblocks/react/suspense";
