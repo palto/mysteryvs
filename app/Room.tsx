@@ -7,6 +7,7 @@ import {
   ClientSideSuspense,
 } from "@liveblocks/react/suspense";
 import { LiveList, LiveMap } from "@liveblocks/client";
+import { room } from "@/app/constants";
 
 const defaultParticipants = [
   "Anssi",
@@ -25,7 +26,7 @@ export function Room({ children }: { children: ReactNode }) {
   return (
     <LiveblocksProvider authEndpoint="/api/liveblocks-auth">
       <RoomProvider
-        id="hevilan:lanit-2025-kevat"
+        id={room}
         initialStorage={{
           name: "Lanit 2025",
           participants: new LiveList(defaultParticipants),

@@ -1,7 +1,7 @@
 import { Liveblocks } from "@liveblocks/node";
 import { getUsername } from "@/app/login/getUsername";
 
-const liveblocks = new Liveblocks({
+export const liveblocks = new Liveblocks({
   secret: process.env.LIVEBLOCKS_SECRET!,
 });
 

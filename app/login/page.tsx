@@ -1,24 +1,23 @@
-import Form from "next/form";
-import { Input } from "@/components/ui/input";
-import { Button } from "@/components/ui/button";
-import { login } from "@/app/login/actions";
-import { Label } from "@/components/ui/label";
 import { getUsername } from "@/app/login/getUsername";
+import { getParticipants } from "@/app/login/getParticipants";
+import { ParticipantLoginButton } from "@/app/login/ParticipantLoginButton";
+import { redirect } from "next/navigation";
 
 export default async function Login() {
   const username = await getUsername();
+  if (username) {
+    return redirect("/");
+  }
 
+  const participants = await getParticipants();
   return (
     <div>
-      <Form action={login} className="space-y-8">
-        <Label htmlFor="username">Syötä nimimerkkisi tähän</Label>
-        <Input
-          defaultValue={username}
-          placeholder="Nimimerkki"
-          name={"username"}
-        />
-        <Button>Tallenna</Button>
-      </Form>
+      Valitse pelaajasi!
+      {participants.map((participant) => (
+        <div key={participant}>
+          <ParticipantLoginButton username={participant} />
+        </div>
+      ))}
     </div>
   );
 }
