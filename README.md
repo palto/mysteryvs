@@ -36,7 +36,9 @@ This is a list of features that are planned for the future.
 
 - [x] Manage / Admin players
 - [x] User should know who they are
-- [ ] Round states: Starting, In progress, Finished
+- [x] Round states: Starting, In progress, Finished
+- [x] DNF should show for player that did not finish
+- [ ] Round should have host
 - [ ] Live cursors
-- [ ] DNF should show for player that did not finish
+
 

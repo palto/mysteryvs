@@ -31,13 +31,17 @@ export function Timer() {
 
   const completeRound = useCompleteRound();
   const startRound = useStartRound();
+  const resetRound = useResetRound();
 
   return (
     <>
       {running && timerText}
       {completedTime && format(completedTime - startTime!, "mm:ss:SSS")}
+      {!startTime && <Button onClick={startRound}>AIKA ALKAA NYT!</Button>}
       {running && <Button onClick={completeRound}>AIKA PÄÄTTYI!</Button>}
-      {!running && <Button onClick={startRound}>AIKA ALKAA NYT!</Button>}
+      {startTime && !running && (
+        <Button onClick={resetRound}>Aloita uusi kierros!</Button>
+      )}
     </>
   );
 }
@@ -52,6 +56,16 @@ function useStartRound() {
   return useMutation(({ storage }) => {
     storage.update({
       startTime: Date.now(),
+      completedTime: null,
+      participantTimes: new LiveMap(),
+    });
+  }, []);
+}
+
+function useResetRound() {
+  return useMutation(({ storage }) => {
+    storage.update({
+      startTime: null,
       completedTime: null,
       participantTimes: new LiveMap(),
     });

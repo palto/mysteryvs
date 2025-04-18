@@ -2,7 +2,11 @@ import { Button } from "@/components/ui/button";
 import { format } from "date-fns";
 import { Participant } from "@/app/participants";
 import { useMutation } from "@liveblocks/react/suspense";
-import { useParticipantTime, useStartTime } from "@/app/mysteryhooks";
+import {
+  useIsRunning,
+  useParticipantTime,
+  useStartTime,
+} from "@/app/mysteryhooks";
 
 export function ParticipantNameButton({
   participant,
@@ -10,21 +14,25 @@ export function ParticipantNameButton({
   participant: Participant;
 }) {
   const completedTime = useParticipantTime(participant.id);
+  const isRunning = useIsRunning();
   const startTime = useStartTime();
 
   const participantFinish = useParticipantFinish(participant.id);
 
   return (
     <>
-      {!completedTime && (
+      {!completedTime && isRunning && (
         <Button onClick={participantFinish}>
           {participant.name.toUpperCase()}!!!
         </Button>
       )}
-      {completedTime && (
+      {(completedTime || !isRunning) && (
         <>
           {participant.name}&nbsp;
-          {startTime && format(completedTime - startTime, "mm:ss:SSS")}
+          {startTime &&
+            completedTime &&
+            format(completedTime - startTime, "mm:ss:SSS")}
+          {startTime && !completedTime && <>DNF</>}
         </>
       )}
     </>

@@ -20,7 +20,6 @@ export function MysteryRoundPage({ username }: { username: string }) {
           </Button>{" "}
         </h2>
 
-        <h2>Ajastin!</h2>
         <Timer />
 
         <h2>Osallistujat</h2>
