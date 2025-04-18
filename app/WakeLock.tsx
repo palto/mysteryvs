@@ -16,7 +16,7 @@ export function WakeLock() {
           console.warn("Wake Lock API is not supported in this browser.");
         }
       } catch (err) {
-        console.error(`Wake Lock request failed`);
+        console.error(`Wake Lock request failed`, err);
       }
     };
 
