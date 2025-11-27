@@ -1,1 +1,1 @@
-export const room = "hevilan:lanit-2025-syksy";
+export const room = "hevilan:pti-2025-syksy";

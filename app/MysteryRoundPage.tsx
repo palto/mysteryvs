@@ -24,7 +24,7 @@ export function MysteryRoundPage({ username }: { username: string }) {
         </h1>
         <div>
           Seuraa turnauksen edistymistä{" "}
-          <Link href="https://docs.google.com/spreadsheets/d/1JrWPjSZtmCmkkn_kQBsOIBLFFg3S3aIqGSbEQ2NVwDM/edit?usp=sharing">
+          <Link href="https://docs.google.com/spreadsheets/d/1SqQ6xzUvr1K-nnNueDl90F8mpMyQRdzCWssQ8N09mbA/edit#gid=1460718855">
             Google sheetsistä
           </Link>
         </div>

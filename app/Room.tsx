@@ -10,15 +10,12 @@ import { LiveList, LiveMap } from "@liveblocks/client";
 import { room } from "@/app/constants";
 
 const defaultParticipants = [
-  "Pyry",
-  "Eetu",
-  "Jarno",
-  "Jarkko",
-  "Jussi",
-  "Irene",
-  "Lauri",
-  "Jörö",
-  "Toni",
+  "murgo",
+  "Janne",
+  "grrooovy",
+  "Alex (VE's)",
+  "Maksi",
+  "GinToni",
 ];
 
 export function Room({ children }: { children: ReactNode }) {
@@ -27,7 +24,7 @@ export function Room({ children }: { children: ReactNode }) {
       <RoomProvider
         id={room}
         initialStorage={{
-          name: "Lanit 2025 Syksy",
+          name: "PTI Mysteeri 2025",
           participants: new LiveList(defaultParticipants),
           startTime: null,
           completedTime: null,
