@@ -11,7 +11,7 @@ import {
 } from "@/app/mysteryhooks";
 import { LiveMap } from "@liveblocks/client";
 
-const roundLength = 15 * 60 * 1000;
+const roundLength = 20 * 60 * 1000;
 
 export function Timer() {
   const [elapsedTime, setElapsedTime] = useState<number>(0);
