@@ -13,9 +13,9 @@
   },
   "dependencies": {
     "@hookform/resolvers": "^3.9.1",
-    "@liveblocks/client": "^2.24.4",
-    "@liveblocks/node": "^2.24.4",
-    "@liveblocks/react": "^2.24.4",
+    "@liveblocks/client": "^3.11.0",
+    "@liveblocks/node": "^3.11.0",
+    "@liveblocks/react": "^3.11.0",
     "@radix-ui/react-label": "^2.1.1",
     "@radix-ui/react-slot": "^1.1.1",
     "class-variance-authority": "^0.7.1",
