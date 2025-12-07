@@ -12,7 +12,6 @@
     "verify": "npm run type-check && npm run lint && npm run format:check"
   },
   "dependencies": {
-    "@hookform/resolvers": "^3.9.1",
     "@liveblocks/client": "^3.11.0",
     "@liveblocks/node": "^3.11.0",
     "@liveblocks/react": "^3.11.0",
