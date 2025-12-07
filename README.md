@@ -14,8 +14,9 @@ The production runs at https://mysteeri.hevirinki.fi/
 ## Development
 
 ### Prerequisites
- - Node.js v22
- - Liveblocks API secret. Set it in `.env` using variable `LIVEBLOCKS_SECRET`
+
+- Node.js v22
+- Liveblocks API secret. Set it in `.env` using variable `LIVEBLOCKS_SECRET`
 
 ### Start dev server
 
@@ -41,5 +42,3 @@ This is a list of features that are planned for the future.
 - [x] DNF should show for player that did not finish
 - [x] Round should have host
 - [ ] Live cursors
-
-
