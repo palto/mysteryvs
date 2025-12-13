@@ -26,6 +26,7 @@ npm run dev          # Start Next.js development server with Turbopack
 npm run build        # Production build
 npm start            # Start production server
 npm run lint         # Run ESLint
+npm run verify       # Run all validations (type-check + lint + format check)
 ```
 
 ### Environment Variables
