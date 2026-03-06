@@ -5,7 +5,11 @@ updates:
     schedule:
       interval: "daily"
     open-pull-requests-limit: 5
+    cooldown:
+      semver-patch-days: 3
+      semver-minor-days: 7
+      semver-major-days: 30
     groups:
-      all-dependencies:
-        patterns:
-          - "*"
+      patch-updates:
+        update-types:
+          - "patch"
