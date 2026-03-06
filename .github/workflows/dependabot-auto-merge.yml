@@ -15,7 +15,7 @@ jobs:
         id: fetch-metadata
 
       - name: Auto-merge minor and patch updates
-        if: | 
+        if: |
           steps.fetch-metadata.outputs.package-ecosystem == 'github_actions' ||
           steps.fetch-metadata.outputs.update-type == 'version-update:semver-minor' ||
           steps.fetch-metadata.outputs.update-type == 'version-update:semver-patch'
