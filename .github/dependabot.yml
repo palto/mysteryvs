@@ -19,6 +19,15 @@ updates:
         update-types:
           - "version-update:semver-major"
     groups:
+      liveblocks:
+        patterns:
+          - "@liveblocks/*"
+      react:
+        patterns:
+          - "react"
+          - "react-dom"
+          - "@types/react"
+          - "@types/react-dom"
       patch-updates:
         update-types:
           - "patch"
