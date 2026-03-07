@@ -8,7 +8,7 @@ export async function TopNav() {
 
   return (
     <nav className="sticky top-0 z-50 flex items-center justify-between px-6 py-3 border-b border-border bg-background">
-      <span className="font-semibold text-lg">PTI Mysteeri 2025</span>
+      <Link href="/" className="font-semibold text-lg hover:text-muted-foreground">PTI Mysteeri 2025</Link>
       <div className="flex items-center gap-3">
         <Link
           href="/admin"
