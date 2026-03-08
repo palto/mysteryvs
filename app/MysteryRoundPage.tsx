@@ -20,11 +20,6 @@ export function MysteryRoundPage() {
             Google sheetsistä
           </Link>
         </div>
-        <div>
-          <Link href="/GinToni - Mysteeri2025.zip" download>
-            Lataa mysteeri (GinToni - Mysteeri2025.zip)
-          </Link>
-        </div>
 
         {host && (
           <h2>
