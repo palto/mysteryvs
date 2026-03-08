@@ -2,8 +2,9 @@ import Link from "next/link";
 import { Settings } from "lucide-react";
 import { getUsername } from "@/app/login/getUsername";
 import { AvatarMenu } from "@/app/AvatarMenu";
+import { ReactNode } from "react";
 
-export async function TopNav() {
+export async function TopNav({ title }: { title?: ReactNode }) {
   const username = await getUsername();
 
   return (
@@ -12,7 +13,7 @@ export async function TopNav() {
         href="/"
         className="font-semibold text-lg hover:text-muted-foreground"
       >
-        PTI Mysteeri 2025
+        {title ?? "Mystery Versus"}
       </Link>
       <div className="flex items-center gap-3">
         <Link
