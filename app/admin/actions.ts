@@ -26,13 +26,12 @@ export async function removeParticipant(id: string) {
 }
 
 export async function addParticipant(data: FormData) {
-  const username = data.get("username") as string;
+  const username = (data.get("username") as string)?.trim();
   if (!username) {
     throw new Error("Username is required");
   }
   await liveblocks.mutateStorage(room, async ({ root }) => {
     const participants = root.get("participants");
-
     if (participants.findIndex((p) => p === username) !== -1) {
       throw new Error("Username already exists");
     }

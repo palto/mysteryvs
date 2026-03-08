@@ -9,10 +9,10 @@ import {
 } from "@/components/ui/table";
 import { addParticipant, removeParticipant } from "@/app/admin/actions";
 import { Button } from "@/components/ui/button";
-import Form from "next/form";
 import { Label } from "@/components/ui/label";
 import { Input } from "@/components/ui/input";
 import { TournamentNameEditor } from "@/app/admin/TournamentNameEditor";
+import { useTransition, useState } from "react";
 
 export function AdminPage({
   participants,
@@ -21,6 +21,23 @@ export function AdminPage({
   participants: readonly string[];
   name: string;
 }) {
+  const [username, setUsername] = useState("");
+  const [isPending, startTransition] = useTransition();
+
+  const trimmed = username.trim();
+  const isDuplicate = participants.includes(trimmed);
+  const canSubmit = trimmed.length > 0 && !isDuplicate && !isPending;
+
+  function handleSubmit(e: React.SyntheticEvent<HTMLFormElement>) {
+    e.preventDefault();
+    if (!canSubmit) return;
+    const data = new FormData(e.currentTarget);
+    startTransition(async () => {
+      await addParticipant(data);
+      setUsername("");
+    });
+  }
+
   return (
     <div className="overflow-x-hidden">
       <h1 className="text-2xl font-bold mb-6">Hallintapaneeli</h1>
@@ -48,11 +65,22 @@ export function AdminPage({
           })}
         </TableBody>
       </Table>
-      <Form action={addParticipant} className="space-y-8">
-        <Label htmlFor="username">Syötä uuden pelaajan nimi</Label>
-        <Input placeholder="Nimimerkki" name={"username"} />
-        <Button>Tallenna</Button>
-      </Form>
+      <form onSubmit={handleSubmit} className="space-y-8">
+        <div className="space-y-2">
+          <Label htmlFor="username">Syötä uuden pelaajan nimi</Label>
+          <Input
+            id="username"
+            placeholder="Nimimerkki"
+            name="username"
+            value={username}
+            onChange={(e) => setUsername(e.target.value)}
+          />
+          {isDuplicate && trimmed.length > 0 && (
+            <p className="text-sm text-destructive">Pelaaja on jo olemassa.</p>
+          )}
+        </div>
+        <Button disabled={!canSubmit}>Tallenna</Button>
+      </form>
     </div>
   );
 }
