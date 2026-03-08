@@ -26,7 +26,7 @@ export function AdminPage({
 }) {
   return (
     <div>
-      <h1>Pelaajien hallinta</h1>
+      <h1 className="text-2xl font-bold mb-6">Hallintapaneeli</h1>
       <h2>Turnauksen nimi</h2>
       <Form action={setName} className="space-y-8">
         <Label htmlFor="name">Nimi</Label>
