@@ -7,7 +7,11 @@ import {
   TableHeader,
   TableRow,
 } from "@/components/ui/table";
-import { addParticipant, removeParticipant, setName } from "@/app/admin/actions";
+import {
+  addParticipant,
+  removeParticipant,
+  setName,
+} from "@/app/admin/actions";
 import { Button } from "@/components/ui/button";
 import Form from "next/form";
 import { Label } from "@/components/ui/label";
