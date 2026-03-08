@@ -4,7 +4,8 @@ import { revalidatePath } from "next/cache";
 
 import { liveblocks } from "@/app/liveblocks/liveblocks";
 
-export async function setName(name: string) {
+export async function setName(data: FormData) {
+  const name = data.get("name") as string;
   if (!name) {
     throw new Error("Name is required");
   }
