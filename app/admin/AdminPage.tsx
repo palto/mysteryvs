@@ -7,15 +7,12 @@ import {
   TableHeader,
   TableRow,
 } from "@/components/ui/table";
-import {
-  addParticipant,
-  removeParticipant,
-  setName,
-} from "@/app/admin/actions";
+import { addParticipant, removeParticipant } from "@/app/admin/actions";
 import { Button } from "@/components/ui/button";
 import Form from "next/form";
 import { Label } from "@/components/ui/label";
 import { Input } from "@/components/ui/input";
+import { TournamentNameEditor } from "@/app/admin/TournamentNameEditor";
 
 export function AdminPage({
   participants,
@@ -25,18 +22,14 @@ export function AdminPage({
   name: string;
 }) {
   return (
-    <div>
+    <div className="overflow-x-hidden">
       <h1 className="text-2xl font-bold mb-6">Hallintapaneeli</h1>
-      <Form action={setName} className="space-y-8">
-        <Label htmlFor="name">Turnauksen nimi</Label>
-        <Input defaultValue={name} name="name" />
-        <Button>Tallenna</Button>
-      </Form>
+      <TournamentNameEditor initialName={name} />
       <h2>Osallistujat</h2>
       <Table>
         <TableHeader>
           <TableRow>
-            <TableHead className="w-[300px]">Nimi</TableHead>
+            <TableHead className="w-75">Nimi</TableHead>
             <TableHead>Toiminnot</TableHead>
           </TableRow>
         </TableHeader>
