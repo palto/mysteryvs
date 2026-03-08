@@ -7,7 +7,7 @@ import {
   TableHeader,
   TableRow,
 } from "@/components/ui/table";
-import { addParticipant, removeParticipant } from "@/app/admin/actions";
+import { addParticipant, removeParticipant, setName } from "@/app/admin/actions";
 import { Button } from "@/components/ui/button";
 import Form from "next/form";
 import { Label } from "@/components/ui/label";
@@ -15,12 +15,20 @@ import { Input } from "@/components/ui/input";
 
 export function AdminPage({
   participants,
+  name,
 }: {
   participants: readonly string[];
+  name: string;
 }) {
   return (
     <div>
       <h1>Pelaajien hallinta</h1>
+      <h2>Turnauksen nimi</h2>
+      <Form action={setName} className="space-y-8">
+        <Label htmlFor="name">Nimi</Label>
+        <Input defaultValue={name} name="name" />
+        <Button>Tallenna</Button>
+      </Form>
       <h2>Osallistujat</h2>
       <Table>
         <TableHeader>

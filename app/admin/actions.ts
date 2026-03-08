@@ -4,6 +4,17 @@ import { revalidatePath } from "next/cache";
 
 import { liveblocks } from "@/app/liveblocks/liveblocks";
 
+export async function setName(data: FormData) {
+  const name = data.get("name") as string;
+  if (!name) {
+    throw new Error("Name is required");
+  }
+  await liveblocks.mutateStorage(room, async ({ root }) => {
+    root.set("name", name);
+  });
+  revalidatePath("/admin");
+}
+
 export async function removeParticipant(id: string) {
   await liveblocks.mutateStorage(room, async ({ root }) => {
     const participants = root.get("participants");
