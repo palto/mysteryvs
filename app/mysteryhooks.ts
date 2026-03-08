@@ -19,3 +19,7 @@ export function useParticipantTime(id: string) {
 export function useHost() {
   return useStorage((root) => root.host);
 }
+
+export function useName() {
+  return useStorage((root) => root.name);
+}
