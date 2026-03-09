@@ -23,3 +23,7 @@ export function useHost() {
 export function useName() {
   return useStorage((root) => root.name);
 }
+
+export function useDescription() {
+  return useStorage((root) => root.description);
+}
