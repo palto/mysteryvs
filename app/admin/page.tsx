@@ -12,7 +12,7 @@ export default async function AdminPageServer() {
   return (
     <>
       <TopNav />
-      <AdminPage participants={participants} name={storage.name} />
+      <AdminPage participants={participants} name={storage.name} description={storage.description ?? ""} />
     </>
   );
 }

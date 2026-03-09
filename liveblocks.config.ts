@@ -14,6 +14,7 @@ declare global {
     // The Storage tree for the room, for useMutation, useStorage, etc.
     Storage: {
       name: string;
+      description: string;
       participants: LiveList<string>;
       startTime: number | null;
       completedTime: number | null;

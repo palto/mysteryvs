@@ -12,14 +12,17 @@ import { Button } from "@/components/ui/button";
 import { Label } from "@/components/ui/label";
 import { Input } from "@/components/ui/input";
 import { TournamentNameEditor } from "@/app/admin/TournamentNameEditor";
+import { TournamentDescriptionEditor } from "@/app/admin/TournamentDescriptionEditor";
 import { useTransition, useState } from "react";
 
 export function AdminPage({
   participants,
   name,
+  description,
 }: {
   participants: readonly string[];
   name: string;
+  description: string;
 }) {
   const [username, setUsername] = useState("");
   const [isPending, startTransition] = useTransition();
@@ -42,6 +45,7 @@ export function AdminPage({
     <div className="overflow-x-hidden">
       <h1 className="text-2xl font-bold mb-6">Hallintapaneeli</h1>
       <TournamentNameEditor initialName={name} />
+      <TournamentDescriptionEditor initialDescription={description} />
       <h2>Osallistujat</h2>
       <Table>
         <TableHeader>
