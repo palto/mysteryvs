@@ -1,12 +1,7 @@
 "use client";
 import { setDescription } from "@/app/admin/actions";
 import { Label } from "@/components/ui/label";
-import {
-  InputGroup,
-  InputGroupAddon,
-  InputGroupButton,
-  InputGroupInput,
-} from "@/components/ui/input-group";
+import { Button } from "@/components/ui/button";
 import { Check, Save, X } from "lucide-react";
 import { useCallback, useEffect, useRef, useState, useTransition } from "react";
 
@@ -38,8 +33,8 @@ export function TournamentDescriptionEditor({
   }, [initialDescription]);
 
   const handleKeyDown = useCallback(
-    (e: React.KeyboardEvent<HTMLInputElement>) => {
-      if (e.key === "Enter") {
+    (e: React.KeyboardEvent<HTMLTextAreaElement>) => {
+      if (e.key === "Enter" && (e.ctrlKey || e.metaKey)) {
         e.preventDefault();
         handleSave();
       } else if (e.key === "Escape") {
@@ -58,40 +53,41 @@ export function TournamentDescriptionEditor({
 
   return (
     <div className="space-y-2">
-      <Label htmlFor="description">Kuvaus</Label>
-      <InputGroup>
-        <InputGroupInput
-          id="description"
-          value={value}
-          onChange={(e) => setValue(e.target.value)}
-          onKeyDown={handleKeyDown}
-          disabled={isPending}
-        />
-        <InputGroupAddon align="inline-end">
-          {isDirty && (
-            <InputGroupButton
-              size="icon-sm"
-              onClick={handleDiscard}
-              title="Hylkää muutokset (Esc)"
-            >
-              <X />
-            </InputGroupButton>
-          )}
-          <InputGroupButton
-            size="icon-sm"
-            onClick={handleSave}
-            disabled={isPending || !isDirty}
-            title="Tallenna (Enter)"
-            className={
-              saved
-                ? "bg-green-500 text-white hover:bg-green-500 hover:text-white transition-colors"
-                : "transition-colors"
-            }
+      <Label htmlFor="description">Kuvaus (tukee markdownia)</Label>
+      <textarea
+        id="description"
+        value={value}
+        onChange={(e) => setValue(e.target.value)}
+        onKeyDown={handleKeyDown}
+        disabled={isPending}
+        rows={6}
+        className="w-full rounded-md border border-input bg-background px-3 py-2 text-sm font-mono shadow-sm focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-ring disabled:opacity-50 resize-y"
+      />
+      <div className="flex items-center gap-2">
+        {isDirty && (
+          <Button
+            size="sm"
+            variant="ghost"
+            onClick={handleDiscard}
+            title="Hylkää muutokset (Esc)"
           >
-            {saved ? <Check /> : <Save />}
-          </InputGroupButton>
-        </InputGroupAddon>
-      </InputGroup>
+            <X /> Hylkää
+          </Button>
+        )}
+        <Button
+          size="sm"
+          onClick={handleSave}
+          disabled={isPending || !isDirty}
+          title="Tallenna (Ctrl+Enter)"
+          className={
+            saved
+              ? "bg-green-500 text-white hover:bg-green-500 hover:text-white transition-colors"
+              : "transition-colors"
+          }
+        >
+          {saved ? <Check /> : <Save />} Tallenna
+        </Button>
+      </div>
     </div>
   );
 }

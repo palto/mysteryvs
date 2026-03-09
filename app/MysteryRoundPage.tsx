@@ -6,6 +6,7 @@ import { Button } from "@/components/ui/button";
 import { useDescription, useHost, useStartTime } from "@/app/mysteryhooks";
 import { WakeLock } from "@/app/WakeLock";
 import Link from "next/link";
+import ReactMarkdown from "react-markdown";
 
 export function MysteryRoundPage() {
   const host = useHost();
@@ -16,7 +17,9 @@ export function MysteryRoundPage() {
     <div className="grid grid-rows-[20px_1fr_20px] items-center justify-items-center p-8 pb-20 gap-16 sm:p-20 font-(family-name:--font-geist-sans)">
       <main className="flex flex-col gap-8 row-start-2 items-center sm:items-start">
         {description ? (
-          <div>{description}</div>
+          <div className="prose prose-sm dark:prose-invert">
+            <ReactMarkdown>{description}</ReactMarkdown>
+          </div>
         ) : (
           <div>
             Seuraa turnauksen edistymistä{" "}
