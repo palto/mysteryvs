@@ -3,23 +3,26 @@ import { useMutation } from "@liveblocks/react/suspense";
 import { Timer } from "@/components/ui/timer";
 import { Participants } from "@/app/Participants";
 import { Button } from "@/components/ui/button";
-import { useHost, useStartTime } from "@/app/mysteryhooks";
+import { useDescription, useHost, useStartTime } from "@/app/mysteryhooks";
 import { WakeLock } from "@/app/WakeLock";
-import Link from "next/link";
+import ReactMarkdown from "react-markdown";
+import remarkGfm from "remark-gfm";
 
 export function MysteryRoundPage() {
   const host = useHost();
   const unsetHost = useUnsetHost();
   const startTime = useStartTime();
+  const description = useDescription();
   return (
     <div className="grid grid-rows-[20px_1fr_20px] items-center justify-items-center p-8 pb-20 gap-16 sm:p-20 font-(family-name:--font-geist-sans)">
       <main className="flex flex-col gap-8 row-start-2 items-center sm:items-start">
-        <div>
-          Seuraa turnauksen edistymistä{" "}
-          <Link href="https://docs.google.com/spreadsheets/d/1SqQ6xzUvr1K-nnNueDl90F8mpMyQRdzCWssQ8N09mbA/edit#gid=1460718855">
-            Google sheetsistä
-          </Link>
-        </div>
+        {description && (
+          <div className="prose prose-sm dark:prose-invert">
+            <ReactMarkdown remarkPlugins={[remarkGfm]}>
+              {description}
+            </ReactMarkdown>
+          </div>
+        )}
 
         {host && (
           <h2>

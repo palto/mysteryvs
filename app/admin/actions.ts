@@ -4,6 +4,14 @@ import { revalidatePath } from "next/cache";
 
 import { liveblocks } from "@/app/liveblocks/liveblocks";
 
+export async function setDescription(data: FormData) {
+  const description = data.get("description") as string;
+  await liveblocks.mutateStorage(room, async ({ root }) => {
+    root.set("description", description ?? "");
+  });
+  revalidatePath("/admin");
+}
+
 export async function setName(data: FormData) {
   const name = data.get("name") as string;
   if (!name) {
