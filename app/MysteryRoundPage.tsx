@@ -18,7 +18,17 @@ export function MysteryRoundPage() {
       <main className="flex flex-col gap-8 row-start-2 items-center sm:items-start">
         {description ? (
           <div className="prose prose-sm dark:prose-invert">
-            <ReactMarkdown>{description}</ReactMarkdown>
+            <ReactMarkdown
+              components={{
+                a: ({ href, children }) => (
+                  <a href={href} target="_blank" rel="noopener noreferrer">
+                    {children}
+                  </a>
+                ),
+              }}
+            >
+              {description}
+            </ReactMarkdown>
           </div>
         ) : (
           <div>
