@@ -25,6 +25,7 @@ export function Room({ children }: { children: ReactNode }) {
         id={room}
         initialStorage={{
           name: "PTI Mysteeri 2025",
+          description: "",
           participants: new LiveList(defaultParticipants),
           startTime: null,
           completedTime: null,
