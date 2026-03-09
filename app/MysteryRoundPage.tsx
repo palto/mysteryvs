@@ -7,6 +7,7 @@ import { useDescription, useHost, useStartTime } from "@/app/mysteryhooks";
 import { WakeLock } from "@/app/WakeLock";
 import Link from "next/link";
 import ReactMarkdown from "react-markdown";
+import remarkGfm from "remark-gfm";
 
 export function MysteryRoundPage() {
   const host = useHost();
@@ -18,7 +19,9 @@ export function MysteryRoundPage() {
       <main className="flex flex-col gap-8 row-start-2 items-center sm:items-start">
         {description ? (
           <div className="prose prose-sm dark:prose-invert">
-            <ReactMarkdown>{description}</ReactMarkdown>
+            <ReactMarkdown remarkPlugins={[remarkGfm]}>
+              {description}
+            </ReactMarkdown>
           </div>
         ) : (
           <div>
