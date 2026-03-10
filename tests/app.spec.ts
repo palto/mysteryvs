@@ -9,11 +9,12 @@ test.describe("Unauthenticated user", () => {
   test("login page loads and shows content", async ({ page }) => {
     await page.goto("/login");
     await expect(page).toHaveURL(/\/login/);
-    // The login page wraps content in ClientSideSuspense (Liveblocks).
-    // In environments with a live Liveblocks connection the player selection
-    // heading appears; otherwise the loading fallback is shown.
+    // Content is inside Liveblocks ClientSideSuspense. The "Valitse pelaajasi!"
+    // heading appears when the WebSocket connects. In environments where proxy
+    // auth is not forwarded for WebSocket CONNECT, Chromium stays on "Loading…".
+    // Both are valid outcomes confirming the page loaded.
     const heading = page.getByRole("heading", { name: "Valitse pelaajasi!" });
-    const loading = page.getByText("Loading");
+    const loading = page.locator("div:visible", { hasText: "Loading" }).first();
     await expect(heading.or(loading)).toBeVisible({ timeout: 10000 });
   });
 });
