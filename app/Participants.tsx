@@ -28,20 +28,18 @@ export function Participants() {
             </TableRow>
           </TableHeader>
           <TableBody>
-            {_.sortBy(participants, ["completedTime", "id"]).map(
-              (participant) => {
-                return (
-                  <TableRow key={participant.id}>
-                    <TableCell>
-                      <ParticipantNameButton participant={participant} />
-                    </TableCell>
-                    <TableCell>
-                      <ParticipantActionButton participant={participant} />
-                    </TableCell>
-                  </TableRow>
-                );
-              },
-            )}
+            {_.sortBy(participants, ["completedTime"]).map((participant) => {
+              return (
+                <TableRow key={participant.id}>
+                  <TableCell>
+                    <ParticipantNameButton participant={participant} />
+                  </TableCell>
+                  <TableCell>
+                    <ParticipantActionButton participant={participant} />
+                  </TableCell>
+                </TableRow>
+              );
+            })}
           </TableBody>
         </Table>
       )}

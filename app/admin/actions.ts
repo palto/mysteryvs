@@ -33,6 +33,15 @@ export async function removeParticipant(id: string) {
   revalidatePath("/admin");
 }
 
+export async function reorderParticipants(newOrder: string[]) {
+  await liveblocks.mutateStorage(room, async ({ root }) => {
+    const participants = root.get("participants");
+    while (participants.length > 0) participants.delete(0);
+    for (const name of newOrder) participants.push(name);
+  });
+  revalidatePath("/admin");
+}
+
 export async function addParticipant(data: FormData) {
   const username = (data.get("username") as string)?.trim();
   if (!username) {
