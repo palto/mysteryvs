@@ -27,3 +27,9 @@ export function useName() {
 export function useDescription() {
   return useStorage((root) => root.description);
 }
+
+const DEFAULT_ROUND_LENGTH = 20 * 60 * 1000;
+
+export function useRoundLength() {
+  return useStorage((root) => root.roundLength ?? DEFAULT_ROUND_LENGTH);
+}

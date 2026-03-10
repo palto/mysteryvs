@@ -16,6 +16,7 @@ export default async function AdminPageServer() {
         participants={participants}
         name={storage.name}
         description={storage.description ?? ""}
+        roundLength={storage.roundLength ?? 20 * 60 * 1000}
       />
     </>
   );
