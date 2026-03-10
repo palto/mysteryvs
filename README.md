@@ -15,7 +15,7 @@ The production runs at https://mysteeri.hevirinki.fi/
 
 ### Prerequisites
 
-- Node.js v22
+- Node.js v24
 - Liveblocks API secret. Set it in `.env` using variable `LIVEBLOCKS_SECRET`
 
 ### Start dev server
