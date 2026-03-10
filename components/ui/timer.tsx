@@ -7,11 +7,10 @@ import {
   useCompletedTime,
   useHost,
   useIsRunning,
+  useRoundLength,
   useStartTime,
 } from "@/app/mysteryhooks";
 import { LiveMap } from "@liveblocks/client";
-
-const roundLength = 20 * 60 * 1000;
 
 export function Timer() {
   const [elapsedTime, setElapsedTime] = useState<number>(0);
@@ -21,6 +20,7 @@ export function Timer() {
   const startTime = useStartTime();
   const completedTime = useCompletedTime();
   const host = useHost();
+  const roundLength = useRoundLength();
 
   useInterval(() => {
     if (!running || !startTime) {

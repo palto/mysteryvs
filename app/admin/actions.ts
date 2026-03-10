@@ -42,6 +42,17 @@ export async function reorderParticipants(newOrder: string[]) {
   revalidatePath("/admin");
 }
 
+export async function setRoundLength(data: FormData) {
+  const minutes = Number(data.get("roundLength"));
+  if (!Number.isFinite(minutes) || minutes <= 0) {
+    throw new Error("Invalid round length");
+  }
+  await liveblocks.mutateStorage(room, async ({ root }) => {
+    root.set("roundLength", Math.round(minutes * 60 * 1000));
+  });
+  revalidatePath("/admin");
+}
+
 export async function addParticipant(data: FormData) {
   const username = (data.get("username") as string)?.trim();
   if (!username) {

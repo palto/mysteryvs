@@ -10,6 +10,7 @@ import { Label } from "@/components/ui/label";
 import { Input } from "@/components/ui/input";
 import { TournamentNameEditor } from "@/app/admin/TournamentNameEditor";
 import { TournamentDescriptionEditor } from "@/app/admin/TournamentDescriptionEditor";
+import { RoundLengthEditor } from "@/app/admin/RoundLengthEditor";
 import { useTransition, useState } from "react";
 import {
   DndContext,
@@ -75,10 +76,12 @@ export function AdminPage({
   participants,
   name,
   description,
+  roundLength,
 }: {
   participants: readonly string[];
   name: string;
   description: string;
+  roundLength: number;
 }) {
   const [username, setUsername] = useState("");
   const [isPending, startTransition] = useTransition();
@@ -122,6 +125,7 @@ export function AdminPage({
       <h1 className="text-2xl font-bold mb-6">Hallintapaneeli</h1>
       <TournamentNameEditor initialName={name} />
       <TournamentDescriptionEditor initialDescription={description} />
+      <RoundLengthEditor initialMinutes={roundLength / 60 / 1000} />
       <h2 className="mb-3">Osallistujat</h2>
       <DndContext
         sensors={sensors}
