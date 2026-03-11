@@ -14,8 +14,8 @@ export function MysteryRoundPage() {
   const startTime = useStartTime();
   const description = useDescription();
   return (
-    <div className="grid grid-rows-[20px_1fr_20px] items-center justify-items-center p-8 pb-20 gap-16 sm:p-20 font-(family-name:--font-geist-sans)">
-      <main className="flex flex-col gap-8 row-start-2 items-center sm:items-start">
+    <div className="grid grid-rows-[20px_1fr_20px] items-center justify-items-center p-4 pb-20 gap-16 sm:p-20 font-(family-name:--font-geist-sans)">
+      <main className="flex flex-col gap-8 row-start-2 items-center sm:items-start w-full max-w-lg">
         {description && (
           <div className="prose prose-sm dark:prose-invert">
             <ReactMarkdown remarkPlugins={[remarkGfm]}>

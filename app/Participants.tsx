@@ -6,16 +6,28 @@ import {
   TableHeader,
   TableRow,
 } from "@/components/ui/table";
+import { Card, CardContent } from "@/components/ui/card";
 import _ from "lodash";
 import { ParticipantNameButton } from "@/app/ParticipantNameButton";
 import { ParticipantActionButton } from "@/app/ParticipantActionButton";
-import { shallow, useStorage } from "@liveblocks/react/suspense";
-import { useHost } from "@/app/mysteryhooks";
+import { shallow, useMutation, useStorage } from "@liveblocks/react/suspense";
+import { useHost, useStartTime } from "@/app/mysteryhooks";
 
 export function Participants() {
   const host = useHost();
+  const startTime = useStartTime();
   let participants = useParticipants();
   participants = participants.filter((p) => p.id !== host);
+
+  if (!host && !startTime) {
+    return (
+      <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 w-full">
+        {participants.map((participant) => (
+          <ParticipantCard key={participant.id} participant={participant} />
+        ))}
+      </div>
+    );
+  }
 
   return (
     <div>
@@ -44,6 +56,25 @@ export function Participants() {
         </Table>
       )}
     </div>
+  );
+}
+
+function ParticipantCard({ participant }: { participant: Participant }) {
+  const setHost = useMutation(
+    ({ storage }) => {
+      storage.set("host", participant.id);
+    },
+    [participant.id],
+  );
+
+  return (
+    <button onClick={setHost} className="w-full">
+      <Card className="w-full h-20 cursor-pointer hover:bg-accent transition-colors">
+        <CardContent className="flex items-center justify-center h-full pt-6">
+          <span className="text-xl font-semibold">{participant.name}</span>
+        </CardContent>
+      </Card>
+    </button>
   );
 }
 export interface Participant {
