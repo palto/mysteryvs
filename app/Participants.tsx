@@ -21,7 +21,7 @@ export function Participants() {
 
   if (!host && !startTime) {
     return (
-      <div className="flex flex-wrap gap-4">
+      <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 w-full">
         {participants.map((participant) => (
           <ParticipantCard key={participant.id} participant={participant} />
         ))}
@@ -68,8 +68,8 @@ function ParticipantCard({ participant }: { participant: Participant }) {
   );
 
   return (
-    <button onClick={setHost}>
-      <Card className="w-40 h-24 cursor-pointer hover:bg-accent transition-colors">
+    <button onClick={setHost} className="w-full">
+      <Card className="w-full h-20 cursor-pointer hover:bg-accent transition-colors">
         <CardContent className="flex items-center justify-center h-full pt-6">
           <span className="text-xl font-semibold">{participant.name}</span>
         </CardContent>
