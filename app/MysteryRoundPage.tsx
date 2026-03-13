@@ -3,7 +3,13 @@ import { useMutation } from "@liveblocks/react/suspense";
 import { Timer } from "@/components/ui/timer";
 import { Participants } from "@/app/Participants";
 import { Button } from "@/components/ui/button";
-import { useDescription, useHost, useStartTime } from "@/app/mysteryhooks";
+import {
+  useCompletedTime,
+  useDescription,
+  useHost,
+  useIsRunning,
+  useStartTime,
+} from "@/app/mysteryhooks";
 import { WakeLock } from "@/app/WakeLock";
 import ReactMarkdown from "react-markdown";
 import remarkGfm from "remark-gfm";
@@ -12,6 +18,8 @@ export function MysteryRoundPage() {
   const host = useHost();
   const unsetHost = useUnsetHost();
   const startTime = useStartTime();
+  const isRunning = useIsRunning();
+  const completedTime = useCompletedTime();
   const description = useDescription();
   return (
     <div className="grid grid-rows-[20px_1fr_20px] items-center justify-items-center p-4 pb-20 gap-16 sm:p-20 font-(family-name:--font-geist-sans)">
@@ -36,6 +44,29 @@ export function MysteryRoundPage() {
         )}
 
         {!host && <h2>Valitse seuraavan kierroksen järjestäjä</h2>}
+
+        {!host && !startTime && (
+          <p className="text-sm text-muted-foreground">
+            Klikkaa nimeäsi valitaksesi itsesi kierroksen järjestäjäksi.
+          </p>
+        )}
+        {host && !startTime && (
+          <p className="text-sm text-muted-foreground">
+            Järjestäjä käynnistää kierroksen. Klikkaa omaa korttiasi kun olet
+            maalissa — voit siirtyä takaisin Matkalle klikkaamalla uudelleen.
+          </p>
+        )}
+        {isRunning && (
+          <p className="text-sm text-muted-foreground">
+            Klikkaa omaa korttiasi kun olet maalissa. Voit siirtyä takaisin
+            Matkalle klikkaamalla uudelleen.
+          </p>
+        )}
+        {completedTime && (
+          <p className="text-sm text-muted-foreground">
+            Kierros päättyi. Aloita uusi kierros nollaamalla ajastin.
+          </p>
+        )}
 
         <Timer />
 
