@@ -1,6 +1,5 @@
 import { Card, CardContent } from "@/components/ui/card";
 import _ from "lodash";
-import { Check } from "lucide-react";
 import { shallow, useMutation, useStorage } from "@liveblocks/react/suspense";
 import {
   useCompletedTime,
@@ -176,31 +175,19 @@ function ScoreParticipantCard({
           <span className="text-base font-medium">{participant.name}</span>
         </div>
         {editing ? (
-          <div
-            className="flex items-center gap-1"
+          <input
+            ref={inputRef}
+            type="text"
+            inputMode="numeric"
+            enterKeyHint="done"
+            value={inputValue}
+            onChange={(e) => setInputValue(e.target.value)}
+            onBlur={commitScore}
+            onKeyDown={handleKeyDown}
             onClick={(e) => e.stopPropagation()}
-          >
-            <input
-              ref={inputRef}
-              type="text"
-              inputMode="numeric"
-              enterKeyHint="done"
-              value={inputValue}
-              onChange={(e) => setInputValue(e.target.value)}
-              onBlur={commitScore}
-              onKeyDown={handleKeyDown}
-              className="w-16 text-right text-sm font-mono border rounded px-2 py-0.5 bg-background"
-              placeholder="pisteet"
-            />
-            <button
-              type="button"
-              onPointerDown={(e) => e.preventDefault()}
-              onClick={commitScore}
-              className="text-green-600 hover:text-green-700 p-0.5"
-            >
-              <Check className="h-4 w-4" />
-            </button>
-          </div>
+            className="w-20 text-right text-sm font-mono border rounded px-2 py-0.5 bg-background"
+            placeholder="pisteet"
+          />
         ) : (
           <span className="text-sm text-muted-foreground font-mono">
             {participant.score !== undefined ? participant.score : "—"}
