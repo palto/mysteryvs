@@ -57,13 +57,14 @@ export function Participants() {
       <div>
         <h2 className="text-lg font-semibold mb-3">Maalissa</h2>
         <div className="flex flex-col gap-2">
-          {finished.map((participant) => (
+          {finished.map((participant, index) => (
             <RoundParticipantCard
               key={participant.id}
               participant={participant}
               startTime={startTime}
               isRunning={isRunning}
               roundEnded={roundEnded}
+              rank={index + 1}
             />
           ))}
           {finished.length === 0 && (
@@ -82,11 +83,13 @@ function RoundParticipantCard({
   startTime,
   isRunning,
   roundEnded,
+  rank,
 }: {
   participant: Participant;
   startTime: number | null;
   isRunning: boolean;
   roundEnded: boolean;
+  rank?: number;
 }) {
   const finish = useParticipantFinish(participant.id);
   const unFinish = useParticipantUnFinish(participant.id);
@@ -112,7 +115,14 @@ function RoundParticipantCard({
         className={`w-full cursor-pointer hover:bg-accent transition-colors ${isFinished ? "border-green-500" : ""}`}
       >
         <CardContent className="flex items-center justify-between py-3 px-4 pt-3">
-          <span className="text-base font-medium">{participant.name}</span>
+          <div className="flex items-center gap-2">
+            {rank !== undefined && (
+              <span className="text-sm font-bold text-muted-foreground w-5 shrink-0">
+                {rank}.
+              </span>
+            )}
+            <span className="text-base font-medium">{participant.name}</span>
+          </div>
           {isFinished && startTime && participant.completedTime && (
             <span className="text-sm text-muted-foreground font-mono">
               {format(participant.completedTime - startTime, "mm:ss")}
