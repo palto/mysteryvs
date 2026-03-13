@@ -62,7 +62,7 @@ export function Timer() {
       )}
       {running && <Button onClick={completeRound}>AIKA PÄÄTTYI!</Button>}
       {startTime && !running && (
-        <Button onClick={resetRound}>Aloita uusi kierros!</Button>
+        <Button onClick={resetRound}>Valitse seuraava järjestäjä</Button>
       )}
     </>
   );
