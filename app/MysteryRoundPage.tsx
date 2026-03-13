@@ -46,24 +46,24 @@ export function MysteryRoundPage() {
         {!host && <h2>Valitse seuraavan kierroksen järjestäjä</h2>}
 
         {!host && !startTime && (
-          <p className="text-sm text-muted-foreground">
+          <p className="text-base font-medium">
             Klikkaa nimeäsi valitaksesi itsesi kierroksen järjestäjäksi.
           </p>
         )}
         {host && !startTime && (
-          <p className="text-sm text-muted-foreground">
-            Järjestäjä käynnistää kierroksen. Klikkaa omaa korttiasi kun olet
-            maalissa — voit siirtyä takaisin Matkalle klikkaamalla uudelleen.
+          <p className="text-base font-medium">
+            Järjestäjä käynnistää kierroksen. Klikkaa pelaajan korttiasi kun hän
+            on maalissa — voit siirtää takaisin Matkalle klikkaamalla uudelleen.
           </p>
         )}
         {isRunning && (
-          <p className="text-sm text-muted-foreground">
-            Klikkaa omaa korttiasi kun olet maalissa. Voit siirtyä takaisin
-            Matkalle klikkaamalla uudelleen.
+          <p className="text-base font-medium">
+            Klikkaa pelaajan korttiasi kun hän on maalissa. Voit siirtää
+            takaisin Matkalle klikkaamalla uudelleen.
           </p>
         )}
         {completedTime && (
-          <p className="text-sm text-muted-foreground">
+          <p className="text-base font-medium">
             Kierros päättyi. Aloita uusi kierros nollaamalla ajastin.
           </p>
         )}
