@@ -177,7 +177,9 @@ function ScoreParticipantCard({
         {editing ? (
           <input
             ref={inputRef}
-            type="number"
+            type="text"
+            inputMode="numeric"
+            enterKeyHint="done"
             value={inputValue}
             onChange={(e) => setInputValue(e.target.value)}
             onBlur={commitScore}
