@@ -19,8 +19,10 @@ declare global {
       startTime: number | null;
       completedTime: number | null;
       participantTimes: LiveMap<string, number>;
+      participantScores: LiveMap<string, number>;
       host: string | null;
       roundLength: number | null;
+      roundType: "time" | "score" | null;
     };
 
     // Custom user info set when authenticating with a secret key

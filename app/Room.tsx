@@ -30,8 +30,10 @@ export function Room({ children }: { children: ReactNode }) {
           startTime: null,
           completedTime: null,
           participantTimes: new LiveMap(),
+          participantScores: new LiveMap(),
           host: null,
           roundLength: null,
+          roundType: null,
         }}
       >
         <ClientSideSuspense fallback={<div>Loading…</div>}>
