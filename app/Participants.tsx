@@ -9,7 +9,7 @@ import {
   useStartTime,
 } from "@/app/mysteryhooks";
 import { format } from "date-fns";
-import { useRef, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 
 export function Participants() {
   const host = useHost();
@@ -136,8 +136,24 @@ function ScoreParticipantCard({
     setTimeout(() => inputRef.current?.focus(), 0);
   }
 
+  // On iOS, numeric keypad Done dismisses the keyboard without firing blur.
+  // Detect keyboard close via visualViewport resize and blur the input manually.
+  useEffect(() => {
+    if (!editing) return;
+    const vv = window.visualViewport;
+    if (!vv) return;
+    const onResize = () => {
+      if (document.activeElement === inputRef.current) {
+        inputRef.current?.blur();
+      }
+    };
+    vv.addEventListener("resize", onResize);
+    return () => vv.removeEventListener("resize", onResize);
+  }, [editing]);
+
   function commitScore() {
-    const trimmed = inputValue.trim();
+    // Read directly from DOM to avoid stale closure over inputValue state.
+    const trimmed = (inputRef.current?.value ?? inputValue).trim();
     if (trimmed === "") {
       setScore(null);
     } else {
