@@ -11,6 +11,7 @@ import {
   useStartTime,
 } from "@/app/mysteryhooks";
 import { LiveMap } from "@liveblocks/client";
+import { RotateCcw } from "lucide-react";
 
 export function Timer() {
   const [elapsedTime, setElapsedTime] = useState<number>(0);
@@ -37,12 +38,30 @@ export function Timer() {
   const startRound = useStartRound();
   const resetRound = useResetRound();
 
+  function handleReset() {
+    if (!confirm("Nollataanko ajastin ja valitaan uusi järjestäjä?")) return;
+    resetRound();
+  }
+
   return (
     <>
       {running && (
-        <div>
-          Aikaa kulunut: {format(elapsedTime, "mm:ss:SSS")} /{" "}
-          {format(roundLength, "mm:ss:SSS")}
+        <div className="flex items-center gap-2">
+          <span>
+            Aikaa kulunut: {format(elapsedTime, "mm:ss:SSS")} /{" "}
+            {format(roundLength, "mm:ss:SSS")}
+          </span>
+          {host && (
+            <Button
+              variant="ghost"
+              size="icon"
+              className="h-6 w-6"
+              onClick={handleReset}
+              title="Nollaa ajastin"
+            >
+              <RotateCcw className="h-4 w-4" />
+            </Button>
+          )}
         </div>
       )}
       {running && (
@@ -52,9 +71,22 @@ export function Timer() {
         </div>
       )}
       {completedTime && (
-        <div>
-          Kierros päättyi: {format(completedTime - startTime!, "mm:ss:SSS")} /{" "}
-          {format(roundLength, "mm:ss:SSS")}
+        <div className="flex items-center gap-2">
+          <span>
+            Kierros päättyi: {format(completedTime - startTime!, "mm:ss:SSS")} /{" "}
+            {format(roundLength, "mm:ss:SSS")}
+          </span>
+          {host && (
+            <Button
+              variant="ghost"
+              size="icon"
+              className="h-6 w-6"
+              onClick={handleReset}
+              title="Nollaa ajastin"
+            >
+              <RotateCcw className="h-4 w-4" />
+            </Button>
+          )}
         </div>
       )}
       {!startTime && host && (

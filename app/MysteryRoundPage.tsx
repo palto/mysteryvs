@@ -64,7 +64,8 @@ export function MysteryRoundPage() {
         )}
         {completedTime && (
           <p className="text-base font-medium">
-            Kierros päättyi. Aloita uusi kierros nollaamalla ajastin.
+            Kierros päättyi. Nollaa ajastin aloittaaksesi uuden kierroksen ja
+            valitaksesi järjestäjän.
           </p>
         )}
 
