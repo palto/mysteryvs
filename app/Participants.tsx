@@ -1,12 +1,19 @@
 import { Card, CardContent } from "@/components/ui/card";
 import _ from "lodash";
 import { shallow, useMutation, useStorage } from "@liveblocks/react/suspense";
-import { useHost, useStartTime } from "@/app/mysteryhooks";
+import {
+  useCompletedTime,
+  useHost,
+  useIsRunning,
+  useStartTime,
+} from "@/app/mysteryhooks";
 import { format } from "date-fns";
 
 export function Participants() {
   const host = useHost();
   const startTime = useStartTime();
+  const isRunning = useIsRunning();
+  const roundEnded = !!useCompletedTime();
   let participants = useParticipants();
   participants = participants.filter((p) => p.id !== host);
 
@@ -36,6 +43,8 @@ export function Participants() {
               key={participant.id}
               participant={participant}
               startTime={startTime}
+              isRunning={isRunning}
+              roundEnded={roundEnded}
             />
           ))}
           {inProgress.length === 0 && (
@@ -53,6 +62,8 @@ export function Participants() {
               key={participant.id}
               participant={participant}
               startTime={startTime}
+              isRunning={isRunning}
+              roundEnded={roundEnded}
             />
           ))}
           {finished.length === 0 && (
@@ -69,19 +80,34 @@ export function Participants() {
 function RoundParticipantCard({
   participant,
   startTime,
+  isRunning,
+  roundEnded,
 }: {
   participant: Participant;
   startTime: number | null;
+  isRunning: boolean;
+  roundEnded: boolean;
 }) {
   const finish = useParticipantFinish(participant.id);
   const unFinish = useParticipantUnFinish(participant.id);
   const isFinished = !!participant.completedTime;
 
+  function handleClick() {
+    if (roundEnded) {
+      if (!confirm(`Muuta ${participant.name} tilaa? Kierros on jo päättynyt.`))
+        return;
+    } else if (isRunning && isFinished) {
+      if (!confirm(`Siirrä ${participant.name} takaisin Matkalle?`)) return;
+    }
+    if (isFinished) {
+      unFinish();
+    } else {
+      finish();
+    }
+  }
+
   return (
-    <button
-      onClick={isFinished ? unFinish : finish}
-      className="w-full text-left"
-    >
+    <button onClick={handleClick} className="w-full text-left">
       <Card
         className={`w-full cursor-pointer hover:bg-accent transition-colors ${isFinished ? "border-green-500" : ""}`}
       >
