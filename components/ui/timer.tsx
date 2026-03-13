@@ -38,9 +38,11 @@ export function Timer() {
   const startRound = useStartRound();
   const resetRound = useResetRound();
 
-  function handleReset() {
-    if (!confirm("Nollataanko ajastin ja valitaan uusi järjestäjä?")) return;
-    resetRound();
+  const resetTimer = useResetTimer();
+
+  function handleResetTimer() {
+    if (!confirm("Nollataanko kierros? Järjestäjä pysyy samana.")) return;
+    resetTimer();
   }
 
   return (
@@ -56,7 +58,7 @@ export function Timer() {
               variant="ghost"
               size="icon"
               className="h-6 w-6"
-              onClick={handleReset}
+              onClick={handleResetTimer}
               title="Nollaa ajastin"
             >
               <RotateCcw className="h-4 w-4" />
@@ -81,7 +83,7 @@ export function Timer() {
               variant="ghost"
               size="icon"
               className="h-6 w-6"
-              onClick={handleReset}
+              onClick={handleResetTimer}
               title="Nollaa ajastin"
             >
               <RotateCcw className="h-4 w-4" />
@@ -123,6 +125,16 @@ function useResetRound() {
       completedTime: null,
       participantTimes: new LiveMap(),
       host: null,
+    });
+  }, []);
+}
+
+function useResetTimer() {
+  return useMutation(({ storage }) => {
+    storage.update({
+      startTime: null,
+      completedTime: null,
+      participantTimes: new LiveMap(),
     });
   }, []);
 }
