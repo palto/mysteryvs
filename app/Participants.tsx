@@ -1,21 +1,19 @@
-import {
-  Table,
-  TableBody,
-  TableCell,
-  TableHead,
-  TableHeader,
-  TableRow,
-} from "@/components/ui/table";
 import { Card, CardContent } from "@/components/ui/card";
 import _ from "lodash";
-import { ParticipantNameButton } from "@/app/ParticipantNameButton";
-import { ParticipantActionButton } from "@/app/ParticipantActionButton";
 import { shallow, useMutation, useStorage } from "@liveblocks/react/suspense";
-import { useHost, useStartTime } from "@/app/mysteryhooks";
+import {
+  useCompletedTime,
+  useHost,
+  useIsRunning,
+  useStartTime,
+} from "@/app/mysteryhooks";
+import { format } from "date-fns";
 
 export function Participants() {
   const host = useHost();
   const startTime = useStartTime();
+  const isRunning = useIsRunning();
+  const roundEnded = !!useCompletedTime();
   let participants = useParticipants();
   participants = participants.filter((p) => p.id !== host);
 
@@ -29,33 +27,110 @@ export function Participants() {
     );
   }
 
+  const inProgress = participants.filter((p) => !p.completedTime);
+  const finished = _.sortBy(
+    participants.filter((p) => p.completedTime),
+    ["completedTime"],
+  );
+
   return (
-    <div>
-      {participants.length > 0 && (
-        <Table>
-          <TableHeader>
-            <TableRow>
-              <TableHead className="w-[300px]">Nimi</TableHead>
-              <TableHead>Toiminnot</TableHead>
-            </TableRow>
-          </TableHeader>
-          <TableBody>
-            {_.sortBy(participants, ["completedTime"]).map((participant) => {
-              return (
-                <TableRow key={participant.id}>
-                  <TableCell>
-                    <ParticipantNameButton participant={participant} />
-                  </TableCell>
-                  <TableCell>
-                    <ParticipantActionButton participant={participant} />
-                  </TableCell>
-                </TableRow>
-              );
-            })}
-          </TableBody>
-        </Table>
-      )}
+    <div className="grid grid-cols-2 gap-6 w-full">
+      <div>
+        <h2 className="text-lg font-semibold mb-3">Matkalla</h2>
+        <div className="flex flex-col gap-2">
+          {inProgress.map((participant) => (
+            <RoundParticipantCard
+              key={participant.id}
+              participant={participant}
+              startTime={startTime}
+              isRunning={isRunning}
+              roundEnded={roundEnded}
+            />
+          ))}
+          {inProgress.length === 0 && (
+            <p className="text-muted-foreground text-sm italic">
+              Kaikki maalissa!
+            </p>
+          )}
+        </div>
+      </div>
+      <div>
+        <h2 className="text-lg font-semibold mb-3">Maalissa</h2>
+        <div className="flex flex-col gap-2">
+          {finished.map((participant, index) => (
+            <RoundParticipantCard
+              key={participant.id}
+              participant={participant}
+              startTime={startTime}
+              isRunning={isRunning}
+              roundEnded={roundEnded}
+              rank={index + 1}
+            />
+          ))}
+          {finished.length === 0 && (
+            <p className="text-muted-foreground text-sm italic">
+              Ei vielä ketään
+            </p>
+          )}
+        </div>
+      </div>
     </div>
+  );
+}
+
+function RoundParticipantCard({
+  participant,
+  startTime,
+  isRunning,
+  roundEnded,
+  rank,
+}: {
+  participant: Participant;
+  startTime: number | null;
+  isRunning: boolean;
+  roundEnded: boolean;
+  rank?: number;
+}) {
+  const finish = useParticipantFinish(participant.id);
+  const unFinish = useParticipantUnFinish(participant.id);
+  const isFinished = !!participant.completedTime;
+
+  function handleClick() {
+    if (roundEnded) {
+      if (!confirm(`Muuta ${participant.name} tilaa? Kierros on jo päättynyt.`))
+        return;
+    } else if (isRunning && isFinished) {
+      if (!confirm(`Siirrä ${participant.name} takaisin Matkalle?`)) return;
+    }
+    if (isFinished) {
+      unFinish();
+    } else {
+      finish();
+    }
+  }
+
+  return (
+    <button onClick={handleClick} className="w-full text-left">
+      <Card
+        className={`w-full cursor-pointer hover:bg-accent transition-colors ${isFinished ? "border-green-500" : ""}`}
+      >
+        <CardContent className="flex items-center justify-between py-3 px-4 pt-3">
+          <div className="flex items-center gap-2">
+            {rank !== undefined && (
+              <span className="text-sm font-bold text-muted-foreground w-5 shrink-0">
+                {rank}.
+              </span>
+            )}
+            <span className="text-base font-medium">{participant.name}</span>
+          </div>
+          {isFinished && startTime && participant.completedTime && (
+            <span className="text-sm text-muted-foreground font-mono">
+              {format(participant.completedTime - startTime, "mm:ss")}
+            </span>
+          )}
+        </CardContent>
+      </Card>
+    </button>
   );
 }
 
@@ -77,6 +152,7 @@ function ParticipantCard({ participant }: { participant: Participant }) {
     </button>
   );
 }
+
 export interface Participant {
   id: string;
   name: string;
@@ -92,5 +168,23 @@ export function useParticipants(): Participant[] {
         completedTime: root.participantTimes.get(p),
       })),
     shallow,
+  );
+}
+
+function useParticipantFinish(id: string) {
+  return useMutation(
+    ({ storage }) => {
+      storage.get("participantTimes").set(id, Date.now());
+    },
+    [id],
+  );
+}
+
+function useParticipantUnFinish(id: string) {
+  return useMutation(
+    ({ storage }) => {
+      storage.get("participantTimes").delete(id);
+    },
+    [id],
   );
 }
