@@ -1,4 +1,10 @@
 import { Card, CardContent } from "@/components/ui/card";
+import {
+  InputGroup,
+  InputGroupAddon,
+  InputGroupButton,
+  InputGroupInput,
+} from "@/components/ui/input-group";
 import _ from "lodash";
 import { shallow, useMutation, useStorage } from "@liveblocks/react/suspense";
 import {
@@ -8,6 +14,7 @@ import {
   useRoundType,
   useStartTime,
 } from "@/app/mysteryhooks";
+import { Check } from "lucide-react";
 import { format } from "date-fns";
 import { useRef, useState } from "react";
 
@@ -175,19 +182,29 @@ function ScoreParticipantCard({
           <span className="text-base font-medium">{participant.name}</span>
         </div>
         {editing ? (
-          <input
-            ref={inputRef}
-            type="text"
-            inputMode="numeric"
-            enterKeyHint="done"
-            value={inputValue}
-            onChange={(e) => setInputValue(e.target.value)}
-            onBlur={commitScore}
-            onKeyDown={handleKeyDown}
-            onClick={(e) => e.stopPropagation()}
-            className="w-20 text-right text-sm font-mono border rounded px-2 py-0.5 bg-background"
-            placeholder="pisteet"
-          />
+          <InputGroup className="w-28" onClick={(e) => e.stopPropagation()}>
+            <InputGroupInput
+              ref={inputRef}
+              type="text"
+              inputMode="numeric"
+              enterKeyHint="done"
+              value={inputValue}
+              onChange={(e) => setInputValue(e.target.value)}
+              onBlur={commitScore}
+              onKeyDown={handleKeyDown}
+              className="text-right text-sm font-mono"
+              placeholder="pisteet"
+            />
+            <InputGroupAddon align="inline-end">
+              <InputGroupButton
+                onMouseDown={(e) => e.preventDefault()}
+                onClick={commitScore}
+                aria-label="Tallenna pisteet"
+              >
+                <Check />
+              </InputGroupButton>
+            </InputGroupAddon>
+          </InputGroup>
         ) : (
           <span className="text-sm text-muted-foreground font-mono">
             {participant.score !== undefined ? participant.score : "—"}
