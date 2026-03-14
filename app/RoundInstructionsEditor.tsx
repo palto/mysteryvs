@@ -5,7 +5,10 @@ import "@blocknote/core/fonts/inter.css";
 import "@blocknote/mantine/style.css";
 
 export function RoundInstructionsEditor() {
-  const editor = useCreateBlockNoteWithLiveblocks({}, { field: "round-instructions" });
+  const editor = useCreateBlockNoteWithLiveblocks(
+    {},
+    { field: "round-instructions" },
+  );
 
   return (
     <div className="w-full rounded-md border">
