@@ -1,8 +1,8 @@
 "use client";
 import { useCreateBlockNoteWithLiveblocks } from "@liveblocks/react-blocknote";
-import { BlockNoteView } from "@blocknote/mantine";
+import { BlockNoteView } from "@blocknote/shadcn";
 import "@blocknote/core/fonts/inter.css";
-import "@blocknote/mantine/style.css";
+import "@blocknote/shadcn/style.css";
 
 export function RoundInstructionsEditor() {
   const editor = useCreateBlockNoteWithLiveblocks(
