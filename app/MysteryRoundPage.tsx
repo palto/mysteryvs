@@ -38,6 +38,8 @@ export function MysteryRoundPage() {
           </div>
         )}
 
+        <RoundInstructionsEditor />
+
         {host && (
           <h2>
             Kierroksen järjestäjä: {host}
@@ -98,8 +100,6 @@ export function MysteryRoundPage() {
               : 'Kierros päättyi. Paina "Valitse seuraava järjestäjä" aloittaaksesi uuden kierroksen.'}
           </p>
         )}
-
-        <RoundInstructionsEditor />
 
         <Timer />
 
