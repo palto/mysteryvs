@@ -14,6 +14,7 @@ import {
 import { WakeLock } from "@/app/WakeLock";
 import ReactMarkdown from "react-markdown";
 import remarkGfm from "remark-gfm";
+import { RoundInstructionsEditor } from "@/app/RoundInstructionsEditor";
 
 export function MysteryRoundPage() {
   const host = useHost();
@@ -97,6 +98,8 @@ export function MysteryRoundPage() {
               : 'Kierros päättyi. Paina "Valitse seuraava järjestäjä" aloittaaksesi uuden kierroksen.'}
           </p>
         )}
+
+        <RoundInstructionsEditor />
 
         <Timer />
 
