@@ -16,7 +16,7 @@ export function RoundInstructionsEditor() {
         Kierroksen ohjeet
       </h3>
       <div className="rounded-md border">
-        <BlockNoteView editor={editor} />
+        <BlockNoteView editor={editor} theme="dark" />
       </div>
     </div>
   );
