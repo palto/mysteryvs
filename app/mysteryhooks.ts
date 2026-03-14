@@ -33,3 +33,11 @@ const DEFAULT_ROUND_LENGTH = 20 * 60 * 1000;
 export function useRoundLength() {
   return useStorage((root) => root.roundLength ?? DEFAULT_ROUND_LENGTH);
 }
+
+export function useRoundType() {
+  return useStorage((root) => root.roundType ?? "time");
+}
+
+export function useParticipantScore(id: string) {
+  return useStorage((root) => root.participantScores.get(id));
+}

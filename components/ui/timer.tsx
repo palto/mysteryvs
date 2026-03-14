@@ -114,6 +114,7 @@ function useStartRound() {
       startTime: Date.now(),
       completedTime: null,
       participantTimes: new LiveMap(),
+      participantScores: new LiveMap(),
     });
   }, []);
 }
@@ -124,7 +125,9 @@ function useResetRound() {
       startTime: null,
       completedTime: null,
       participantTimes: new LiveMap(),
+      participantScores: new LiveMap(),
       host: null,
+      roundType: null,
     });
   }, []);
 }
@@ -135,6 +138,7 @@ function useResetTimer() {
       startTime: null,
       completedTime: null,
       participantTimes: new LiveMap(),
+      participantScores: new LiveMap(),
     });
   }, []);
 }

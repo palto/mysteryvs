@@ -8,6 +8,7 @@ import {
   useDescription,
   useHost,
   useIsRunning,
+  useRoundType,
   useStartTime,
 } from "@/app/mysteryhooks";
 import { WakeLock } from "@/app/WakeLock";
@@ -21,6 +22,10 @@ export function MysteryRoundPage() {
   const isRunning = useIsRunning();
   const completedTime = useCompletedTime();
   const description = useDescription();
+  const roundType = useRoundType();
+  const setRoundType = useSetRoundType();
+  const isScoreMode = roundType === "score";
+
   return (
     <div className="grid grid-rows-[20px_1fr_20px] items-center justify-items-center p-4 pb-20 gap-16 sm:p-20 font-(family-name:--font-geist-sans)">
       <main className="flex flex-col gap-8 row-start-2 items-center sm:items-start w-full max-w-lg">
@@ -51,21 +56,45 @@ export function MysteryRoundPage() {
           </p>
         )}
         {host && !startTime && (
-          <p className="text-base font-medium">
-            Järjestäjä käynnistää kierroksen. Klikkaa pelaajan korttiasi kun hän
-            on maalissa — voit siirtää takaisin Matkalle klikkaamalla uudelleen.
-          </p>
+          <>
+            <div className="flex items-center gap-2">
+              <span className="text-sm font-medium text-muted-foreground">
+                Kierrostyyppi:
+              </span>
+              <Button
+                variant={!isScoreMode ? "default" : "outline"}
+                size="sm"
+                onClick={() => setRoundType("time")}
+              >
+                Aika
+              </Button>
+              <Button
+                variant={isScoreMode ? "default" : "outline"}
+                size="sm"
+                onClick={() => setRoundType("score")}
+              >
+                Pisteet
+              </Button>
+            </div>
+            <p className="text-base font-medium">
+              {isScoreMode
+                ? "Pistekierros: syötä pisteet klikkaamalla pelaajan nimeä."
+                : "Järjestäjä käynnistää kierroksen. Klikkaa pelaajan korttiasi kun hän on maalissa — voit siirtää takaisin Matkalle klikkaamalla uudelleen."}
+            </p>
+          </>
         )}
         {isRunning && (
           <p className="text-base font-medium">
-            Klikkaa pelaajan korttiasi kun hän on maalissa. Voit siirtää
-            takaisin Matkalle klikkaamalla uudelleen.
+            {isScoreMode
+              ? "Syötä pisteet klikkaamalla pelaajan nimeä."
+              : "Klikkaa pelaajan korttiasi kun hän on maalissa. Voit siirtää takaisin Matkalle klikkaamalla uudelleen."}
           </p>
         )}
         {completedTime && (
           <p className="text-base font-medium">
-            Kierros päättyi. Paina &quot;Valitse seuraava järjestäjä&quot;
-            aloittaaksesi uuden kierroksen.
+            {isScoreMode
+              ? "Kierros päättyi. Voit vielä päivittää pisteitä."
+              : 'Kierros päättyi. Paina "Valitse seuraava järjestäjä" aloittaaksesi uuden kierroksen.'}
           </p>
         )}
 
@@ -82,5 +111,11 @@ export function MysteryRoundPage() {
 function useUnsetHost() {
   return useMutation(({ storage }) => {
     storage.set("host", null);
+  }, []);
+}
+
+function useSetRoundType() {
+  return useMutation(({ storage }, type: "time" | "score") => {
+    storage.set("roundType", type);
   }, []);
 }
