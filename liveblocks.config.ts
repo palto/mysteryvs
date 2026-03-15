@@ -22,7 +22,7 @@ declare global {
       participantScores: LiveMap<string, number>;
       host: string | null;
       roundLength: number | null;
-      roundType: "time" | "score" | null;
+      roundType: string | null;
     };
 
     // Custom user info set when authenticating with a secret key
