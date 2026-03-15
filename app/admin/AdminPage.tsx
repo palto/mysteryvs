@@ -9,7 +9,14 @@ import { Card } from "@/components/ui/card";
 import { Label } from "@/components/ui/label";
 import { Input } from "@/components/ui/input";
 import { TournamentNameEditor } from "@/app/admin/TournamentNameEditor";
-import { TournamentDescriptionEditor } from "@/app/admin/TournamentDescriptionEditor";
+import dynamic from "next/dynamic";
+const TournamentDescriptionEditor = dynamic(
+  () =>
+    import("@/app/admin/TournamentDescriptionEditor").then(
+      (m) => m.TournamentDescriptionEditor,
+    ),
+  { ssr: false },
+);
 import { RoundLengthEditor } from "@/app/admin/RoundLengthEditor";
 import { useTransition, useState } from "react";
 import {
