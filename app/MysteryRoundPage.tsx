@@ -38,7 +38,7 @@ export function MysteryRoundPage() {
           </div>
         )}
 
-        <RoundInstructionsEditor />
+        {host && <RoundInstructionsEditor />}
 
         {host && (
           <h2>

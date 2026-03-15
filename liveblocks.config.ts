@@ -28,11 +28,8 @@ declare global {
     // Custom user info set when authenticating with a secret key
     UserMeta: {
       id: string;
-      // eslint-disable-next-line @typescript-eslint/no-empty-object-type
       info: {
-        // Example properties, for useSelf, useUser, useOthers, etc.
-        // name: string;
-        // avatar: string;
+        name: string;
       };
     };
 
