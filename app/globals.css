@@ -3,6 +3,8 @@
 @plugin 'tailwindcss-animate';
 @plugin '@tailwindcss/typography';
 
+@source "../node_modules/@blocknote";
+
 @custom-variant dark (&:is(.dark *));
 
 @theme {
