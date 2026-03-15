@@ -4,46 +4,52 @@ import { Label } from "@/components/ui/label";
 import { Button } from "@/components/ui/button";
 import { Check, Save, X } from "lucide-react";
 import { useCallback, useEffect, useRef, useState, useTransition } from "react";
+import { useCreateBlockNote } from "@blocknote/react";
+import { BlockNoteView } from "@blocknote/shadcn";
+import "@blocknote/core/fonts/inter.css";
+import "@blocknote/shadcn/style.css";
 
 export function TournamentDescriptionEditor({
   initialDescription,
 }: {
   initialDescription: string;
 }) {
-  const [value, setValue] = useState(initialDescription);
   const [saved, setSaved] = useState(false);
+  const [isDirty, setIsDirty] = useState(false);
   const [isPending, startTransition] = useTransition();
-  const isDirty = value !== initialDescription && !isPending;
   const savedTimeoutRef = useRef<ReturnType<typeof setTimeout> | null>(null);
+  const initializedRef = useRef(false);
+
+  const editor = useCreateBlockNote();
+
+  useEffect(() => {
+    async function init() {
+      const blocks = await editor.tryParseMarkdownToBlocks(initialDescription);
+      editor.replaceBlocks(editor.document, blocks);
+      initializedRef.current = true;
+    }
+    init();
+  }, []);
 
   const handleSave = useCallback(() => {
     if (!isDirty) return;
-    const formData = new FormData();
-    formData.set("description", value);
     startTransition(async () => {
+      const markdown = await editor.blocksToMarkdownLossy(editor.document);
+      const formData = new FormData();
+      formData.set("description", markdown);
       await setDescription(formData);
       setSaved(true);
+      setIsDirty(false);
       if (savedTimeoutRef.current) clearTimeout(savedTimeoutRef.current);
       savedTimeoutRef.current = setTimeout(() => setSaved(false), 2000);
     });
-  }, [value, isDirty]);
+  }, [editor, isDirty]);
 
-  const handleDiscard = useCallback(() => {
-    setValue(initialDescription);
-  }, [initialDescription]);
-
-  const handleKeyDown = useCallback(
-    (e: React.KeyboardEvent<HTMLTextAreaElement>) => {
-      if (e.key === "Enter" && (e.ctrlKey || e.metaKey)) {
-        e.preventDefault();
-        handleSave();
-      } else if (e.key === "Escape") {
-        e.preventDefault();
-        handleDiscard();
-      }
-    },
-    [handleSave, handleDiscard],
-  );
+  const handleDiscard = useCallback(async () => {
+    const blocks = await editor.tryParseMarkdownToBlocks(initialDescription);
+    editor.replaceBlocks(editor.document, blocks);
+    setIsDirty(false);
+  }, [editor, initialDescription]);
 
   useEffect(() => {
     return () => {
@@ -52,17 +58,17 @@ export function TournamentDescriptionEditor({
   }, []);
 
   return (
-    <div className="space-y-2">
-      <Label htmlFor="description">Kuvaus (tukee markdownia)</Label>
-      <textarea
-        id="description"
-        value={value}
-        onChange={(e) => setValue(e.target.value)}
-        onKeyDown={handleKeyDown}
-        disabled={isPending}
-        rows={6}
-        className="w-full rounded-md border border-input bg-background px-3 py-2 text-sm font-mono shadow-sm focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-ring disabled:opacity-50 resize-y"
-      />
+    <div className="space-y-2 mb-6">
+      <Label>Kuvaus (tukee markdownia)</Label>
+      <div className="rounded-md border">
+        <BlockNoteView
+          editor={editor}
+          theme="dark"
+          onChange={() => {
+            if (initializedRef.current) setIsDirty(true);
+          }}
+        />
+      </div>
       <div className="flex items-center gap-2">
         {isDirty && (
           <Button
@@ -78,7 +84,7 @@ export function TournamentDescriptionEditor({
           size="sm"
           onClick={handleSave}
           disabled={isPending || !isDirty}
-          title="Tallenna (Ctrl+Enter)"
+          title="Tallenna"
           className={
             saved
               ? "bg-green-500 text-white hover:bg-green-500 hover:text-white transition-colors"
