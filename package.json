@@ -20,7 +20,7 @@
     "@dnd-kit/utilities": "^3.2.2",
     "@liveblocks/client": "^3.15.4",
     "@liveblocks/node": "^3.15.4",
-    "@liveblocks/react": "^3.15.4",
+    "@liveblocks/react": "^3.15.5",
     "@liveblocks/react-blocknote": "^3.15.4",
     "@radix-ui/react-label": "^2.1.8",
     "@radix-ui/react-slot": "^1.2.4",
