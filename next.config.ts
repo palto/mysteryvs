@@ -4,6 +4,7 @@ import z from "zod";
 const envValidationResult = z
   .object({
     LIVEBLOCKS_SECRET: z.string(),
+    DATABASE_URL: z.string().url(),
   })
   .safeParse(process.env);
 

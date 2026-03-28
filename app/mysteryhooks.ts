@@ -41,3 +41,7 @@ export function useRoundType() {
 export function useParticipantScore(id: string) {
   return useStorage((root) => root.participantScores.get(id));
 }
+
+export function useParticipantTimes() {
+  return useStorage((root) => Object.fromEntries(root.participantTimes));
+}

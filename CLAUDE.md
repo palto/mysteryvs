@@ -31,8 +31,12 @@ npm run verify       # Run all validations (type-check + lint + format check)
 
 ### Environment Variables
 
-- `LIVEBLOCKS_SECRET`: Required for real-time collaboration. Set in `.env` file.
-- The application validates environment variables at build time in `next.config.ts` and will exit if missing.
+Copy `.env.example` to `.env` and fill in the values:
+
+- `LIVEBLOCKS_SECRET`: Required for real-time collaboration. Get from [liveblocks.io/dashboard](https://liveblocks.io/dashboard).
+- `DATABASE_URL`: Required for database persistence. Neon Postgres connection string. Get from [console.neon.tech](https://console.neon.tech).
+
+The application validates both variables at build time in `next.config.ts` and will exit if either is missing.
 
 ## Architecture
 
