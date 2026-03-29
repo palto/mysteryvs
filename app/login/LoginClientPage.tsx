@@ -19,6 +19,11 @@ const STEPS = [
   },
   {
     number: 3,
+    title: "Valitse kierrostyyppi",
+    description: "Aika- tai pistekierros ennen aloitusta",
+  },
+  {
+    number: 4,
     title: "Klikkaa pelaajan korttiaa",
     description: "Klikkaa pelaajan korttiaa kun hän on maalissa",
   },
