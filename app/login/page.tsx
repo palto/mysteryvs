@@ -3,8 +3,6 @@ import { redirect } from "next/navigation";
 
 import { LoginClientPage } from "@/app/login/LoginClientPage";
 import { Room } from "@/app/Room";
-import { TopNav } from "@/app/TopNav";
-import { TournamentName } from "@/app/TournamentName";
 
 export default async function Login() {
   const username = await getUsername();
@@ -14,7 +12,6 @@ export default async function Login() {
 
   return (
     <Room>
-      <TopNav title={<TournamentName />} />
       <LoginClientPage />
     </Room>
   );
