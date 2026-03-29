@@ -1,5 +1,5 @@
 "use client";
-import { useEffect, useRef } from "react";
+import { useEffect, useLayoutEffect, useRef } from "react";
 import { useMutation } from "@liveblocks/react/suspense";
 import { Timer } from "@/components/ui/timer";
 import { Participants } from "@/app/Participants";
@@ -32,6 +32,10 @@ export function MysteryRoundPage() {
   const name = useName();
   const participantTimes = useParticipantTimes();
   const savedRoundRef = useRef<number | null>(null);
+  const payloadRef = useRef({ name, host, participantTimes });
+  useLayoutEffect(() => {
+    payloadRef.current = { name, host, participantTimes };
+  });
 
   useEffect(() => {
     if (!completedTime || savedRoundRef.current === completedTime) return;
@@ -40,13 +44,11 @@ export function MysteryRoundPage() {
       method: "POST",
       headers: { "Content-Type": "application/json" },
       body: JSON.stringify({
-        name,
-        host,
+        ...payloadRef.current,
         completedAt: completedTime,
-        participantTimes,
       }),
     }).catch(console.error);
-  }, [completedTime, host, name, participantTimes]);
+  }, [completedTime]);
 
   return (
     <div className="grid grid-rows-[20px_1fr_20px] items-center justify-items-center p-4 pb-20 gap-16 sm:p-20 font-(family-name:--font-geist-sans)">
