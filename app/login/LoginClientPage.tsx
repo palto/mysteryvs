@@ -3,22 +3,24 @@
 import { ParticipantLoginButton } from "@/app/login/ParticipantLoginButton";
 import { useParticipants } from "@/app/Participants";
 import { useDescription, useName } from "@/app/mysteryhooks";
+import ReactMarkdown from "react-markdown";
+import remarkGfm from "remark-gfm";
 
 const STEPS = [
   {
     number: 1,
     title: "Valitse nimesi",
-    description: "Klikkaa omaa nimeäsi alla",
+    description: "Klikkaa omaa nimeäsi alla kirjautuaksesi",
   },
   {
     number: 2,
-    title: "Odota hostia",
-    description: "Hosti käynnistää kierroksen",
+    title: "Valitse järjestäjä",
+    description: "Klikkaa seuraavan kierroksen järjestäjää",
   },
   {
     number: 3,
-    title: "Klikkaa kun olet valmis",
-    description: "Klikkaa nimeäsi kun olet ratkaissut mysteerin",
+    title: "Klikkaa pelaajan korttiaa",
+    description: "Klikkaa pelaajan korttiaa kun hän on maalissa",
   },
 ];
 
@@ -32,9 +34,15 @@ export function LoginClientPage() {
       {/* Welcome hero */}
       <div className="text-center flex flex-col gap-2">
         <h1 className="text-4xl font-bold">{tournamentName}</h1>
-        <p className="text-muted-foreground text-base">
-          {description || "Tervetuloa mukaan!"}
-        </p>
+        {description ? (
+          <div className="prose prose-sm dark:prose-invert text-center">
+            <ReactMarkdown remarkPlugins={[remarkGfm]}>
+              {description}
+            </ReactMarkdown>
+          </div>
+        ) : (
+          <p className="text-muted-foreground text-base">Tervetuloa mukaan!</p>
+        )}
       </div>
 
       {/* How it works */}
