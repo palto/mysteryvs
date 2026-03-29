@@ -225,10 +225,6 @@ function Step3Instructions() {
     saveInstructions(markdown.trim());
   }
 
-  function handleSkip() {
-    saveInstructions("");
-  }
-
   const unsetRoundType = useMutation(({ storage }) => {
     storage.set("roundType", null);
   }, []);
@@ -251,9 +247,6 @@ function Step3Instructions() {
         <Button onClick={handleReady}>
           <Check className="w-4 h-4 mr-1" />
           Ohjeet valmiit
-        </Button>
-        <Button variant="outline" onClick={handleSkip}>
-          Ohita
         </Button>
         <Button
           variant="ghost"
