@@ -1,6 +1,6 @@
 "use client";
 
-import { useMutation, useSelf } from "@liveblocks/react/suspense";
+import { useMutation } from "@liveblocks/react/suspense";
 import { useCreateBlockNoteWithLiveblocks } from "@liveblocks/react-blocknote";
 import { BlockNoteView } from "@blocknote/shadcn";
 import "@blocknote/core/fonts/inter.css";
@@ -106,8 +106,6 @@ export function SetupWizard() {
 // ---------------------------------------------------------------------------
 
 function Step1SelectHost() {
-  const username = useSelf((me) => me.id);
-
   const participants = useParticipants();
 
   const setHost = useMutation(({ storage }, name: string) => {
@@ -130,23 +128,12 @@ function Step1SelectHost() {
             onClick={() => setHost(p.id)}
             className="w-full rounded-xl focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 active:scale-[0.99] transition-transform duration-100"
           >
-            <Card
-              className={`w-full cursor-pointer transition-colors duration-150 border-border/40 ${
-                p.id === username
-                  ? "bg-primary/10 border-primary/40 hover:bg-primary/20"
-                  : "bg-secondary hover:bg-white/10"
-              }`}
-            >
+            <Card className="w-full cursor-pointer bg-secondary hover:bg-white/10 transition-colors duration-150 border-border/40">
               <CardContent className="flex items-center gap-4 py-4 px-5">
                 <span className="text-sm font-mono text-muted-foreground w-5 shrink-0 text-right">
                   {i + 1}.
                 </span>
                 <span className="text-base font-semibold">{p.name}</span>
-                {p.id === username && (
-                  <span className="ml-auto text-xs text-primary font-medium">
-                    sinä
-                  </span>
-                )}
               </CardContent>
             </Card>
           </button>
@@ -161,10 +148,6 @@ function Step1SelectHost() {
 // ---------------------------------------------------------------------------
 
 function Step2RoundType() {
-  const host = useHost()!;
-  const username = useSelf((me) => me.id);
-  const isHost = username === host;
-
   const setRoundType = useMutation(({ storage }, type: "time" | "score") => {
     storage.set("roundType", type);
   }, []);
@@ -177,32 +160,17 @@ function Step2RoundType() {
     <div className="flex flex-col gap-4">
       <div>
         <h2 className="text-xl font-bold">Kierrostyyppi</h2>
-        {isHost ? (
-          <p className="text-sm text-muted-foreground mt-1">
-            Valitse haluatko kilpailla ajalla vai pisteillä.
-          </p>
-        ) : (
-          <p className="text-sm text-muted-foreground mt-1">
-            Järjestäjä{" "}
-            <span className="font-medium text-foreground">{host}</span> valitsee
-            kierrostyyppiä…
-          </p>
-        )}
+        <p className="text-sm text-muted-foreground mt-1">
+          Valitse haluatko kilpailla ajalla vai pisteillä.
+        </p>
       </div>
 
       <div className="grid grid-cols-2 gap-3">
         <button
-          onClick={() => isHost && setRoundType("time")}
-          disabled={!isHost}
-          className="focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring rounded-xl disabled:pointer-events-none"
+          onClick={() => setRoundType("time")}
+          className="focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring rounded-xl"
         >
-          <Card
-            className={`h-full transition-colors border-2 ${
-              isHost
-                ? "cursor-pointer hover:border-primary hover:bg-primary/5"
-                : "opacity-60"
-            }`}
-          >
+          <Card className="h-full cursor-pointer transition-colors border-2 hover:border-primary hover:bg-primary/5">
             <CardContent className="flex flex-col items-center gap-2 py-6 px-4">
               <Clock className="w-8 h-8 text-primary" />
               <span className="text-base font-semibold">Aika</span>
@@ -214,17 +182,10 @@ function Step2RoundType() {
         </button>
 
         <button
-          onClick={() => isHost && setRoundType("score")}
-          disabled={!isHost}
-          className="focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring rounded-xl disabled:pointer-events-none"
+          onClick={() => setRoundType("score")}
+          className="focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring rounded-xl"
         >
-          <Card
-            className={`h-full transition-colors border-2 ${
-              isHost
-                ? "cursor-pointer hover:border-primary hover:bg-primary/5"
-                : "opacity-60"
-            }`}
-          >
+          <Card className="h-full cursor-pointer transition-colors border-2 hover:border-primary hover:bg-primary/5">
             <CardContent className="flex flex-col items-center gap-2 py-6 px-4">
               <Trophy className="w-8 h-8 text-primary" />
               <span className="text-base font-semibold">Pisteet</span>
@@ -236,17 +197,10 @@ function Step2RoundType() {
         </button>
       </div>
 
-      {isHost && (
-        <Button
-          variant="ghost"
-          size="sm"
-          className="self-start"
-          onClick={unsetHost}
-        >
-          <ChevronLeft className="w-4 h-4 mr-1" />
-          Takaisin
-        </Button>
-      )}
+      <Button variant="ghost" size="sm" className="self-start" onClick={unsetHost}>
+        <ChevronLeft className="w-4 h-4 mr-1" />
+        Takaisin
+      </Button>
     </div>
   );
 }
@@ -256,10 +210,6 @@ function Step2RoundType() {
 // ---------------------------------------------------------------------------
 
 function Step3Instructions() {
-  const host = useHost()!;
-  const username = useSelf((me) => me.id);
-  const isHost = username === host;
-
   const editor = useCreateBlockNoteWithLiveblocks(
     {},
     { field: "round-instructions" },
@@ -308,17 +258,15 @@ function Step3Instructions() {
         <Button variant="outline" onClick={handleSkip}>
           Ohita
         </Button>
-        {isHost && (
-          <Button
-            variant="ghost"
-            size="sm"
-            className="ml-auto"
-            onClick={unsetRoundType}
-          >
-            <ChevronLeft className="w-4 h-4 mr-1" />
-            Takaisin
-          </Button>
-        )}
+        <Button
+          variant="ghost"
+          size="sm"
+          className="ml-auto"
+          onClick={unsetRoundType}
+        >
+          <ChevronLeft className="w-4 h-4 mr-1" />
+          Takaisin
+        </Button>
       </div>
     </div>
   );
@@ -329,11 +277,8 @@ function Step3Instructions() {
 // ---------------------------------------------------------------------------
 
 function Step4Start() {
-  const host = useHost()!;
   const rawRoundType = useStorage((root) => root.roundType);
   const roundInstructions = useRoundInstructions();
-  const username = useSelf((me) => me.id);
-  const isHost = username === host;
 
   const startRound = useMutation(({ storage }) => {
     storage.update({
@@ -352,18 +297,9 @@ function Step4Start() {
     <div className="flex flex-col gap-4">
       <div>
         <h2 className="text-xl font-bold">Valmis aloittamaan!</h2>
-        {isHost ? (
-          <p className="text-sm text-muted-foreground mt-1">
-            Kaikki valmista. Käynnistä kierros kun kaikki pelaajat ovat
-            valmiina.
-          </p>
-        ) : (
-          <p className="text-sm text-muted-foreground mt-1">
-            Järjestäjä{" "}
-            <span className="font-medium text-foreground">{host}</span> aloittaa
-            kierroksen pian…
-          </p>
-        )}
+        <p className="text-sm text-muted-foreground mt-1">
+          Kaikki valmista. Käynnistä kierros kun kaikki pelaajat ovat valmiina.
+        </p>
       </div>
 
       <Card className="bg-muted/30">
@@ -396,21 +332,10 @@ function Step4Start() {
       </Card>
 
       <div className="flex items-center gap-2">
-        {isHost && (
-          <Button
-            size="lg"
-            onClick={startRound}
-            className="font-bold tracking-wide"
-          >
-            AIKA ALKAA NYT!
-          </Button>
-        )}
-        <Button
-          variant="ghost"
-          size="sm"
-          className={isHost ? "ml-auto" : ""}
-          onClick={unsetInstructionsReady}
-        >
+        <Button size="lg" onClick={startRound} className="font-bold tracking-wide">
+          AIKA ALKAA NYT!
+        </Button>
+        <Button variant="ghost" size="sm" className="ml-auto" onClick={unsetInstructionsReady}>
           <ChevronLeft className="w-4 h-4 mr-1" />
           Takaisin
         </Button>
