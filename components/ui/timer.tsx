@@ -114,7 +114,6 @@ function useResetRound() {
       host: null,
       roundType: null,
       roundInstructions: null,
-      instructionsReady: null,
     });
   }, []);
 }
@@ -127,7 +126,6 @@ function useResetTimer() {
       participantTimes: new LiveMap(),
       participantScores: new LiveMap(),
       roundInstructions: null,
-      instructionsReady: null,
     });
   }, []);
 }

@@ -8,11 +8,7 @@ import "@blocknote/shadcn/style.css";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
 import { Check, Clock, Trophy, ChevronLeft } from "lucide-react";
-import {
-  useHost,
-  useInstructionsReady,
-  useRoundInstructions,
-} from "@/app/mysteryhooks";
+import { useHost, useRoundInstructions } from "@/app/mysteryhooks";
 import { useStorage } from "@liveblocks/react/suspense";
 import { useParticipants } from "@/app/Participants";
 import { LiveMap } from "@liveblocks/client";
@@ -80,13 +76,13 @@ function StepIndicator({ current }: { current: number }) {
 export function SetupWizard() {
   const host = useHost();
   const rawRoundType = useStorage((root) => root.roundType);
-  const instructionsReady = useInstructionsReady();
+  const roundInstructions = useRoundInstructions();
 
   const currentStep = !host
     ? 1
     : rawRoundType === null
       ? 2
-      : !instructionsReady
+      : roundInstructions === null
         ? 3
         : 4;
 
@@ -220,21 +216,17 @@ function Step3Instructions() {
     { field: "round-instructions" },
   );
 
-  const saveInstructions = useMutation(
-    ({ storage }, markdown: string | null) => {
-      storage.set("roundInstructions", markdown);
-      storage.set("instructionsReady", true);
-    },
-    [],
-  );
+  const saveInstructions = useMutation(({ storage }, markdown: string) => {
+    storage.set("roundInstructions", markdown);
+  }, []);
 
   async function handleReady() {
     const markdown = await editor.blocksToMarkdownLossy(editor.document);
-    saveInstructions(markdown.trim() || null);
+    saveInstructions(markdown.trim());
   }
 
   function handleSkip() {
-    saveInstructions(null);
+    saveInstructions("");
   }
 
   const unsetRoundType = useMutation(({ storage }) => {
@@ -295,7 +287,7 @@ function Step4Start() {
   }, []);
 
   const unsetInstructionsReady = useMutation(({ storage }) => {
-    storage.set("instructionsReady", null);
+    storage.set("roundInstructions", null);
   }, []);
 
   return (

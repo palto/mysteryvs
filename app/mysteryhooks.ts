@@ -45,7 +45,3 @@ export function useParticipantScore(id: string) {
 export function useRoundInstructions() {
   return useStorage((root) => root.roundInstructions);
 }
-
-export function useInstructionsReady() {
-  return useStorage((root) => root.instructionsReady);
-}
