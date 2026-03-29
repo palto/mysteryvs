@@ -122,8 +122,6 @@ export function Participants() {
 function ScoreParticipantCard({
   participant,
   rank,
-  roundEnded: _roundEnded,
-  isRunning: _isRunning,
 }: {
   participant: Participant;
   rank?: number;
