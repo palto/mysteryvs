@@ -1,6 +1,6 @@
 "use client";
 
-import { useMutation } from "@liveblocks/react/suspense";
+import { useMutation, useSelf } from "@liveblocks/react/suspense";
 import { useCreateBlockNoteWithLiveblocks } from "@liveblocks/react-blocknote";
 import { BlockNoteView } from "@blocknote/shadcn";
 import "@blocknote/core/fonts/inter.css";
@@ -15,9 +15,7 @@ import {
 } from "@/app/mysteryhooks";
 import { useStorage } from "@liveblocks/react/suspense";
 import { useParticipants } from "@/app/Participants";
-import { getUsername } from "@/app/login/getUsername";
 import { LiveMap } from "@liveblocks/client";
-import { useEffect, useState } from "react";
 import ReactMarkdown from "react-markdown";
 import remarkGfm from "remark-gfm";
 
@@ -108,10 +106,7 @@ export function SetupWizard() {
 // ---------------------------------------------------------------------------
 
 function Step1SelectHost() {
-  const [username, setUsername] = useState<string | null>(null);
-  useEffect(() => {
-    getUsername().then((v) => setUsername(v ?? null));
-  }, []);
+  const username = useSelf((me) => me.id);
 
   const participants = useParticipants();
 
@@ -167,10 +162,7 @@ function Step1SelectHost() {
 
 function Step2RoundType() {
   const host = useHost()!;
-  const [username, setUsername] = useState<string | null>(null);
-  useEffect(() => {
-    getUsername().then((v) => setUsername(v ?? null));
-  }, []);
+  const username = useSelf((me) => me.id);
   const isHost = username === host;
 
   const setRoundType = useMutation(({ storage }, type: "time" | "score") => {
@@ -265,10 +257,7 @@ function Step2RoundType() {
 
 function Step3Instructions() {
   const host = useHost()!;
-  const [username, setUsername] = useState<string | null>(null);
-  useEffect(() => {
-    getUsername().then((v) => setUsername(v ?? null));
-  }, []);
+  const username = useSelf((me) => me.id);
   const isHost = username === host;
 
   const editor = useCreateBlockNoteWithLiveblocks(
@@ -343,10 +332,7 @@ function Step4Start() {
   const host = useHost()!;
   const rawRoundType = useStorage((root) => root.roundType);
   const roundInstructions = useRoundInstructions();
-  const [username, setUsername] = useState<string | null>(null);
-  useEffect(() => {
-    getUsername().then((v) => setUsername(v ?? null));
-  }, []);
+  const username = useSelf((me) => me.id);
   const isHost = username === host;
 
   const startRound = useMutation(({ storage }) => {
