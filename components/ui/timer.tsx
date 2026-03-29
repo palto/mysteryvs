@@ -48,11 +48,11 @@ export function Timer() {
   function handleCompleteRound() {
     const completedAt = Date.now();
     completeRound(completedAt);
-    fetch("/api/rounds", {
+    void fetch("/api/rounds", {
       method: "POST",
       headers: { "Content-Type": "application/json" },
       body: JSON.stringify({ name, host, completedAt, participantTimes }),
-    }).catch(console.error);
+    });
   }
 
   function handleResetTimer() {
