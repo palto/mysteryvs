@@ -1,5 +1,4 @@
 "use client";
-import { useEffect, useLayoutEffect, useRef } from "react";
 import { useMutation } from "@liveblocks/react/suspense";
 import { Timer } from "@/components/ui/timer";
 import { Participants } from "@/app/Participants";
@@ -9,8 +8,6 @@ import {
   useDescription,
   useHost,
   useIsRunning,
-  useName,
-  useParticipantTimes,
   useRoundType,
   useStartTime,
 } from "@/app/mysteryhooks";
@@ -29,26 +26,6 @@ export function MysteryRoundPage() {
   const roundType = useRoundType();
   const setRoundType = useSetRoundType();
   const isScoreMode = roundType === "score";
-  const name = useName();
-  const participantTimes = useParticipantTimes();
-  const savedRoundRef = useRef<number | null>(null);
-  const payloadRef = useRef({ name, host, participantTimes });
-  useLayoutEffect(() => {
-    payloadRef.current = { name, host, participantTimes };
-  });
-
-  useEffect(() => {
-    if (!completedTime || savedRoundRef.current === completedTime) return;
-    savedRoundRef.current = completedTime;
-    fetch("/api/rounds", {
-      method: "POST",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({
-        ...payloadRef.current,
-        completedAt: completedTime,
-      }),
-    }).catch(console.error);
-  }, [completedTime]);
 
   return (
     <div className="grid grid-rows-[20px_1fr_20px] items-center justify-items-center p-4 pb-20 gap-16 sm:p-20 font-(family-name:--font-geist-sans)">

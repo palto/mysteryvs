@@ -7,6 +7,8 @@ import {
   useCompletedTime,
   useHost,
   useIsRunning,
+  useName,
+  useParticipantTimes,
   useRoundLength,
   useStartTime,
 } from "@/app/mysteryhooks";
@@ -34,11 +36,24 @@ export function Timer() {
     setElapsedTime(difference);
   }, 10);
 
+  const name = useName();
+  const participantTimes = useParticipantTimes();
+
   const completeRound = useCompleteRound();
   const startRound = useStartRound();
   const resetRound = useResetRound();
 
   const resetTimer = useResetTimer();
+
+  function handleCompleteRound() {
+    const completedAt = Date.now();
+    completeRound(completedAt);
+    fetch("/api/rounds", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ name, host, completedAt, participantTimes }),
+    }).catch(console.error);
+  }
 
   function handleResetTimer() {
     if (!confirm("Nollataanko kierros? Järjestäjä pysyy samana.")) return;
@@ -94,7 +109,7 @@ export function Timer() {
       {!startTime && host && (
         <Button onClick={startRound}>AIKA ALKAA NYT!</Button>
       )}
-      {running && <Button onClick={completeRound}>AIKA PÄÄTTYI!</Button>}
+      {running && <Button onClick={handleCompleteRound}>AIKA PÄÄTTYI!</Button>}
       {startTime && !running && (
         <Button onClick={resetRound}>Valitse seuraava järjestäjä</Button>
       )}
@@ -103,8 +118,8 @@ export function Timer() {
 }
 
 function useCompleteRound() {
-  return useMutation(({ storage }) => {
-    storage.set("completedTime", Date.now());
+  return useMutation(({ storage }, completedAt: number) => {
+    storage.set("completedTime", completedAt);
   }, []);
 }
 
