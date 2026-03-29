@@ -243,21 +243,19 @@ function Step3Instructions() {
         <BlockNoteView editor={editor} theme="dark" />
       </div>
 
-      <div className="flex items-center gap-2">
-        <Button onClick={handleReady}>
-          <Check className="w-4 h-4 mr-1" />
-          Ohjeet valmiit
-        </Button>
-        <Button
-          variant="ghost"
-          size="sm"
-          className="ml-auto"
-          onClick={unsetRoundType}
-        >
-          <ChevronLeft className="w-4 h-4 mr-1" />
-          Takaisin
-        </Button>
-      </div>
+      <Button onClick={handleReady}>
+        <Check className="w-4 h-4 mr-1" />
+        Ohjeet valmiit
+      </Button>
+      <Button
+        variant="ghost"
+        size="sm"
+        className="self-start"
+        onClick={unsetRoundType}
+      >
+        <ChevronLeft className="w-4 h-4 mr-1" />
+        Takaisin
+      </Button>
     </div>
   );
 }
