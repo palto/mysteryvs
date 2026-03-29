@@ -29,9 +29,13 @@ export function Participants() {
 
   if (!host && !startTime) {
     return (
-      <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 w-full">
-        {participants.map((participant) => (
-          <ParticipantCard key={participant.id} participant={participant} />
+      <div className="flex flex-col gap-2 w-full">
+        {participants.map((participant, index) => (
+          <ParticipantCard
+            key={participant.id}
+            participant={participant}
+            index={index + 1}
+          />
         ))}
       </div>
     );
@@ -269,7 +273,13 @@ function RoundParticipantCard({
   );
 }
 
-function ParticipantCard({ participant }: { participant: Participant }) {
+function ParticipantCard({
+  participant,
+  index,
+}: {
+  participant: Participant;
+  index: number;
+}) {
   const setHost = useMutation(
     ({ storage }) => {
       storage.set("host", participant.id);
@@ -278,10 +288,16 @@ function ParticipantCard({ participant }: { participant: Participant }) {
   );
 
   return (
-    <button onClick={setHost} className="w-full">
-      <Card className="w-full h-20 cursor-pointer hover:bg-accent transition-colors">
-        <CardContent className="flex items-center justify-center h-full pt-6">
-          <span className="text-xl font-semibold">{participant.name}</span>
+    <button
+      onClick={setHost}
+      className="w-full rounded-xl focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 focus-visible:ring-offset-background active:scale-[0.99] transition-transform duration-100"
+    >
+      <Card className="w-full cursor-pointer bg-secondary hover:bg-white/10 transition-colors duration-150 border-border/40">
+        <CardContent className="flex items-center gap-4 py-4 px-5">
+          <span className="text-sm font-mono text-muted-foreground w-5 shrink-0 text-right">
+            {index}.
+          </span>
+          <span className="text-base font-semibold">{participant.name}</span>
         </CardContent>
       </Card>
     </button>
