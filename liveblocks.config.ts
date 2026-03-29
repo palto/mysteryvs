@@ -23,6 +23,8 @@ declare global {
       host: string | null;
       roundLength: number | null;
       roundType: string | null;
+      roundInstructions: string | null;
+      instructionsReady: boolean | null;
     };
 
     // Custom user info set when authenticating with a secret key
