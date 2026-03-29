@@ -51,12 +51,17 @@ export function MysteryRoundPage() {
           </h2>
         )}
 
-        {!host && <h2>Valitse seuraavan kierroksen järjestäjä</h2>}
-
-        {!host && !startTime && (
-          <p className="text-base font-medium">
-            Klikkaa nimeäsi valitaksesi itsesi kierroksen järjestäjäksi.
-          </p>
+        {!host && (
+          <div className="flex flex-col gap-2 w-full">
+            <h2 className="text-2xl font-bold tracking-tight">
+              Valitse seuraavan kierroksen järjestäjä
+            </h2>
+            {!startTime && (
+              <p className="text-sm text-muted-foreground">
+                Klikkaa nimeäsi valitaksesi itsesi kierroksen järjestäjäksi.
+              </p>
+            )}
+          </div>
         )}
         {host && !startTime && (
           <>
