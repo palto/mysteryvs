@@ -197,7 +197,12 @@ function Step2RoundType() {
         </button>
       </div>
 
-      <Button variant="ghost" size="sm" className="self-start" onClick={unsetHost}>
+      <Button
+        variant="ghost"
+        size="sm"
+        className="self-start"
+        onClick={unsetHost}
+      >
         <ChevronLeft className="w-4 h-4 mr-1" />
         Takaisin
       </Button>
@@ -332,10 +337,19 @@ function Step4Start() {
       </Card>
 
       <div className="flex items-center gap-2">
-        <Button size="lg" onClick={startRound} className="font-bold tracking-wide">
+        <Button
+          size="lg"
+          onClick={startRound}
+          className="font-bold tracking-wide"
+        >
           AIKA ALKAA NYT!
         </Button>
-        <Button variant="ghost" size="sm" className="ml-auto" onClick={unsetInstructionsReady}>
+        <Button
+          variant="ghost"
+          size="sm"
+          className="ml-auto"
+          onClick={unsetInstructionsReady}
+        >
           <ChevronLeft className="w-4 h-4 mr-1" />
           Takaisin
         </Button>
