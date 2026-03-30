@@ -8,7 +8,11 @@ import "@blocknote/shadcn/style.css";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
 import { Check, Clock, Trophy, ChevronLeft } from "lucide-react";
-import { useHost, useRoundInstructions } from "@/app/mysteryhooks";
+import {
+  useHost,
+  useRoundInstructions,
+  useRoundLength,
+} from "@/app/mysteryhooks";
 import { useStorage } from "@liveblocks/react/suspense";
 import { useParticipants } from "@/app/Participants";
 import { LiveMap } from "@liveblocks/client";
@@ -265,8 +269,11 @@ function Step3Instructions() {
 // ---------------------------------------------------------------------------
 
 function Step4Start() {
+  const host = useHost()!;
   const rawRoundType = useStorage((root) => root.roundType);
   const roundInstructions = useRoundInstructions();
+  const roundLength = useRoundLength();
+  const roundMinutes = Math.round(roundLength / 60000);
 
   const startRound = useMutation(({ storage }) => {
     storage.update({
@@ -292,6 +299,16 @@ function Step4Start() {
 
       <Card className="bg-muted/30">
         <CardContent className="py-4 px-5 flex flex-col gap-3">
+          <div className="flex items-center justify-between">
+            <div className="flex flex-col">
+              <span className="text-xs text-muted-foreground">Järjestäjä</span>
+              <span className="text-lg font-bold">{host}</span>
+            </div>
+            <div className="flex flex-col items-end">
+              <span className="text-xs text-muted-foreground">Kierrosaika</span>
+              <span className="text-lg font-bold">{roundMinutes} min</span>
+            </div>
+          </div>
           <div className="flex items-center gap-2 text-sm">
             {rawRoundType === "score" ? (
               <>
