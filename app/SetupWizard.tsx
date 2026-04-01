@@ -1,5 +1,6 @@
 "use client";
 
+import React from "react";
 import { useMutation } from "@liveblocks/react/suspense";
 import { useCreateBlockNoteWithLiveblocks } from "@liveblocks/react-blocknote";
 import { BlockNoteView } from "@blocknote/shadcn";
@@ -148,13 +149,31 @@ function Step1SelectHost() {
 // ---------------------------------------------------------------------------
 
 function Step2RoundType() {
+  const roundLength = useRoundLength();
+  const [minutesValue, setMinutesValue] = React.useState(
+    String(Math.round(roundLength / 60000)),
+  );
+
   const setRoundType = useMutation(({ storage }, type: "time" | "score") => {
     storage.set("roundType", type);
+  }, []);
+
+  const setRoundLengthMutation = useMutation(({ storage }, minutes: number) => {
+    storage.set("roundLength", minutes * 60000);
   }, []);
 
   const unsetHost = useMutation(({ storage }) => {
     storage.set("host", null);
   }, []);
+
+  function handleMinutesBlur() {
+    const num = Number(minutesValue);
+    if (Number.isFinite(num) && num > 0) {
+      setRoundLengthMutation(num);
+    } else {
+      setMinutesValue(String(Math.round(roundLength / 60000)));
+    }
+  }
 
   return (
     <div className="flex flex-col gap-4">
@@ -163,6 +182,30 @@ function Step2RoundType() {
         <p className="text-sm text-muted-foreground mt-1">
           Valitse haluatko kilpailla ajalla vai pisteillä.
         </p>
+      </div>
+
+      <div className="flex flex-col gap-1">
+        <label
+          htmlFor="roundLengthInput"
+          className="text-sm font-medium text-foreground"
+        >
+          Kierroksen pituus (minuuttia)
+        </label>
+        <input
+          id="roundLengthInput"
+          type="number"
+          min="1"
+          step="1"
+          value={minutesValue}
+          onChange={(e) => setMinutesValue(e.target.value)}
+          onBlur={handleMinutesBlur}
+          onKeyDown={(e) => {
+            if (e.key === "Enter") {
+              e.currentTarget.blur();
+            }
+          }}
+          className="w-28 rounded-md border border-input bg-background px-3 py-1.5 text-sm focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring"
+        />
       </div>
 
       <div className="grid grid-cols-2 gap-3">
