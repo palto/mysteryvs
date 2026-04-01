@@ -14,7 +14,7 @@ import {
   useRoundType,
   useStartTime,
 } from "@/app/mysteryhooks";
-import { Check } from "lucide-react";
+import { Check, CheckCircle2, Flag, Loader2 } from "lucide-react";
 import { format } from "date-fns";
 import { useRef, useState } from "react";
 
@@ -29,14 +29,19 @@ export function Participants() {
 
   if (!host && !startTime) {
     return (
-      <div className="flex flex-col gap-2 w-full">
-        {participants.map((participant, index) => (
-          <ParticipantCard
-            key={participant.id}
-            participant={participant}
-            index={index + 1}
-          />
-        ))}
+      <div className="flex flex-col gap-3 w-full">
+        <h2 className="text-xs font-semibold uppercase tracking-widest text-muted-foreground">
+          Valitse kierroksen järjestäjä
+        </h2>
+        <div className="flex flex-col gap-2">
+          {participants.map((participant, index) => (
+            <ParticipantCard
+              key={participant.id}
+              participant={participant}
+              index={index + 1}
+            />
+          ))}
+        </div>
       </div>
     );
   }
@@ -81,7 +86,10 @@ export function Participants() {
   return (
     <div className="grid grid-cols-2 gap-6 w-full">
       <div>
-        <h2 className="text-lg font-semibold mb-3">Matkalla</h2>
+        <h2 className="flex items-center gap-1.5 text-sm font-semibold mb-3 text-muted-foreground">
+          <Loader2 className="w-3.5 h-3.5" />
+          Matkalla
+        </h2>
         <div className="flex flex-col gap-2">
           {inProgress.map((participant) => (
             <RoundParticipantCard
@@ -100,7 +108,10 @@ export function Participants() {
         </div>
       </div>
       <div>
-        <h2 className="text-lg font-semibold mb-3">Maalissa</h2>
+        <h2 className="flex items-center gap-1.5 text-sm font-semibold mb-3 text-muted-foreground">
+          <Flag className="w-3.5 h-3.5" />
+          Maalissa
+        </h2>
         <div className="flex flex-col gap-2">
           {finished.map((participant, index) => (
             <RoundParticipantCard
@@ -166,9 +177,11 @@ function ScoreParticipantCard({
     }
   }
 
+  const hasScore = participant.score !== undefined;
+
   return (
     <Card
-      className={`w-full cursor-pointer hover:bg-accent transition-colors ${participant.score !== undefined ? "border-green-500" : ""}`}
+      className={`w-full cursor-pointer hover:bg-accent transition-colors ${hasScore ? "border-green-500/50 bg-green-500/5" : ""}`}
       onClick={!editing ? handleCardClick : undefined}
     >
       <CardContent className="flex items-center justify-between py-3 px-4 pt-3">
@@ -208,8 +221,10 @@ function ScoreParticipantCard({
             </InputGroupAddon>
           </InputGroup>
         ) : (
-          <span className="text-sm text-muted-foreground font-mono">
-            {participant.score !== undefined ? participant.score : "—"}
+          <span
+            className={`text-sm font-mono ${hasScore ? "text-foreground font-bold text-base" : "text-muted-foreground"}`}
+          >
+            {hasScore ? participant.score : "—"}
           </span>
         )}
       </CardContent>
@@ -251,7 +266,7 @@ function RoundParticipantCard({
   return (
     <button onClick={handleClick} className="w-full text-left">
       <Card
-        className={`w-full cursor-pointer hover:bg-accent transition-colors ${isFinished ? "border-green-500" : ""}`}
+        className={`w-full cursor-pointer hover:bg-accent transition-colors ${isFinished ? "border-green-500/50 bg-green-500/5" : ""}`}
       >
         <CardContent className="flex items-center justify-between py-3 px-4 pt-3">
           <div className="flex items-center gap-2">
@@ -262,11 +277,14 @@ function RoundParticipantCard({
             )}
             <span className="text-base font-medium">{participant.name}</span>
           </div>
-          {isFinished && startTime && participant.completedTime && (
-            <span className="text-sm text-muted-foreground font-mono">
-              {format(participant.completedTime - startTime, "mm:ss")}
-            </span>
-          )}
+          {isFinished && startTime && participant.completedTime ? (
+            <div className="flex items-center gap-1.5">
+              <span className="text-sm text-muted-foreground font-mono">
+                {format(participant.completedTime - startTime, "mm:ss")}
+              </span>
+              <CheckCircle2 className="h-4 w-4 text-green-500 shrink-0" />
+            </div>
+          ) : null}
         </CardContent>
       </Card>
     </button>
