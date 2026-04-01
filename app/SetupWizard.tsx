@@ -158,12 +158,9 @@ function Step2RoundType() {
     storage.set("roundType", type);
   }, []);
 
-  const setRoundLengthMutation = useMutation(
-    ({ storage }, minutes: number) => {
-      storage.set("roundLength", minutes * 60000);
-    },
-    [],
-  );
+  const setRoundLengthMutation = useMutation(({ storage }, minutes: number) => {
+    storage.set("roundLength", minutes * 60000);
+  }, []);
 
   const unsetHost = useMutation(({ storage }) => {
     storage.set("host", null);
