@@ -35,7 +35,6 @@ export function Timer() {
   }, 10);
 
   const completeRound = useCompleteRound();
-  const startRound = useStartRound();
   const resetRound = useResetRound();
 
   const resetTimer = useResetTimer();
@@ -91,9 +90,6 @@ export function Timer() {
           )}
         </div>
       )}
-      {!startTime && host && (
-        <Button onClick={startRound}>AIKA ALKAA NYT!</Button>
-      )}
       {running && <Button onClick={completeRound}>AIKA PÄÄTTYI!</Button>}
       {startTime && !running && (
         <Button onClick={resetRound}>Valitse seuraava järjestäjä</Button>
@@ -108,17 +104,6 @@ function useCompleteRound() {
   }, []);
 }
 
-function useStartRound() {
-  return useMutation(({ storage }) => {
-    storage.update({
-      startTime: Date.now(),
-      completedTime: null,
-      participantTimes: new LiveMap(),
-      participantScores: new LiveMap(),
-    });
-  }, []);
-}
-
 function useResetRound() {
   return useMutation(({ storage }) => {
     storage.update({
@@ -128,6 +113,7 @@ function useResetRound() {
       participantScores: new LiveMap(),
       host: null,
       roundType: null,
+      roundInstructions: null,
     });
   }, []);
 }
@@ -139,6 +125,7 @@ function useResetTimer() {
       completedTime: null,
       participantTimes: new LiveMap(),
       participantScores: new LiveMap(),
+      roundInstructions: null,
     });
   }, []);
 }

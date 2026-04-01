@@ -34,6 +34,7 @@ export function Room({ children }: { children: ReactNode }) {
           host: null,
           roundLength: null,
           roundType: null,
+          roundInstructions: null,
         }}
       >
         <ClientSideSuspense fallback={<div>Loading…</div>}>
