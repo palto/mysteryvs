@@ -48,7 +48,9 @@ export function MysteryRoundPage() {
             {host && (
               <div className="flex items-center justify-between bg-muted/30 border rounded-xl px-5 py-3">
                 <div className="flex flex-col">
-                  <span className="text-xs text-muted-foreground">Järjestäjä</span>
+                  <span className="text-xs text-muted-foreground">
+                    Järjestäjä
+                  </span>
                   <span className="text-lg font-bold">{host}</span>
                 </div>
               </div>
