@@ -66,7 +66,7 @@ export function MysteryRoundPage() {
               <div className="flex items-center gap-2 bg-blue-500/10 text-blue-300 px-3 py-2 rounded-lg text-sm">
                 <Info className="h-4 w-4 shrink-0" />
                 {isScoreMode
-                  ? "Syötä pisteet klikkaamalla pelaajan nimeä."
+                  ? "Syötä pisteet alla olevaan lomakkeeseen. Enter tai Tab siirtyy seuraavaan."
                   : "Klikkaa pelaajan korttiasi kun hän on maalissa. Voit siirtää takaisin Matkalle klikkaamalla uudelleen."}
               </div>
             )}
