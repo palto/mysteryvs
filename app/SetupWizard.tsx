@@ -1,6 +1,6 @@
 "use client";
 
-import React from "react";
+import React, { useMemo } from "react";
 import { useMutation } from "@liveblocks/react/suspense";
 import { useCreateBlockNoteWithLiveblocks } from "@liveblocks/react-blocknote";
 import { BlockNoteView } from "@blocknote/shadcn";
@@ -8,7 +8,14 @@ import "@blocknote/core/fonts/inter.css";
 import "@blocknote/shadcn/style.css";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
-import { Check, Clock, Trophy, ChevronLeft } from "lucide-react";
+import {
+  Check,
+  Clock,
+  Trophy,
+  ChevronLeft,
+  GripVertical,
+  Trash2,
+} from "lucide-react";
 import {
   useHost,
   useRoundInstructions,
@@ -19,6 +26,22 @@ import { useParticipants } from "@/app/Participants";
 import { LiveMap } from "@liveblocks/client";
 import ReactMarkdown from "react-markdown";
 import remarkGfm from "remark-gfm";
+import {
+  DndContext,
+  closestCenter,
+  PointerSensor,
+  TouchSensor,
+  useSensor,
+  useSensors,
+  type DragEndEvent,
+} from "@dnd-kit/core";
+import {
+  SortableContext,
+  verticalListSortingStrategy,
+  useSortable,
+} from "@dnd-kit/sortable";
+import { CSS } from "@dnd-kit/utilities";
+import { NewPlayerDrawer } from "@/app/login/NewPlayerDrawer";
 
 // ---------------------------------------------------------------------------
 // Step indicator
@@ -106,12 +129,99 @@ export function SetupWizard() {
 // Step 1 — Select host
 // ---------------------------------------------------------------------------
 
+function SortableParticipantRow({
+  id,
+  index,
+  onSelect,
+  onRemove,
+}: {
+  id: string;
+  index: number;
+  onSelect: (name: string) => void;
+  onRemove: (name: string) => void;
+}) {
+  const {
+    attributes,
+    listeners,
+    setNodeRef,
+    transform,
+    transition,
+    isDragging,
+  } = useSortable({ id });
+
+  return (
+    <div
+      ref={setNodeRef}
+      style={{
+        transform: CSS.Transform.toString(transform),
+        transition,
+        opacity: isDragging ? 0.5 : 1,
+      }}
+    >
+      <Card className="w-full bg-secondary border-border/40">
+        <CardContent className="flex items-center gap-2 py-3 px-3">
+          <button
+            {...attributes}
+            {...listeners}
+            className="cursor-grab touch-none text-muted-foreground shrink-0"
+            aria-label="Järjestä"
+          >
+            <GripVertical className="h-5 w-5" />
+          </button>
+          <span className="text-sm font-mono text-muted-foreground w-5 shrink-0 text-right">
+            {index + 1}.
+          </span>
+          <button
+            onClick={() => onSelect(id)}
+            className="flex-1 text-left text-base font-semibold hover:text-primary transition-colors py-1"
+          >
+            {id}
+          </button>
+          <Button
+            variant="ghost"
+            size="icon"
+            className="shrink-0 text-muted-foreground hover:text-destructive"
+            onClick={() => onRemove(id)}
+            aria-label="Poista"
+          >
+            <Trash2 className="h-4 w-4" />
+          </Button>
+        </CardContent>
+      </Card>
+    </div>
+  );
+}
+
 function Step1SelectHost() {
   const participants = useParticipants();
+  const items = useMemo(() => participants.map((p) => p.id), [participants]);
+
+  const sensors = useSensors(useSensor(PointerSensor), useSensor(TouchSensor));
 
   const setHost = useMutation(({ storage }, name: string) => {
     storage.set("host", name);
   }, []);
+
+  const removeParticipant = useMutation(({ storage }, name: string) => {
+    const p = storage.get("participants");
+    const idx = p.indexOf(name);
+    if (idx !== -1) p.delete(idx);
+  }, []);
+
+  const moveParticipant = useMutation(
+    ({ storage }, fromIndex: number, toIndex: number) => {
+      storage.get("participants").move(fromIndex, toIndex);
+    },
+    [],
+  );
+
+  function handleDragEnd(event: DragEndEvent) {
+    const { active, over } = event;
+    if (!over || active.id === over.id) return;
+    const oldIndex = items.indexOf(active.id as string);
+    const newIndex = items.indexOf(over.id as string);
+    moveParticipant(oldIndex, newIndex);
+  }
 
   return (
     <div className="flex flex-col gap-4">
@@ -122,23 +232,27 @@ function Step1SelectHost() {
           kierrostyypin ja aloittaa kierroksen.
         </p>
       </div>
-      <div className="flex flex-col gap-2">
-        {participants.map((p, i) => (
-          <button
-            key={p.id}
-            onClick={() => setHost(p.id)}
-            className="w-full rounded-xl focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 active:scale-[0.99] transition-transform duration-100"
-          >
-            <Card className="w-full cursor-pointer bg-secondary hover:bg-white/10 transition-colors duration-150 border-border/40">
-              <CardContent className="flex items-center gap-4 py-4 px-5">
-                <span className="text-sm font-mono text-muted-foreground w-5 shrink-0 text-right">
-                  {i + 1}.
-                </span>
-                <span className="text-base font-semibold">{p.name}</span>
-              </CardContent>
-            </Card>
-          </button>
-        ))}
+      <DndContext
+        sensors={sensors}
+        collisionDetection={closestCenter}
+        onDragEnd={handleDragEnd}
+      >
+        <SortableContext items={items} strategy={verticalListSortingStrategy}>
+          <div className="flex flex-col gap-2">
+            {items.map((id, i) => (
+              <SortableParticipantRow
+                key={id}
+                id={id}
+                index={i}
+                onSelect={setHost}
+                onRemove={removeParticipant}
+              />
+            ))}
+          </div>
+        </SortableContext>
+      </DndContext>
+      <div>
+        <NewPlayerDrawer />
       </div>
     </div>
   );
