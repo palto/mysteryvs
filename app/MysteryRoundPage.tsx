@@ -29,23 +29,28 @@ export function MysteryRoundPage() {
   return (
     <div className="flex flex-col items-center px-4 py-8 gap-8 sm:py-12 font-(family-name:--font-geist-sans)">
       <main className="flex flex-col gap-6 w-full max-w-2xl">
-        {description && (
-          <div className="prose prose-sm dark:prose-invert">
-            <ReactMarkdown remarkPlugins={[remarkGfm]}>
-              {description}
-            </ReactMarkdown>
-          </div>
+        {!startTime && (
+          <>
+            {description && (
+              <div className="prose prose-sm dark:prose-invert">
+                <ReactMarkdown remarkPlugins={[remarkGfm]}>
+                  {description}
+                </ReactMarkdown>
+              </div>
+            )}
+            <SetupWizard />
+          </>
         )}
-
-        {!startTime && <SetupWizard />}
 
         {startTime && (
           <>
             {/* Host banner */}
             {host && (
-              <div className="flex items-center gap-2 text-sm text-muted-foreground">
-                <span>Järjestäjä:</span>
-                <span className="font-semibold text-foreground">{host}</span>
+              <div className="flex items-center justify-between bg-muted/30 border rounded-xl px-5 py-3">
+                <div className="flex flex-col">
+                  <span className="text-xs text-muted-foreground">Järjestäjä</span>
+                  <span className="text-lg font-bold">{host}</span>
+                </div>
               </div>
             )}
 
