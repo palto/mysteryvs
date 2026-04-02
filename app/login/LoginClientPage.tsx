@@ -1,6 +1,7 @@
 "use client";
 
 import { ParticipantLoginButton } from "@/app/login/ParticipantLoginButton";
+import { NewPlayerDrawer } from "@/app/login/NewPlayerDrawer";
 import { useParticipants } from "@/app/Participants";
 import { useDescription, useName } from "@/app/mysteryhooks";
 import ReactMarkdown from "react-markdown";
@@ -39,6 +40,7 @@ export function LoginClientPage() {
               username={participant.id}
             />
           ))}
+          <NewPlayerDrawer />
         </div>
       </div>
     </div>

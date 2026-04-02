@@ -67,4 +67,5 @@ export async function addParticipant(data: FormData) {
     console.log(`Added participant ${username}`);
   });
   revalidatePath("/admin");
+  revalidatePath("/login");
 }
