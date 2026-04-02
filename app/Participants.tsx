@@ -1,10 +1,4 @@
 import { Card, CardContent } from "@/components/ui/card";
-import {
-  InputGroup,
-  InputGroupAddon,
-  InputGroupButton,
-  InputGroupInput,
-} from "@/components/ui/input-group";
 import _ from "lodash";
 import { shallow, useMutation, useStorage } from "@liveblocks/react/suspense";
 import {
@@ -47,34 +41,7 @@ export function Participants() {
   }
 
   if (roundType === "score") {
-    const withScores = _.orderBy(
-      participants.filter((p) => p.score !== undefined),
-      ["score"],
-      ["desc"],
-    );
-    const withoutScores = participants.filter((p) => p.score === undefined);
-
-    return (
-      <div className="flex flex-col gap-2 w-full">
-        {withScores.map((participant, index) => (
-          <ScoreParticipantCard
-            key={participant.id}
-            participant={participant}
-            rank={index + 1}
-            roundEnded={roundEnded}
-            isRunning={isRunning}
-          />
-        ))}
-        {withoutScores.map((participant) => (
-          <ScoreParticipantCard
-            key={participant.id}
-            participant={participant}
-            roundEnded={roundEnded}
-            isRunning={isRunning}
-          />
-        ))}
-      </div>
-    );
+    return <ScoreRoundPanel participants={participants} />;
   }
 
   const inProgress = participants.filter((p) => !p.completedTime);
@@ -134,30 +101,91 @@ export function Participants() {
   );
 }
 
-function ScoreParticipantCard({
+function ScoreRoundPanel({ participants }: { participants: Participant[] }) {
+  const ranked = _.orderBy(
+    participants.filter((p) => p.score !== undefined),
+    ["score"],
+    ["desc"],
+  );
+
+  return (
+    <div className="flex flex-col gap-6 w-full">
+      <ScoreEntryForm participants={participants} />
+      {ranked.length > 0 && (
+        <ScoreLeaderboard ranked={ranked} total={participants.length} />
+      )}
+    </div>
+  );
+}
+
+function ScoreEntryForm({ participants }: { participants: Participant[] }) {
+  const inputRefs = useRef<(HTMLInputElement | null)[]>([]);
+
+  function focusNext(currentIndex: number) {
+    for (let i = currentIndex + 1; i < inputRefs.current.length; i++) {
+      const el = inputRefs.current[i];
+      if (el) {
+        el.focus();
+        el.select();
+        return;
+      }
+    }
+  }
+
+  return (
+    <div className="w-full rounded-xl border border-border overflow-hidden">
+      <div className="flex items-center justify-between px-4 py-2 bg-muted/40 border-b border-border">
+        <span className="text-xs font-semibold uppercase tracking-widest text-muted-foreground">
+          Pelaaja
+        </span>
+        <span className="text-xs font-semibold uppercase tracking-widest text-muted-foreground">
+          Pisteet
+        </span>
+      </div>
+      {participants.map((p, i) => (
+        <ScoreRow
+          key={p.id}
+          participant={p}
+          inputRef={(el) => {
+            inputRefs.current[i] = el;
+          }}
+          onAdvance={() => focusNext(i)}
+        />
+      ))}
+    </div>
+  );
+}
+
+function ScoreRow({
   participant,
-  rank,
+  inputRef,
+  onAdvance,
 }: {
   participant: Participant;
-  rank?: number;
-  roundEnded: boolean;
-  isRunning: boolean;
+  inputRef: (el: HTMLInputElement | null) => void;
+  onAdvance: () => void;
 }) {
-  const [editing, setEditing] = useState(false);
-  const [inputValue, setInputValue] = useState("");
-  const inputRef = useRef<HTMLInputElement>(null);
+  // draft holds the in-progress edit; only used while focused
+  const [draft, setDraft] = useState("");
+  const [focused, setFocused] = useState(false);
+  const committedViaKeyboard = useRef(false);
   const setScore = useSetParticipantScore(participant.id);
 
-  function handleCardClick() {
-    setInputValue(
-      participant.score !== undefined ? String(participant.score) : "",
-    );
-    setEditing(true);
-    setTimeout(() => inputRef.current?.focus(), 0);
+  // When unfocused, display the external score directly (stays in sync with Liveblocks).
+  // When focused, display the local draft so typing isn't disrupted by external updates.
+  const displayValue = focused
+    ? draft
+    : participant.score !== undefined
+      ? String(participant.score)
+      : "";
+
+  function handleFocus() {
+    setDraft(participant.score !== undefined ? String(participant.score) : "");
+    setFocused(true);
   }
 
   function commitScore() {
-    const trimmed = inputValue.trim();
+    const trimmed = draft.trim();
     if (trimmed === "") {
       setScore(null);
     } else {
@@ -166,69 +194,82 @@ function ScoreParticipantCard({
         setScore(parsed);
       }
     }
-    setEditing(false);
   }
 
   function handleKeyDown(e: React.KeyboardEvent<HTMLInputElement>) {
-    if (e.key === "Enter") {
+    if (e.key === "Enter" || e.key === "Tab") {
+      e.preventDefault();
+      committedViaKeyboard.current = true;
       commitScore();
+      onAdvance();
     } else if (e.key === "Escape") {
-      setEditing(false);
+      setDraft(
+        participant.score !== undefined ? String(participant.score) : "",
+      );
     }
+  }
+
+  function handleBlur() {
+    setFocused(false);
+    if (!committedViaKeyboard.current) commitScore();
+    committedViaKeyboard.current = false;
   }
 
   const hasScore = participant.score !== undefined;
 
   return (
-    <Card
-      className={`w-full cursor-pointer hover:bg-accent transition-colors ${hasScore ? "border-green-500/50 bg-green-500/5" : ""}`}
-      onClick={!editing ? handleCardClick : undefined}
-    >
-      <CardContent className="flex items-center justify-between py-3 px-4 pt-3">
-        <div className="flex items-center gap-2">
-          {rank !== undefined && (
-            <span className="text-sm font-bold text-muted-foreground w-5 shrink-0">
-              {rank}.
-            </span>
-          )}
-          {rank === undefined && (
-            <span className="text-sm font-bold text-muted-foreground w-5 shrink-0" />
-          )}
-          <span className="text-base font-medium">{participant.name}</span>
-        </div>
-        {editing ? (
-          <InputGroup className="w-28" onClick={(e) => e.stopPropagation()}>
-            <InputGroupInput
-              ref={inputRef}
-              type="text"
-              inputMode="numeric"
-              enterKeyHint="done"
-              value={inputValue}
-              onChange={(e) => setInputValue(e.target.value)}
-              onBlur={commitScore}
-              onKeyDown={handleKeyDown}
-              className="text-right text-sm font-mono"
-              placeholder="pisteet"
-            />
-            <InputGroupAddon align="inline-end">
-              <InputGroupButton
-                onMouseDown={(e) => e.preventDefault()}
-                onClick={commitScore}
-                aria-label="Tallenna pisteet"
-              >
-                <Check />
-              </InputGroupButton>
-            </InputGroupAddon>
-          </InputGroup>
-        ) : (
-          <span
-            className={`text-sm font-mono ${hasScore ? "text-foreground font-bold text-base" : "text-muted-foreground"}`}
-          >
-            {hasScore ? participant.score : "—"}
-          </span>
+    <div className="flex items-center justify-between px-4 py-3 border-b border-border last:border-b-0 focus-within:bg-accent/30 transition-colors">
+      <span className="text-base font-medium">{participant.name}</span>
+      <div className="flex items-center gap-1.5">
+        {hasScore && !focused && (
+          <Check className="w-3 h-3 text-green-400 shrink-0" />
         )}
-      </CardContent>
-    </Card>
+        <input
+          ref={inputRef}
+          type="text"
+          inputMode="numeric"
+          enterKeyHint="done"
+          value={displayValue}
+          onChange={(e) => setDraft(e.target.value)}
+          onFocus={handleFocus}
+          onBlur={handleBlur}
+          onKeyDown={handleKeyDown}
+          placeholder="—"
+          className="w-20 text-right text-sm font-mono bg-transparent border-0 border-b-2 border-transparent focus:border-primary focus:outline-none text-foreground placeholder:text-muted-foreground"
+        />
+      </div>
+    </div>
+  );
+}
+
+function ScoreLeaderboard({
+  ranked,
+  total,
+}: {
+  ranked: Participant[];
+  total: number;
+}) {
+  const allEntered = ranked.length === total;
+
+  return (
+    <div className="w-full">
+      <h2 className="text-xs font-semibold uppercase tracking-widest text-muted-foreground mb-3">
+        {allEntered ? "Lopputulos" : "Tilanne"}
+      </h2>
+      <div className="flex flex-col gap-1">
+        {ranked.map((p, i) => (
+          <div key={p.id} className="flex items-center gap-3 px-1 py-2">
+            <span className="text-sm w-6 shrink-0 text-center">
+              {i === 0 ? "🥇" : i === 1 ? "🥈" : i === 2 ? "🥉" : `${i + 1}.`}
+            </span>
+            <span className="text-base font-medium flex-1">{p.name}</span>
+            <span className="text-base font-bold font-mono tabular-nums">
+              {p.score}
+            </span>
+          </div>
+        ))}
+      </div>
+    </div>
   );
 }
 
