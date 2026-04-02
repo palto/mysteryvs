@@ -1,6 +1,6 @@
 "use client";
 
-import React, { useState } from "react";
+import React, { useMemo } from "react";
 import { useMutation } from "@liveblocks/react/suspense";
 import { useCreateBlockNoteWithLiveblocks } from "@liveblocks/react-blocknote";
 import { BlockNoteView } from "@blocknote/shadcn";
@@ -39,7 +39,6 @@ import {
   SortableContext,
   verticalListSortingStrategy,
   useSortable,
-  arrayMove,
 } from "@dnd-kit/sortable";
 import { CSS } from "@dnd-kit/utilities";
 import { NewPlayerDrawer } from "@/app/login/NewPlayerDrawer";
@@ -195,12 +194,7 @@ function SortableParticipantRow({
 
 function Step1SelectHost() {
   const participants = useParticipants();
-  const [prevParticipants, setPrevParticipants] = useState(participants);
-  const [items, setItems] = useState(participants.map((p) => p.id));
-  if (prevParticipants !== participants) {
-    setPrevParticipants(participants);
-    setItems(participants.map((p) => p.id));
-  }
+  const items = useMemo(() => participants.map((p) => p.id), [participants]);
 
   const sensors = useSensors(useSensor(PointerSensor), useSensor(TouchSensor));
 
@@ -210,24 +204,23 @@ function Step1SelectHost() {
 
   const removeParticipant = useMutation(({ storage }, name: string) => {
     const p = storage.get("participants");
-    const idx = p.findIndex((x) => x === name);
+    const idx = p.indexOf(name);
     if (idx !== -1) p.delete(idx);
   }, []);
 
-  const reorderParticipants = useMutation(({ storage }, newOrder: string[]) => {
-    const p = storage.get("participants");
-    while (p.length > 0) p.delete(0);
-    for (const name of newOrder) p.push(name);
-  }, []);
+  const moveParticipant = useMutation(
+    ({ storage }, fromIndex: number, toIndex: number) => {
+      storage.get("participants").move(fromIndex, toIndex);
+    },
+    [],
+  );
 
   function handleDragEnd(event: DragEndEvent) {
     const { active, over } = event;
     if (!over || active.id === over.id) return;
     const oldIndex = items.indexOf(active.id as string);
     const newIndex = items.indexOf(over.id as string);
-    const newItems = arrayMove(items, oldIndex, newIndex);
-    setItems(newItems);
-    reorderParticipants(newItems);
+    moveParticipant(oldIndex, newIndex);
   }
 
   return (
