@@ -29,10 +29,12 @@ export default async function Home() {
   if (!username) {
     return redirect("/login");
   }
-  const storage = await liveblocks.getStorageDocument(room, "json");
+  const storage = await liveblocks
+    .getStorageDocument(room, "json")
+    .catch(() => null);
   return (
     <Room>
-      <TopNav title={storage.name} />
+      <TopNav title={storage?.name} />
       <ClientSideSuspense fallback={<LoadingSkeleton />}>
         <MysteryRoundPage />
       </ClientSideSuspense>
