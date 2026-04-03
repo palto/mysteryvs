@@ -4,7 +4,6 @@ import { ReactNode } from "react";
 import {
   LiveblocksProvider,
   RoomProvider,
-  ClientSideSuspense,
 } from "@liveblocks/react/suspense";
 import { LiveList, LiveMap } from "@liveblocks/client";
 import { room } from "@/app/constants";
@@ -37,9 +36,7 @@ export function Room({ children }: { children: ReactNode }) {
           roundInstructions: null,
         }}
       >
-        <ClientSideSuspense fallback={<div>Loading…</div>}>
-          {children}
-        </ClientSideSuspense>
+        {children}
       </RoomProvider>
     </LiveblocksProvider>
   );
