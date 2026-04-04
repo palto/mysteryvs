@@ -372,9 +372,13 @@ function Step2RoundType() {
 // ---------------------------------------------------------------------------
 
 function Step3Instructions() {
+  const host = useHost()!;
   const editor = useCreateBlockNoteWithLiveblocks(
     {},
-    { field: "round-instructions" },
+    {
+      initialContent: "<p>Kirjoita tähän mitä pelaajien pitää tehdä!</p>",
+      field: `round-instructions-${host}`,
+    },
   );
 
   const saveInstructions = useMutation(({ storage }, markdown: string) => {
