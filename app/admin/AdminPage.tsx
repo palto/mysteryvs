@@ -11,7 +11,7 @@ import { Input } from "@/components/ui/input";
 import { TournamentNameEditor } from "@/app/admin/TournamentNameEditor";
 import { TournamentDescriptionEditor } from "@/app/admin/TournamentDescriptionEditor";
 import { RoundLengthEditor } from "@/app/admin/RoundLengthEditor";
-import { useTransition, useState } from "react";
+import { useTransition, useState, useOptimistic } from "react";
 import {
   DndContext,
   closestCenter,
@@ -85,23 +85,21 @@ export function AdminPage({
 }) {
   const [username, setUsername] = useState("");
   const [isPending, startTransition] = useTransition();
-  const [prevParticipants, setPrevParticipants] = useState(participants);
-  const [items, setItems] = useState([...participants]);
-  if (prevParticipants !== participants) {
-    setPrevParticipants(participants);
-    setItems([...participants]);
-  }
+  const [optimisticItems, reorderOptimistic] = useOptimistic(
+    [...participants],
+    (_current, newOrder: string[]) => newOrder,
+  );
 
   const sensors = useSensors(useSensor(PointerSensor), useSensor(TouchSensor));
 
   function handleDragEnd(event: DragEndEvent) {
     const { active, over } = event;
     if (!over || active.id === over.id) return;
-    const oldIndex = items.indexOf(active.id as string);
-    const newIndex = items.indexOf(over.id as string);
-    const newItems = arrayMove(items, oldIndex, newIndex);
-    setItems(newItems);
+    const oldIndex = optimisticItems.indexOf(active.id as string);
+    const newIndex = optimisticItems.indexOf(over.id as string);
+    const newItems = arrayMove(optimisticItems, oldIndex, newIndex);
     startTransition(async () => {
+      reorderOptimistic(newItems);
       await reorderParticipants(newItems);
     });
   }
@@ -132,9 +130,12 @@ export function AdminPage({
         collisionDetection={closestCenter}
         onDragEnd={handleDragEnd}
       >
-        <SortableContext items={items} strategy={verticalListSortingStrategy}>
+        <SortableContext
+          items={optimisticItems}
+          strategy={verticalListSortingStrategy}
+        >
           <div className="flex flex-col gap-2 mb-6">
-            {items.map((participant) => (
+            {optimisticItems.map((participant) => (
               <SortableParticipantCard
                 key={participant}
                 participant={participant}
