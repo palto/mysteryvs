@@ -18,8 +18,7 @@ export function Participants() {
   const isRunning = useIsRunning();
   const roundEnded = !!useCompletedTime();
   const roundType = useRoundType();
-  let participants = useParticipants();
-  participants = participants.filter((p) => p.id !== host);
+  const participants = useParticipants().filter((p) => p.id !== host);
 
   if (!host && !startTime) {
     return (
