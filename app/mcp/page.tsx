@@ -18,6 +18,12 @@ const TOOLS = [
   },
 ];
 
+const EXAMPLE_PROMPTS = [
+  "List all tournament participants",
+  "Add Alice and Bob to the tournament",
+  "Remove Charlie from the participants",
+];
+
 const STEPS = [
   "Go to claude.ai and open Settings",
   'Navigate to "Connectors"',
@@ -62,6 +68,20 @@ export default function McpPage() {
             Works on claude.ai (Free, Pro, Max, Team, Enterprise) and Claude
             Desktop.
           </p>
+        </section>
+
+        <section className="space-y-3">
+          <h2 className="font-semibold">Example prompts</h2>
+          <div className="flex flex-col gap-2">
+            {EXAMPLE_PROMPTS.map((prompt) => (
+              <div
+                key={prompt}
+                className="bg-muted rounded-md px-4 py-2.5 text-sm font-mono"
+              >
+                {prompt}
+              </div>
+            ))}
+          </div>
         </section>
 
         <section className="space-y-3">
