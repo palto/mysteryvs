@@ -22,7 +22,7 @@ function createMcpServer() {
           { type: "text", text: JSON.stringify(participants, null, 2) },
         ],
       };
-    }
+    },
   );
 
   server.tool(
@@ -40,7 +40,7 @@ function createMcpServer() {
       return {
         content: [{ type: "text", text: `Added participant: ${username}` }],
       };
-    }
+    },
   );
 
   server.tool(
@@ -57,7 +57,7 @@ function createMcpServer() {
       return {
         content: [{ type: "text", text: `Removed participant: ${username}` }],
       };
-    }
+    },
   );
 
   return server;
