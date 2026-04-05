@@ -2,19 +2,6 @@ import { TopNav } from "@/app/TopNav";
 
 const MCP_URL = "https://mysteeri.hevirinki.fi/api/mcp";
 
-const CLAUDE_DESKTOP_CONFIG = JSON.stringify(
-  {
-    mcpServers: {
-      "mystery-tournament": {
-        type: "http",
-        url: MCP_URL,
-      },
-    },
-  },
-  null,
-  2,
-);
-
 const TOOLS = [
   {
     name: "list_participants",
@@ -29,6 +16,14 @@ const TOOLS = [
     name: "remove_participant",
     description: "Removes a participant by username. Errors if not found.",
   },
+];
+
+const STEPS = [
+  "Go to claude.ai and open Settings",
+  'Navigate to "Connectors"',
+  'Click "+" then "Add custom connector"',
+  "Paste the server URL above and click Add",
+  'Enable it per conversation via the "+" button → Connectors',
 ];
 
 export default function McpPage() {
@@ -52,17 +47,21 @@ export default function McpPage() {
         </section>
 
         <section className="space-y-3">
-          <h2 className="font-semibold">Claude Desktop</h2>
-          <p className="text-sm text-muted-foreground">
-            Add this to your{" "}
-            <code className="text-xs bg-muted px-1 py-0.5 rounded">
-              claude_desktop_config.json
-            </code>
-            :
+          <h2 className="font-semibold">How to connect</h2>
+          <ol className="space-y-2">
+            {STEPS.map((step, i) => (
+              <li key={i} className="flex gap-3 text-sm">
+                <span className="flex-shrink-0 flex items-center justify-center w-6 h-6 rounded-full bg-muted text-muted-foreground font-mono text-xs">
+                  {i + 1}
+                </span>
+                <span className="pt-0.5">{step}</span>
+              </li>
+            ))}
+          </ol>
+          <p className="text-xs text-muted-foreground pt-1">
+            Works on claude.ai (Free, Pro, Max, Team, Enterprise) and Claude
+            Desktop.
           </p>
-          <pre className="bg-muted rounded-md px-4 py-3 text-sm font-mono overflow-x-auto">
-            {CLAUDE_DESKTOP_CONFIG}
-          </pre>
         </section>
 
         <section className="space-y-3">
