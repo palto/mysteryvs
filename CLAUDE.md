@@ -133,6 +133,12 @@ components/ui/                  # Shadcn/ui components
 - `@/*` maps to repository root (configured in `tsconfig.json`)
 - Example: `@/app/mysteryhooks` refers to `app/mysteryhooks.ts`
 
+### MCP Server
+
+- Endpoint: `app/api/mcp/route.ts`
+- Documentation page: `app/mcp/page.tsx`
+- **When adding, removing, or changing MCP tools, always update `app/mcp/page.tsx`** (the `TOOLS` array and `EXAMPLE_PROMPTS`) to keep the docs in sync.
+
 ### Deployment
 
 - Deployed to Vercel at https://mysteeri.hevirinki.fi/

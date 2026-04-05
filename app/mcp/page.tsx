@@ -16,12 +16,42 @@ const TOOLS = [
     name: "remove_participant",
     description: "Removes a participant by username. Errors if not found.",
   },
+  {
+    name: "reorder_participants",
+    description:
+      "Reorders the participant list. The full list must be provided in the desired order.",
+  },
+  {
+    name: "get_tournament_state",
+    description:
+      "Returns the current tournament configuration: name, description, and round length in minutes.",
+  },
+  {
+    name: "get_results",
+    description:
+      "Returns per-participant results for the current or last round, sorted by finish time. Shows elapsed seconds and DNF status.",
+  },
+  {
+    name: "set_tournament_name",
+    description: "Sets the tournament name.",
+  },
+  {
+    name: "set_tournament_description",
+    description: "Sets the tournament description. Markdown is supported.",
+  },
+  {
+    name: "set_round_length",
+    description: "Sets the round duration in minutes.",
+  },
 ];
 
 const EXAMPLE_PROMPTS = [
   "List all tournament participants",
   "Add Alice and Bob to the tournament",
   "Remove Charlie from the participants",
+  "What is the current tournament name and description?",
+  "Show me the results from the last round",
+  "Set the round length to 15 minutes",
 ];
 
 const STEPS = [
@@ -40,8 +70,7 @@ export default function McpPage() {
         <div>
           <h1 className="text-2xl font-bold mb-2">MCP Server</h1>
           <p className="text-muted-foreground">
-            Connect your AI assistant to manage tournament participants
-            directly.
+            Connect your AI assistant to manage the tournament directly.
           </p>
         </div>
 
