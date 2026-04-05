@@ -1,5 +1,5 @@
 import Link from "next/link";
-import { Settings } from "lucide-react";
+import { Bot, Settings } from "lucide-react";
 import { getUsername } from "@/app/login/getUsername";
 import { AvatarMenu } from "@/app/AvatarMenu";
 import { liveblocks } from "@/app/liveblocks/liveblocks";
@@ -19,6 +19,13 @@ export async function TopNav() {
         {title ?? "Mystery Versus"}
       </Link>
       <div className="flex items-center gap-3">
+        <Link
+          href="/mcp"
+          className="text-muted-foreground hover:text-foreground"
+          aria-label="MCP"
+        >
+          <Bot size={20} />
+        </Link>
         <Link
           href="/admin"
           className="text-muted-foreground hover:text-foreground"
