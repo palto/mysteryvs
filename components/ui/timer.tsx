@@ -38,6 +38,7 @@ export function Timer() {
   const completeRound = useCompleteRound();
   const resetRound = useResetRound();
   const resetTimer = useResetTimer();
+  const reconfigureRound = useReconfigureRound();
 
   function handleResetTimer() {
     if (!confirm("Nollataanko kierros? Järjestäjä pysyy samana.")) return;
@@ -158,13 +159,22 @@ export function Timer() {
         </Button>
       )}
       {startTime && !running && (
-        <Button
-          size="lg"
-          className="w-full font-bold tracking-wide"
-          onClick={resetRound}
-        >
-          Valitse seuraava järjestäjä
-        </Button>
+        <div className="flex flex-col gap-2">
+          <Button
+            size="lg"
+            className="w-full font-bold tracking-wide"
+            onClick={resetRound}
+          >
+            Valitse seuraava järjestäjä
+          </Button>
+          <Button
+            variant="outline"
+            className="w-full"
+            onClick={reconfigureRound}
+          >
+            Muuta kierroksen asetuksia
+          </Button>
+        </div>
       )}
     </div>
   );
@@ -218,6 +228,19 @@ function useResetTimer() {
       completedTime: null,
       participantTimes: new LiveMap(),
       participantScores: new LiveMap(),
+      roundInstructions: null,
+    });
+  }, []);
+}
+
+function useReconfigureRound() {
+  return useMutation(({ storage }) => {
+    storage.update({
+      startTime: null,
+      completedTime: null,
+      participantTimes: new LiveMap(),
+      participantScores: new LiveMap(),
+      roundType: null,
       roundInstructions: null,
     });
   }, []);
