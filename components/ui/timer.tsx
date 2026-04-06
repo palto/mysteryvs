@@ -11,6 +11,7 @@ import {
   useStartTime,
 } from "@/app/mysteryhooks";
 import { LiveMap } from "@liveblocks/client";
+import type { HostRound } from "@/liveblocks.config";
 import { CheckCircle2, RotateCcw } from "lucide-react";
 
 export function Timer() {
@@ -177,6 +178,27 @@ function useCompleteRound() {
 
 function useResetRound() {
   return useMutation(({ storage }) => {
+    const startTime = storage.get("startTime");
+    const completedTime = storage.get("completedTime");
+    const host = storage.get("host");
+
+    if (startTime && completedTime && host) {
+      const record: HostRound = {
+        roundType: (storage.get("roundType") ?? "time") as "time" | "score",
+        roundInstructions: storage.get("roundInstructions") ?? null,
+        roundLength: storage.get("roundLength") ?? 20 * 60 * 1000,
+        startTime,
+        completedTime,
+        participantTimes: Object.fromEntries(
+          storage.get("participantTimes").entries(),
+        ),
+        participantScores: Object.fromEntries(
+          storage.get("participantScores").entries(),
+        ),
+      };
+      storage.get("hostRounds").set(host, record);
+    }
+
     storage.update({
       startTime: null,
       completedTime: null,

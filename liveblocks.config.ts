@@ -2,6 +2,16 @@
 // https://liveblocks.io/docs/api-reference/liveblocks-react#Typing-your-data
 import { LiveList, LiveMap } from "@liveblocks/client";
 
+export type HostRound = {
+  roundType: "time" | "score";
+  roundInstructions: string | null;
+  roundLength: number;
+  startTime: number;
+  completedTime: number;
+  participantTimes: { [participant: string]: number };
+  participantScores: { [participant: string]: number };
+};
+
 declare global {
   interface Liveblocks {
     // Each user's Presence, for useMyPresence, useOthers, etc.
@@ -24,6 +34,7 @@ declare global {
       roundLength: number | null;
       roundType: string | null;
       roundInstructions: string | null;
+      hostRounds: LiveMap<string, HostRound>;
     };
 
     // Custom user info set when authenticating with a secret key
