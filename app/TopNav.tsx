@@ -1,5 +1,5 @@
 import Link from "next/link";
-import { Bot, Settings } from "lucide-react";
+import { Bot, Github, Settings } from "lucide-react";
 import { getUsername } from "@/app/login/getUsername";
 import { AvatarMenu } from "@/app/AvatarMenu";
 import { liveblocks } from "@/app/liveblocks/liveblocks";
@@ -19,6 +19,15 @@ export async function TopNav() {
         {title ?? "Mystery Versus"}
       </Link>
       <div className="flex items-center gap-3">
+        <a
+          href="https://github.com/palto/mysteryvs"
+          target="_blank"
+          rel="noopener noreferrer"
+          className="text-muted-foreground hover:text-foreground"
+          aria-label="GitHub repository"
+        >
+          <Github size={20} />
+        </a>
         <Link
           href="/mcp"
           className="text-muted-foreground hover:text-foreground"
