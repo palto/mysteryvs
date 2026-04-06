@@ -1,6 +1,6 @@
-import { TopNav } from "@/app/TopNav";
+import { headers } from "next/headers";
 
-const MCP_URL = "https://mysteeri.hevirinki.fi/api/mcp";
+import { TopNav } from "@/app/TopNav";
 
 const TOOLS = [
   {
@@ -62,7 +62,12 @@ const STEPS = [
   'Enable it per conversation via the "+" button → Connectors',
 ];
 
-export default function McpPage() {
+export default async function McpPage() {
+  const headersList = await headers();
+  const host = headersList.get("host") ?? "localhost:3000";
+  const proto = host.startsWith("localhost") ? "http" : "https";
+  const MCP_URL = `${proto}://${host}/api/mcp`;
+
   return (
     <>
       <TopNav />
