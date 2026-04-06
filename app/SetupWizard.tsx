@@ -207,7 +207,25 @@ function Step1SelectHost() {
   const sensors = useSensors(useSensor(PointerSensor), useSensor(TouchSensor));
 
   const setHost = useMutation(({ storage }, name: string) => {
-    storage.set("host", name);
+    const existingRound = storage.get("hostRounds").get(name);
+    if (existingRound) {
+      storage.update({
+        host: name,
+        startTime: existingRound.startTime,
+        completedTime: existingRound.completedTime,
+        roundType: existingRound.roundType,
+        roundInstructions: existingRound.roundInstructions,
+        roundLength: existingRound.roundLength,
+        participantTimes: new LiveMap(
+          Object.entries(existingRound.participantTimes),
+        ),
+        participantScores: new LiveMap(
+          Object.entries(existingRound.participantScores),
+        ),
+      });
+    } else {
+      storage.set("host", name);
+    }
   }, []);
 
   const removeParticipant = useMutation(({ storage }, name: string) => {
