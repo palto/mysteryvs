@@ -8,6 +8,7 @@ import "@blocknote/core/fonts/inter.css";
 import "@blocknote/shadcn/style.css";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
+import { ToggleGroup, ToggleGroupItem } from "@/components/ui/toggle-group";
 import {
   Check,
   Clock,
@@ -294,6 +295,9 @@ function Step2RoundType() {
   const [minutesValue, setMinutesValue] = React.useState(
     String(Math.round(roundLength / 60000)),
   );
+  const [selectedType, setSelectedType] = React.useState<"time" | "score" | "">(
+    "",
+  );
 
   const setRoundType = useMutation(({ storage }, type: "time" | "score") => {
     storage.set("roundType", type);
@@ -314,6 +318,15 @@ function Step2RoundType() {
     } else {
       setMinutesValue(String(Math.round(roundLength / 60000)));
     }
+  }
+
+  function handleContinue() {
+    if (!selectedType) return;
+    const num = Number(minutesValue);
+    if (Number.isFinite(num) && num > 0) {
+      setRoundLengthMutation(num);
+    }
+    setRoundType(selectedType);
   }
 
   return (
@@ -349,47 +362,46 @@ function Step2RoundType() {
         />
       </div>
 
-      <div className="grid grid-cols-2 gap-3">
-        <button
-          onClick={() => setRoundType("time")}
-          className="focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring rounded-xl"
-        >
-          <Card className="h-full cursor-pointer transition-colors border-2 hover:border-primary hover:bg-primary/5">
-            <CardContent className="flex flex-col items-center gap-2 py-6 px-4">
-              <Clock className="w-8 h-8 text-primary" />
-              <span className="text-base font-semibold">Aika</span>
-              <span className="text-xs text-muted-foreground text-center">
-                Pelaajat kilpailevat nopeimmasta ratkaisuajasta
-              </span>
-            </CardContent>
-          </Card>
-        </button>
-
-        <button
-          onClick={() => setRoundType("score")}
-          className="focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring rounded-xl"
-        >
-          <Card className="h-full cursor-pointer transition-colors border-2 hover:border-primary hover:bg-primary/5">
-            <CardContent className="flex flex-col items-center gap-2 py-6 px-4">
-              <Trophy className="w-8 h-8 text-primary" />
-              <span className="text-base font-semibold">Pisteet</span>
-              <span className="text-xs text-muted-foreground text-center">
-                Pelaajille syötetään pisteet kierroksen jälkeen
-              </span>
-            </CardContent>
-          </Card>
-        </button>
-      </div>
-
-      <Button
-        variant="ghost"
-        size="sm"
-        className="self-start"
-        onClick={unsetHost}
+      <ToggleGroup
+        type="single"
+        value={selectedType}
+        onValueChange={(v) => {
+          if (v) setSelectedType(v as "time" | "score");
+        }}
+        className="grid grid-cols-2 gap-3"
       >
-        <ChevronLeft className="w-4 h-4 mr-1" />
-        Takaisin
-      </Button>
+        <ToggleGroupItem
+          value="time"
+          className="h-auto flex-col gap-2 py-6 px-4 border-2 rounded-xl data-[state=on]:border-primary data-[state=on]:bg-primary/10"
+        >
+          <Clock className="w-8 h-8 text-primary" />
+          <span className="text-base font-semibold">Aika</span>
+          <span className="text-xs text-muted-foreground text-center whitespace-normal">
+            Pelaajat kilpailevat nopeimmasta ratkaisuajasta
+          </span>
+        </ToggleGroupItem>
+
+        <ToggleGroupItem
+          value="score"
+          className="h-auto flex-col gap-2 py-6 px-4 border-2 rounded-xl data-[state=on]:border-primary data-[state=on]:bg-primary/10"
+        >
+          <Trophy className="w-8 h-8 text-primary" />
+          <span className="text-base font-semibold">Pisteet</span>
+          <span className="text-xs text-muted-foreground text-center whitespace-normal">
+            Pelaajille syötetään pisteet kierroksen jälkeen
+          </span>
+        </ToggleGroupItem>
+      </ToggleGroup>
+
+      <div className="flex items-center gap-2">
+        <Button onClick={handleContinue} disabled={!selectedType}>
+          Jatka
+        </Button>
+        <Button variant="ghost" size="sm" onClick={unsetHost}>
+          <ChevronLeft className="w-4 h-4 mr-1" />
+          Takaisin
+        </Button>
+      </div>
     </div>
   );
 }
