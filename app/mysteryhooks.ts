@@ -1,4 +1,5 @@
 import { useStorage } from "@liveblocks/react/suspense";
+import type { HostRound } from "@/liveblocks.config";
 
 export function useStartTime() {
   return useStorage((root) => root.startTime);
@@ -44,4 +45,18 @@ export function useParticipantScore(id: string) {
 
 export function useRoundInstructions() {
   return useStorage((root) => root.roundInstructions);
+}
+
+export function useHostRounds(): Map<string, HostRound> {
+  return useStorage((root) => {
+    if (!root.hostRounds) return new Map();
+    return new Map(root.hostRounds.entries());
+  });
+}
+
+export function useHostRound(host: string): HostRound | null {
+  return useStorage((root) => {
+    if (!root.hostRounds) return null;
+    return root.hostRounds.get(host) ?? null;
+  });
 }

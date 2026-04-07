@@ -11,6 +11,7 @@ import {
   useStartTime,
 } from "@/app/mysteryhooks";
 import { LiveMap } from "@liveblocks/client";
+import type { HostRound } from "@/liveblocks.config";
 import { CheckCircle2, RotateCcw } from "lucide-react";
 
 export function Timer() {
@@ -37,6 +38,7 @@ export function Timer() {
   const completeRound = useCompleteRound();
   const resetRound = useResetRound();
   const resetTimer = useResetTimer();
+  const reconfigureRound = useReconfigureRound();
 
   function handleResetTimer() {
     if (!confirm("Nollataanko kierros? Järjestäjä pysyy samana.")) return;
@@ -157,13 +159,22 @@ export function Timer() {
         </Button>
       )}
       {startTime && !running && (
-        <Button
-          size="lg"
-          className="w-full font-bold tracking-wide"
-          onClick={resetRound}
-        >
-          Valitse seuraava järjestäjä
-        </Button>
+        <div className="flex flex-col gap-2">
+          <Button
+            size="lg"
+            className="w-full font-bold tracking-wide"
+            onClick={resetRound}
+          >
+            Valitse seuraava järjestäjä
+          </Button>
+          <Button
+            variant="outline"
+            className="w-full"
+            onClick={reconfigureRound}
+          >
+            Muuta kierroksen asetuksia
+          </Button>
+        </div>
       )}
     </div>
   );
@@ -177,6 +188,27 @@ function useCompleteRound() {
 
 function useResetRound() {
   return useMutation(({ storage }) => {
+    const startTime = storage.get("startTime");
+    const completedTime = storage.get("completedTime");
+    const host = storage.get("host");
+
+    if (startTime && completedTime && host) {
+      const record: HostRound = {
+        roundType: (storage.get("roundType") ?? "time") as "time" | "score",
+        roundInstructions: storage.get("roundInstructions") ?? null,
+        roundLength: storage.get("roundLength") ?? 20 * 60 * 1000,
+        startTime,
+        completedTime,
+        participantTimes: Object.fromEntries(
+          storage.get("participantTimes").entries(),
+        ),
+        participantScores: Object.fromEntries(
+          storage.get("participantScores").entries(),
+        ),
+      };
+      storage.get("hostRounds").set(host, record);
+    }
+
     storage.update({
       startTime: null,
       completedTime: null,
@@ -196,6 +228,19 @@ function useResetTimer() {
       completedTime: null,
       participantTimes: new LiveMap(),
       participantScores: new LiveMap(),
+      roundInstructions: null,
+    });
+  }, []);
+}
+
+function useReconfigureRound() {
+  return useMutation(({ storage }) => {
+    storage.update({
+      startTime: null,
+      completedTime: null,
+      participantTimes: new LiveMap(),
+      participantScores: new LiveMap(),
+      roundType: null,
       roundInstructions: null,
     });
   }, []);

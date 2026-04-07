@@ -15,9 +15,11 @@ import {
   ChevronLeft,
   GripVertical,
   Trash2,
+  CheckCircle2,
 } from "lucide-react";
 import {
   useHost,
+  useHostRounds,
   useRoundInstructions,
   useRoundLength,
 } from "@/app/mysteryhooks";
@@ -132,11 +134,13 @@ export function SetupWizard() {
 function SortableParticipantRow({
   id,
   index,
+  hasRound,
   onSelect,
   onRemove,
 }: {
   id: string;
   index: number;
+  hasRound: boolean;
   onSelect: (name: string) => void;
   onRemove: (name: string) => void;
 }) {
@@ -173,9 +177,12 @@ function SortableParticipantRow({
           </span>
           <button
             onClick={() => onSelect(id)}
-            className="flex-1 text-left text-base font-semibold hover:text-primary transition-colors py-1"
+            className="flex-1 text-left text-base font-semibold hover:text-primary transition-colors py-1 flex items-center gap-2"
           >
             {id}
+            {hasRound && (
+              <CheckCircle2 className="h-4 w-4 text-green-500 shrink-0" />
+            )}
           </button>
           <Button
             variant="ghost"
@@ -195,11 +202,30 @@ function SortableParticipantRow({
 function Step1SelectHost() {
   const participants = useParticipants();
   const items = useMemo(() => participants.map((p) => p.id), [participants]);
+  const hostRounds = useHostRounds();
 
   const sensors = useSensors(useSensor(PointerSensor), useSensor(TouchSensor));
 
   const setHost = useMutation(({ storage }, name: string) => {
-    storage.set("host", name);
+    const existingRound = storage.get("hostRounds").get(name);
+    if (existingRound) {
+      storage.update({
+        host: name,
+        startTime: existingRound.startTime,
+        completedTime: existingRound.completedTime,
+        roundType: existingRound.roundType,
+        roundInstructions: existingRound.roundInstructions,
+        roundLength: existingRound.roundLength,
+        participantTimes: new LiveMap(
+          Object.entries(existingRound.participantTimes),
+        ),
+        participantScores: new LiveMap(
+          Object.entries(existingRound.participantScores),
+        ),
+      });
+    } else {
+      storage.set("host", name);
+    }
   }, []);
 
   const removeParticipant = useMutation(({ storage }, name: string) => {
@@ -244,6 +270,7 @@ function Step1SelectHost() {
                 key={id}
                 id={id}
                 index={i}
+                hasRound={hostRounds.has(id)}
                 onSelect={setHost}
                 onRemove={removeParticipant}
               />
