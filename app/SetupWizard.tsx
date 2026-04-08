@@ -108,6 +108,9 @@ export function SetupWizard() {
   const host = useHost();
   const rawRoundType = useStorage((root) => root.roundType);
   const roundInstructions = useRoundInstructions();
+  const [pendingRoundType, setPendingRoundType] = React.useState<
+    "time" | "score" | ""
+  >("");
 
   const currentStep = !host
     ? 1
@@ -121,7 +124,12 @@ export function SetupWizard() {
     <div className="flex flex-col gap-6 w-full">
       <StepIndicator current={currentStep} />
       {currentStep === 1 && <Step1SelectHost />}
-      {currentStep === 2 && <Step2RoundType />}
+      {currentStep === 2 && (
+        <Step2RoundType
+          selectedType={pendingRoundType}
+          onSelectedTypeChange={setPendingRoundType}
+        />
+      )}
       {currentStep === 3 && <Step3Instructions />}
       {currentStep === 4 && <Step4Start />}
     </div>
@@ -290,13 +298,16 @@ function Step1SelectHost() {
 // Step 2 — Round type
 // ---------------------------------------------------------------------------
 
-function Step2RoundType() {
+function Step2RoundType({
+  selectedType,
+  onSelectedTypeChange,
+}: {
+  selectedType: "time" | "score" | "";
+  onSelectedTypeChange: (type: "time" | "score") => void;
+}) {
   const roundLength = useRoundLength();
   const [minutesValue, setMinutesValue] = React.useState(
     String(Math.round(roundLength / 60000)),
-  );
-  const [selectedType, setSelectedType] = React.useState<"time" | "score" | "">(
-    "",
   );
 
   const setRoundType = useMutation(({ storage }, type: "time" | "score") => {
@@ -366,7 +377,7 @@ function Step2RoundType() {
         type="single"
         value={selectedType}
         onValueChange={(v) => {
-          if (v) setSelectedType(v as "time" | "score");
+          if (v) onSelectedTypeChange(v as "time" | "score");
         }}
         className="grid grid-cols-2 gap-3"
       >
