@@ -82,7 +82,9 @@ export function Participants() {
                 startTime={startTime}
                 isRunning={isRunning}
                 roundEnded={roundEnded}
-                points={roundEnded ? (currentPoints[participant.id] ?? 0) : undefined}
+                points={
+                  roundEnded ? (currentPoints[participant.id] ?? 0) : undefined
+                }
               />
             ))}
             {inProgress.length === 0 && (
@@ -106,7 +108,9 @@ export function Participants() {
                 isRunning={isRunning}
                 roundEnded={roundEnded}
                 rank={index + 1}
-                points={roundEnded ? (currentPoints[participant.id] ?? 0) : undefined}
+                points={
+                  roundEnded ? (currentPoints[participant.id] ?? 0) : undefined
+                }
               />
             ))}
             {finished.length === 0 && (
