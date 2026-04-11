@@ -60,3 +60,84 @@ export function useHostRound(host: string): HostRound | null {
     return root.hostRounds.get(host) ?? null;
   });
 }
+
+export function calculateRoundPoints({
+  participants,
+  host,
+  roundType,
+  participantTimes,
+  participantScores,
+}: {
+  participants: string[];
+  host: string;
+  roundType: string;
+  participantTimes: Record<string, number>;
+  participantScores: Record<string, number>;
+}): Record<string, number> {
+  const result: Record<string, number> = {};
+
+  if (roundType === "time") {
+    const finishers = participants
+      .filter((p) => p in participantTimes)
+      .sort((a, b) => participantTimes[a] - participantTimes[b]);
+    const F = finishers.length;
+    participants.forEach((p) => {
+      result[p] = 0;
+    });
+    finishers.forEach((p, i) => {
+      result[p] = F - i;
+    });
+    result[host] = F;
+  } else {
+    const scored = participants
+      .filter((p) => p in participantScores)
+      .sort((a, b) => participantScores[b] - participantScores[a]);
+    const F = scored.length;
+    participants.forEach((p) => {
+      result[p] = 0;
+    });
+    scored.forEach((p, i) => {
+      result[p] = F - i;
+    });
+    result[host] = F;
+  }
+
+  return result;
+}
+
+export function useCurrentRoundPoints(): Record<string, number> {
+  return useStorage((root) => {
+    const host = root.host;
+    if (!host || !root.startTime) return {};
+    const participants = root.participants.filter((p) => p !== host);
+    const roundType = root.roundType ?? "time";
+    return calculateRoundPoints({
+      participants: [...participants],
+      host,
+      roundType,
+      participantTimes: Object.fromEntries(root.participantTimes.entries()),
+      participantScores: Object.fromEntries(root.participantScores.entries()),
+    });
+  });
+}
+
+export function useCumulativePoints(): Record<string, number> {
+  return useStorage((root) => {
+    const totals: Record<string, number> = {};
+    if (!root.hostRounds) return totals;
+    root.hostRounds.forEach((round, host) => {
+      if (!round.participants) return;
+      const pts = calculateRoundPoints({
+        participants: round.participants,
+        host,
+        roundType: round.roundType,
+        participantTimes: round.participantTimes,
+        participantScores: round.participantScores,
+      });
+      for (const [id, p] of Object.entries(pts)) {
+        totals[id] = (totals[id] ?? 0) + p;
+      }
+    });
+    return totals;
+  });
+}

@@ -10,6 +10,7 @@ export type HostRound = {
   completedTime: number;
   participantTimes: { [participant: string]: number };
   participantScores: { [participant: string]: number };
+  participants: string[];
 };
 
 declare global {

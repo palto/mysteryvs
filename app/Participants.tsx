@@ -3,6 +3,8 @@ import _ from "lodash";
 import { shallow, useMutation, useStorage } from "@liveblocks/react/suspense";
 import {
   useCompletedTime,
+  useCurrentRoundPoints,
+  useCumulativePoints,
   useHost,
   useIsRunning,
   useRoundType,
@@ -19,28 +21,43 @@ export function Participants() {
   const roundEnded = !!useCompletedTime();
   const roundType = useRoundType();
   const participants = useParticipants().filter((p) => p.id !== host);
+  const currentPoints = useCurrentRoundPoints();
+  const cumulativePoints = useCumulativePoints();
+  const hasCumulativePoints = Object.keys(cumulativePoints).length > 0;
 
   if (!host && !startTime) {
     return (
-      <div className="flex flex-col gap-3 w-full">
-        <h2 className="text-xs font-semibold uppercase tracking-widest text-muted-foreground">
-          Valitse kierroksen järjestäjä
-        </h2>
-        <div className="flex flex-col gap-2">
-          {participants.map((participant, index) => (
-            <ParticipantCard
-              key={participant.id}
-              participant={participant}
-              index={index + 1}
-            />
-          ))}
+      <div className="flex flex-col gap-8 w-full">
+        <div className="flex flex-col gap-3 w-full">
+          <h2 className="text-xs font-semibold uppercase tracking-widest text-muted-foreground">
+            Valitse kierroksen järjestäjä
+          </h2>
+          <div className="flex flex-col gap-2">
+            {participants.map((participant, index) => (
+              <ParticipantCard
+                key={participant.id}
+                participant={participant}
+                index={index + 1}
+              />
+            ))}
+          </div>
         </div>
+        {hasCumulativePoints && <Standings points={cumulativePoints} />}
       </div>
     );
   }
 
   if (roundType === "score") {
-    return <ScoreRoundPanel participants={participants} />;
+    return (
+      <div className="flex flex-col gap-8 w-full">
+        <ScoreRoundPanel
+          participants={participants}
+          points={currentPoints}
+          roundEnded={roundEnded}
+        />
+        {hasCumulativePoints && <Standings points={cumulativePoints} />}
+      </div>
+    );
   }
 
   const inProgress = participants.filter((p) => !p.completedTime);
@@ -50,57 +67,70 @@ export function Participants() {
   );
 
   return (
-    <div className="grid grid-cols-2 gap-6 w-full">
-      <div>
-        <h2 className="flex items-center gap-1.5 text-sm font-semibold mb-3 text-muted-foreground">
-          <Loader2 className="w-3.5 h-3.5" />
-          Matkalla
-        </h2>
-        <div className="flex flex-col gap-2">
-          {inProgress.map((participant) => (
-            <RoundParticipantCard
-              key={participant.id}
-              participant={participant}
-              startTime={startTime}
-              isRunning={isRunning}
-              roundEnded={roundEnded}
-            />
-          ))}
-          {inProgress.length === 0 && (
-            <p className="text-muted-foreground text-sm italic">
-              Kaikki maalissa!
-            </p>
-          )}
+    <div className="flex flex-col gap-8 w-full">
+      <div className="grid grid-cols-2 gap-6 w-full">
+        <div>
+          <h2 className="flex items-center gap-1.5 text-sm font-semibold mb-3 text-muted-foreground">
+            <Loader2 className="w-3.5 h-3.5" />
+            Matkalla
+          </h2>
+          <div className="flex flex-col gap-2">
+            {inProgress.map((participant) => (
+              <RoundParticipantCard
+                key={participant.id}
+                participant={participant}
+                startTime={startTime}
+                isRunning={isRunning}
+                roundEnded={roundEnded}
+                points={roundEnded ? (currentPoints[participant.id] ?? 0) : undefined}
+              />
+            ))}
+            {inProgress.length === 0 && (
+              <p className="text-muted-foreground text-sm italic">
+                Kaikki maalissa!
+              </p>
+            )}
+          </div>
+        </div>
+        <div>
+          <h2 className="flex items-center gap-1.5 text-sm font-semibold mb-3 text-muted-foreground">
+            <Flag className="w-3.5 h-3.5" />
+            Maalissa
+          </h2>
+          <div className="flex flex-col gap-2">
+            {finished.map((participant, index) => (
+              <RoundParticipantCard
+                key={participant.id}
+                participant={participant}
+                startTime={startTime}
+                isRunning={isRunning}
+                roundEnded={roundEnded}
+                rank={index + 1}
+                points={roundEnded ? (currentPoints[participant.id] ?? 0) : undefined}
+              />
+            ))}
+            {finished.length === 0 && (
+              <p className="text-muted-foreground text-sm italic">
+                Ei vielä ketään
+              </p>
+            )}
+          </div>
         </div>
       </div>
-      <div>
-        <h2 className="flex items-center gap-1.5 text-sm font-semibold mb-3 text-muted-foreground">
-          <Flag className="w-3.5 h-3.5" />
-          Maalissa
-        </h2>
-        <div className="flex flex-col gap-2">
-          {finished.map((participant, index) => (
-            <RoundParticipantCard
-              key={participant.id}
-              participant={participant}
-              startTime={startTime}
-              isRunning={isRunning}
-              roundEnded={roundEnded}
-              rank={index + 1}
-            />
-          ))}
-          {finished.length === 0 && (
-            <p className="text-muted-foreground text-sm italic">
-              Ei vielä ketään
-            </p>
-          )}
-        </div>
-      </div>
+      {hasCumulativePoints && <Standings points={cumulativePoints} />}
     </div>
   );
 }
 
-function ScoreRoundPanel({ participants }: { participants: Participant[] }) {
+function ScoreRoundPanel({
+  participants,
+  points,
+  roundEnded,
+}: {
+  participants: Participant[];
+  points: Record<string, number>;
+  roundEnded: boolean;
+}) {
   const ranked = _.orderBy(
     participants.filter((p) => p.score !== undefined),
     ["score"],
@@ -111,7 +141,11 @@ function ScoreRoundPanel({ participants }: { participants: Participant[] }) {
     <div className="flex flex-col gap-6 w-full">
       <ScoreEntryForm participants={participants} />
       {ranked.length > 0 && (
-        <ScoreLeaderboard ranked={ranked} total={participants.length} />
+        <ScoreLeaderboard
+          ranked={ranked}
+          total={participants.length}
+          points={roundEnded ? points : {}}
+        />
       )}
     </div>
   );
@@ -244,11 +278,14 @@ function ScoreRow({
 function ScoreLeaderboard({
   ranked,
   total,
+  points,
 }: {
   ranked: Participant[];
   total: number;
+  points: Record<string, number>;
 }) {
   const allEntered = ranked.length === total;
+  const showPoints = Object.keys(points).length > 0;
 
   return (
     <div className="w-full">
@@ -265,6 +302,11 @@ function ScoreLeaderboard({
             <span className="text-base font-bold font-mono tabular-nums">
               {p.score}
             </span>
+            {showPoints && (
+              <span className="text-sm font-semibold text-primary font-mono tabular-nums w-14 text-right">
+                +{points[p.id] ?? 0} pts
+              </span>
+            )}
           </div>
         ))}
       </div>
@@ -278,12 +320,14 @@ function RoundParticipantCard({
   isRunning,
   roundEnded,
   rank,
+  points,
 }: {
   participant: Participant;
   startTime: number | null;
   isRunning: boolean;
   roundEnded: boolean;
   rank?: number;
+  points?: number;
 }) {
   const finish = useParticipantFinish(participant.id);
   const unFinish = useParticipantUnFinish(participant.id);
@@ -317,14 +361,21 @@ function RoundParticipantCard({
             )}
             <span className="text-base font-medium">{participant.name}</span>
           </div>
-          {isFinished && startTime && participant.completedTime ? (
-            <div className="flex items-center gap-1.5">
-              <span className="text-sm text-muted-foreground font-mono">
-                {format(participant.completedTime - startTime, "mm:ss")}
+          <div className="flex items-center gap-2">
+            {points !== undefined && (
+              <span className="text-sm font-semibold text-primary font-mono tabular-nums">
+                +{points} pts
               </span>
-              <CheckCircle2 className="h-4 w-4 text-green-500 shrink-0" />
-            </div>
-          ) : null}
+            )}
+            {isFinished && startTime && participant.completedTime ? (
+              <div className="flex items-center gap-1.5">
+                <span className="text-sm text-muted-foreground font-mono">
+                  {format(participant.completedTime - startTime, "mm:ss")}
+                </span>
+                <CheckCircle2 className="h-4 w-4 text-green-500 shrink-0" />
+              </div>
+            ) : null}
+          </div>
         </CardContent>
       </Card>
     </button>
@@ -359,6 +410,35 @@ function ParticipantCard({
         </CardContent>
       </Card>
     </button>
+  );
+}
+
+function Standings({ points }: { points: Record<string, number> }) {
+  const sorted = Object.entries(points)
+    .sort(([, a], [, b]) => b - a)
+    .filter(([, pts]) => pts > 0);
+
+  if (sorted.length === 0) return null;
+
+  return (
+    <div className="w-full">
+      <h2 className="text-xs font-semibold uppercase tracking-widest text-muted-foreground mb-3">
+        Pisteet yhteensä
+      </h2>
+      <div className="flex flex-col gap-1">
+        {sorted.map(([name, pts], i) => (
+          <div key={name} className="flex items-center gap-3 px-1 py-2">
+            <span className="text-sm w-6 shrink-0 text-center text-muted-foreground">
+              {i + 1}.
+            </span>
+            <span className="text-base font-medium flex-1">{name}</span>
+            <span className="text-base font-bold font-mono tabular-nums">
+              {pts}
+            </span>
+          </div>
+        ))}
+      </div>
+    </div>
   );
 }
 
