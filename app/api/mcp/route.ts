@@ -4,6 +4,42 @@ import { z } from "zod";
 import { liveblocks } from "@/app/liveblocks/liveblocks";
 import { room } from "@/app/constants";
 
+function calcRoundPoints(
+  participants: string[],
+  host: string,
+  roundType: string,
+  participantTimes: Record<string, number>,
+  participantScores: Record<string, number>,
+): Record<string, number> {
+  const result: Record<string, number> = {};
+  if (roundType === "time") {
+    const finishers = participants
+      .filter((p) => p in participantTimes)
+      .sort((a, b) => participantTimes[a] - participantTimes[b]);
+    const F = finishers.length;
+    participants.forEach((p) => {
+      result[p] = 0;
+    });
+    finishers.forEach((p, i) => {
+      result[p] = F - i;
+    });
+    result[host] = F;
+  } else {
+    const scored = participants
+      .filter((p) => p in participantScores)
+      .sort((a, b) => participantScores[b] - participantScores[a]);
+    const F = scored.length;
+    participants.forEach((p) => {
+      result[p] = 0;
+    });
+    scored.forEach((p, i) => {
+      result[p] = F - i;
+    });
+    result[host] = F;
+  }
+  return result;
+}
+
 function createMcpServer() {
   const server = new McpServer({
     name: "mystery-tournament",
@@ -81,12 +117,14 @@ function createMcpServer() {
 
   server.tool(
     "get_results",
-    "Get per-participant results for the current or last round, sorted by finish time. Shows elapsed seconds and DNF status.",
+    "Get per-participant results for the current or last round, sorted by finish time. Shows elapsed seconds, DNF status, and points earned this round.",
     {},
     async () => {
       const storage = await liveblocks.getStorageDocument(room, "json");
       const participants = (storage.participants as string[]) ?? [];
       const startTime = storage.startTime as number | null;
+      const host = (storage.host as string | null) ?? null;
+      const roundType = (storage.roundType as string | null) ?? "time";
       const participantTimes = (storage.participantTimes ?? {}) as Record<
         string,
         number
@@ -95,6 +133,17 @@ function createMcpServer() {
         string,
         number
       >;
+
+      const nonHostParticipants = participants.filter((p) => p !== host);
+      const points = host
+        ? calcRoundPoints(
+            nonHostParticipants,
+            host,
+            roundType,
+            participantTimes,
+            participantScores,
+          )
+        : {};
 
       const results = participants.map((username) => {
         const finishTime = participantTimes[username] ?? null;
@@ -108,6 +157,7 @@ function createMcpServer() {
           elapsedSeconds,
           dnf: elapsedSeconds === null,
           score,
+          points: points[username] ?? null,
         };
       });
 

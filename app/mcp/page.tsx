@@ -29,7 +29,7 @@ const TOOLS = [
   {
     name: "get_results",
     description:
-      "Returns per-participant results for the current or last round, sorted by finish time. Shows elapsed seconds and DNF status.",
+      "Returns per-participant results for the current or last round, sorted by finish time. Shows elapsed seconds, DNF status, and points earned this round.",
   },
   {
     name: "set_tournament_name",

@@ -3,6 +3,7 @@ import _ from "lodash";
 import { shallow, useMutation, useStorage } from "@liveblocks/react/suspense";
 import {
   useCompletedTime,
+  useCurrentRoundPoints,
   useHost,
   useIsRunning,
   useRoundType,
@@ -19,28 +20,37 @@ export function Participants() {
   const roundEnded = !!useCompletedTime();
   const roundType = useRoundType();
   const participants = useParticipants().filter((p) => p.id !== host);
+  const currentPoints = useCurrentRoundPoints();
 
   if (!host && !startTime) {
     return (
-      <div className="flex flex-col gap-3 w-full">
-        <h2 className="text-xs font-semibold uppercase tracking-widest text-muted-foreground">
-          Valitse kierroksen järjestäjä
-        </h2>
-        <div className="flex flex-col gap-2">
-          {participants.map((participant, index) => (
-            <ParticipantCard
-              key={participant.id}
-              participant={participant}
-              index={index + 1}
-            />
-          ))}
+      <div className="flex flex-col gap-8 w-full">
+        <div className="flex flex-col gap-3 w-full">
+          <h2 className="text-xs font-semibold uppercase tracking-widest text-muted-foreground">
+            Valitse kierroksen järjestäjä
+          </h2>
+          <div className="flex flex-col gap-2">
+            {participants.map((participant, index) => (
+              <ParticipantCard
+                key={participant.id}
+                participant={participant}
+                index={index + 1}
+              />
+            ))}
+          </div>
         </div>
       </div>
     );
   }
 
   if (roundType === "score") {
-    return <ScoreRoundPanel participants={participants} />;
+    return (
+      <ScoreRoundPanel
+        participants={participants}
+        points={currentPoints}
+        roundEnded={roundEnded}
+      />
+    );
   }
 
   const inProgress = participants.filter((p) => !p.completedTime);
@@ -49,68 +59,137 @@ export function Participants() {
     ["completedTime"],
   );
 
+  const results = roundEnded
+    ? _.orderBy(
+        [
+          ...finished.map((p) => ({
+            id: p.id,
+            name: p.name,
+            pts: currentPoints[p.id] ?? 0,
+            isHost: false,
+          })),
+          ...inProgress.map((p) => ({
+            id: p.id,
+            name: p.name,
+            pts: 0,
+            isHost: false,
+          })),
+          ...(host
+            ? [
+                {
+                  id: host,
+                  name: host,
+                  pts: currentPoints[host] ?? 0,
+                  isHost: true,
+                },
+              ]
+            : []),
+        ],
+        [(r) => r.pts, (r) => (r.isHost ? 0 : 1)],
+        ["desc", "desc"],
+      )
+    : null;
+
   return (
-    <div className="grid grid-cols-2 gap-6 w-full">
-      <div>
-        <h2 className="flex items-center gap-1.5 text-sm font-semibold mb-3 text-muted-foreground">
-          <Loader2 className="w-3.5 h-3.5" />
-          Matkalla
-        </h2>
-        <div className="flex flex-col gap-2">
-          {inProgress.map((participant) => (
-            <RoundParticipantCard
-              key={participant.id}
-              participant={participant}
-              startTime={startTime}
-              isRunning={isRunning}
-              roundEnded={roundEnded}
-            />
-          ))}
-          {inProgress.length === 0 && (
-            <p className="text-muted-foreground text-sm italic">
-              Kaikki maalissa!
-            </p>
-          )}
+    <div className="flex flex-col gap-6 w-full">
+      <div className="grid grid-cols-2 gap-6 w-full">
+        <div>
+          <h2 className="flex items-center gap-1.5 text-sm font-semibold mb-3 text-muted-foreground">
+            <Loader2 className="w-3.5 h-3.5" />
+            Matkalla
+          </h2>
+          <div className="flex flex-col gap-2">
+            {inProgress.map((participant) => (
+              <RoundParticipantCard
+                key={participant.id}
+                participant={participant}
+                startTime={startTime}
+                isRunning={isRunning}
+                roundEnded={roundEnded}
+              />
+            ))}
+            {inProgress.length === 0 && (
+              <p className="text-muted-foreground text-sm italic">
+                Kaikki maalissa!
+              </p>
+            )}
+          </div>
+        </div>
+        <div>
+          <h2 className="flex items-center gap-1.5 text-sm font-semibold mb-3 text-muted-foreground">
+            <Flag className="w-3.5 h-3.5" />
+            Maalissa
+          </h2>
+          <div className="flex flex-col gap-2">
+            {finished.map((participant, index) => (
+              <RoundParticipantCard
+                key={participant.id}
+                participant={participant}
+                startTime={startTime}
+                isRunning={isRunning}
+                roundEnded={roundEnded}
+                rank={index + 1}
+              />
+            ))}
+            {finished.length === 0 && (
+              <p className="text-muted-foreground text-sm italic">
+                Ei vielä ketään
+              </p>
+            )}
+          </div>
         </div>
       </div>
-      <div>
-        <h2 className="flex items-center gap-1.5 text-sm font-semibold mb-3 text-muted-foreground">
-          <Flag className="w-3.5 h-3.5" />
-          Maalissa
-        </h2>
-        <div className="flex flex-col gap-2">
-          {finished.map((participant, index) => (
-            <RoundParticipantCard
-              key={participant.id}
-              participant={participant}
-              startTime={startTime}
-              isRunning={isRunning}
-              roundEnded={roundEnded}
-              rank={index + 1}
-            />
-          ))}
-          {finished.length === 0 && (
-            <p className="text-muted-foreground text-sm italic">
-              Ei vielä ketään
-            </p>
-          )}
-        </div>
-      </div>
+      {results && <ResultsLeaderboard results={results} />}
     </div>
   );
 }
 
-function ScoreRoundPanel({ participants }: { participants: Participant[] }) {
+function ScoreRoundPanel({
+  participants,
+  points,
+  roundEnded,
+}: {
+  participants: Participant[];
+  points: Record<string, number>;
+  roundEnded: boolean;
+}) {
+  const host = useHost();
   const ranked = _.orderBy(
     participants.filter((p) => p.score !== undefined),
     ["score"],
     ["desc"],
   );
+  const unscored = participants.filter((p) => p.score === undefined);
+
+  const results = _.orderBy(
+    [
+      ...ranked.map((p) => ({
+        id: p.id,
+        name: p.name,
+        pts: points[p.id] ?? 0,
+        isHost: false,
+      })),
+      ...unscored.map((p) => ({
+        id: p.id,
+        name: p.name,
+        pts: 0,
+        isHost: false,
+      })),
+      ...(host
+        ? [{ id: host, name: host, pts: points[host] ?? 0, isHost: true }]
+        : []),
+    ],
+    [(r) => r.pts, (r) => (r.isHost ? 0 : 1)],
+    ["desc", "desc"],
+  );
 
   return (
     <div className="flex flex-col gap-6 w-full">
       <ScoreEntryForm participants={participants} />
-      {ranked.length > 0 && (
+      {roundEnded && results.length > 0 && (
+        <ResultsLeaderboard results={results} />
+      )}
+      {!roundEnded && ranked.length > 0 && (
         <ScoreLeaderboard ranked={ranked} total={participants.length} />
       )}
     </div>
@@ -267,6 +346,52 @@ function ScoreLeaderboard({
             </span>
           </div>
         ))}
+      </div>
+    </div>
+  );
+}
+
+function ResultsLeaderboard({
+  results,
+}: {
+  results: Array<{ id: string; name: string; pts: number; isHost?: boolean }>;
+}) {
+  const playerResults = results.filter((r) => !r.isHost);
+  const hostEntry = results.find((r) => r.isHost);
+
+  return (
+    <div className="w-full">
+      <h2 className="text-xs font-semibold uppercase tracking-widest text-muted-foreground mb-3">
+        Lopputulos
+      </h2>
+      <div className="flex flex-col gap-1">
+        {playerResults.map(({ id, name, pts }, i) => (
+          <div key={id} className="flex items-center gap-3 px-1 py-2">
+            <span className="text-sm w-6 shrink-0 text-center">
+              {i === 0 ? "🥇" : i === 1 ? "🥈" : i === 2 ? "🥉" : `${i + 1}.`}
+            </span>
+            <span className="text-base font-medium flex-1">{name}</span>
+            <span className="text-sm font-semibold text-primary font-mono tabular-nums">
+              +{pts} pts
+            </span>
+          </div>
+        ))}
+        {hostEntry && (
+          <>
+            <hr className="border-border my-1" />
+            <div className="flex items-center gap-3 px-1 py-2">
+              <span className="text-xs text-muted-foreground w-6 shrink-0 text-center">
+                järj.
+              </span>
+              <span className="text-base font-medium flex-1">
+                {hostEntry.name}
+              </span>
+              <span className="text-sm font-semibold text-primary font-mono tabular-nums">
+                +{hostEntry.pts} pts
+              </span>
+            </div>
+          </>
+        )}
       </div>
     </div>
   );

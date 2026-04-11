@@ -193,6 +193,9 @@ function useResetRound() {
     const host = storage.get("host");
 
     if (startTime && completedTime && host) {
+      const participantsList = [...storage.get("participants")].filter(
+        (p) => p !== host,
+      );
       const record: HostRound = {
         roundType: (storage.get("roundType") ?? "time") as "time" | "score",
         roundInstructions: storage.get("roundInstructions") ?? null,
@@ -205,6 +208,7 @@ function useResetRound() {
         participantScores: Object.fromEntries(
           storage.get("participantScores").entries(),
         ),
+        participants: participantsList,
       };
       storage.get("hostRounds").set(host, record);
     }
