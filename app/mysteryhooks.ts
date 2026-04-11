@@ -120,24 +120,3 @@ export function useCurrentRoundPoints(): Record<string, number> {
     });
   });
 }
-
-export function useCumulativePoints(): Record<string, number> {
-  return useStorage((root) => {
-    const totals: Record<string, number> = {};
-    if (!root.hostRounds) return totals;
-    root.hostRounds.forEach((round, host) => {
-      if (!round.participants) return;
-      const pts = calculateRoundPoints({
-        participants: round.participants,
-        host,
-        roundType: round.roundType,
-        participantTimes: round.participantTimes,
-        participantScores: round.participantScores,
-      });
-      for (const [id, p] of Object.entries(pts)) {
-        totals[id] = (totals[id] ?? 0) + p;
-      }
-    });
-    return totals;
-  });
-}

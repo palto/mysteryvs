@@ -4,7 +4,6 @@ import { shallow, useMutation, useStorage } from "@liveblocks/react/suspense";
 import {
   useCompletedTime,
   useCurrentRoundPoints,
-  useCumulativePoints,
   useHost,
   useIsRunning,
   useRoundType,
@@ -22,8 +21,6 @@ export function Participants() {
   const roundType = useRoundType();
   const participants = useParticipants().filter((p) => p.id !== host);
   const currentPoints = useCurrentRoundPoints();
-  const cumulativePoints = useCumulativePoints();
-  const hasCumulativePoints = Object.keys(cumulativePoints).length > 0;
 
   if (!host && !startTime) {
     return (
@@ -42,7 +39,6 @@ export function Participants() {
             ))}
           </div>
         </div>
-        {hasCumulativePoints && <Standings points={cumulativePoints} />}
       </div>
     );
   }
@@ -488,35 +484,6 @@ function ParticipantCard({
         </CardContent>
       </Card>
     </button>
-  );
-}
-
-function Standings({ points }: { points: Record<string, number> }) {
-  const sorted = Object.entries(points)
-    .sort(([, a], [, b]) => b - a)
-    .filter(([, pts]) => pts > 0);
-
-  if (sorted.length === 0) return null;
-
-  return (
-    <div className="w-full">
-      <h2 className="text-xs font-semibold uppercase tracking-widest text-muted-foreground mb-3">
-        Pisteet yhteensä
-      </h2>
-      <div className="flex flex-col gap-1">
-        {sorted.map(([name, pts], i) => (
-          <div key={name} className="flex items-center gap-3 px-1 py-2">
-            <span className="text-sm w-6 shrink-0 text-center text-muted-foreground">
-              {i + 1}.
-            </span>
-            <span className="text-base font-medium flex-1">{name}</span>
-            <span className="text-base font-bold font-mono tabular-nums">
-              {pts}
-            </span>
-          </div>
-        ))}
-      </div>
-    </div>
   );
 }
 
