@@ -63,18 +63,6 @@ export function Participants() {
     ["completedTime"],
   );
 
-  if (roundEnded) {
-    const results = [
-      ...finished.map((p) => ({
-        id: p.id,
-        name: p.name,
-        pts: currentPoints[p.id] ?? 0,
-      })),
-      ...inProgress.map((p) => ({ id: p.id, name: p.name, pts: 0 })),
-    ];
-    return <ResultsLeaderboard results={results} />;
-  }
-
   return (
     <div className="grid grid-cols-2 gap-6 w-full">
       <div>
