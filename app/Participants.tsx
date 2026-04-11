@@ -360,30 +360,42 @@ function ResultsLeaderboard({
 }: {
   results: Array<{ id: string; name: string; pts: number; isHost?: boolean }>;
 }) {
+  const playerResults = results.filter((r) => !r.isHost);
+  const hostEntry = results.find((r) => r.isHost);
+
   return (
     <div className="w-full">
       <h2 className="text-xs font-semibold uppercase tracking-widest text-muted-foreground mb-3">
         Lopputulos
       </h2>
       <div className="flex flex-col gap-1">
-        {results.map(({ id, name, pts, isHost }, i) => (
+        {playerResults.map(({ id, name, pts }, i) => (
           <div key={id} className="flex items-center gap-3 px-1 py-2">
             <span className="text-sm w-6 shrink-0 text-center">
               {i === 0 ? "🥇" : i === 1 ? "🥈" : i === 2 ? "🥉" : `${i + 1}.`}
             </span>
-            <span className="text-base font-medium flex-1">
-              {name}
-              {isHost && (
-                <span className="ml-1.5 text-xs text-muted-foreground font-normal">
-                  järj.
-                </span>
-              )}
-            </span>
+            <span className="text-base font-medium flex-1">{name}</span>
             <span className="text-sm font-semibold text-primary font-mono tabular-nums">
               +{pts} pts
             </span>
           </div>
         ))}
+        {hostEntry && (
+          <>
+            <hr className="border-border my-1" />
+            <div className="flex items-center gap-3 px-1 py-2">
+              <span className="text-xs text-muted-foreground w-6 shrink-0 text-center">
+                järj.
+              </span>
+              <span className="text-base font-medium flex-1">
+                {hostEntry.name}
+              </span>
+              <span className="text-sm font-semibold text-primary font-mono tabular-nums">
+                +{hostEntry.pts} pts
+              </span>
+            </div>
+          </>
+        )}
       </div>
     </div>
   );
