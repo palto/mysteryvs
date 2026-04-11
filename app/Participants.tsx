@@ -49,14 +49,11 @@ export function Participants() {
 
   if (roundType === "score") {
     return (
-      <div className="flex flex-col gap-8 w-full">
-        <ScoreRoundPanel
-          participants={participants}
-          points={currentPoints}
-          roundEnded={roundEnded}
-        />
-        {hasCumulativePoints && <Standings points={cumulativePoints} />}
-      </div>
+      <ScoreRoundPanel
+        participants={participants}
+        points={currentPoints}
+        roundEnded={roundEnded}
+      />
     );
   }
 
@@ -67,61 +64,58 @@ export function Participants() {
   );
 
   return (
-    <div className="flex flex-col gap-8 w-full">
-      <div className="grid grid-cols-2 gap-6 w-full">
-        <div>
-          <h2 className="flex items-center gap-1.5 text-sm font-semibold mb-3 text-muted-foreground">
-            <Loader2 className="w-3.5 h-3.5" />
-            Matkalla
-          </h2>
-          <div className="flex flex-col gap-2">
-            {inProgress.map((participant) => (
-              <RoundParticipantCard
-                key={participant.id}
-                participant={participant}
-                startTime={startTime}
-                isRunning={isRunning}
-                roundEnded={roundEnded}
-                points={
-                  roundEnded ? (currentPoints[participant.id] ?? 0) : undefined
-                }
-              />
-            ))}
-            {inProgress.length === 0 && (
-              <p className="text-muted-foreground text-sm italic">
-                Kaikki maalissa!
-              </p>
-            )}
-          </div>
-        </div>
-        <div>
-          <h2 className="flex items-center gap-1.5 text-sm font-semibold mb-3 text-muted-foreground">
-            <Flag className="w-3.5 h-3.5" />
-            Maalissa
-          </h2>
-          <div className="flex flex-col gap-2">
-            {finished.map((participant, index) => (
-              <RoundParticipantCard
-                key={participant.id}
-                participant={participant}
-                startTime={startTime}
-                isRunning={isRunning}
-                roundEnded={roundEnded}
-                rank={index + 1}
-                points={
-                  roundEnded ? (currentPoints[participant.id] ?? 0) : undefined
-                }
-              />
-            ))}
-            {finished.length === 0 && (
-              <p className="text-muted-foreground text-sm italic">
-                Ei vielä ketään
-              </p>
-            )}
-          </div>
+    <div className="grid grid-cols-2 gap-6 w-full">
+      <div>
+        <h2 className="flex items-center gap-1.5 text-sm font-semibold mb-3 text-muted-foreground">
+          <Loader2 className="w-3.5 h-3.5" />
+          Matkalla
+        </h2>
+        <div className="flex flex-col gap-2">
+          {inProgress.map((participant) => (
+            <RoundParticipantCard
+              key={participant.id}
+              participant={participant}
+              startTime={startTime}
+              isRunning={isRunning}
+              roundEnded={roundEnded}
+              points={
+                roundEnded ? (currentPoints[participant.id] ?? 0) : undefined
+              }
+            />
+          ))}
+          {inProgress.length === 0 && (
+            <p className="text-muted-foreground text-sm italic">
+              Kaikki maalissa!
+            </p>
+          )}
         </div>
       </div>
-      {hasCumulativePoints && <Standings points={cumulativePoints} />}
+      <div>
+        <h2 className="flex items-center gap-1.5 text-sm font-semibold mb-3 text-muted-foreground">
+          <Flag className="w-3.5 h-3.5" />
+          Maalissa
+        </h2>
+        <div className="flex flex-col gap-2">
+          {finished.map((participant, index) => (
+            <RoundParticipantCard
+              key={participant.id}
+              participant={participant}
+              startTime={startTime}
+              isRunning={isRunning}
+              roundEnded={roundEnded}
+              rank={index + 1}
+              points={
+                roundEnded ? (currentPoints[participant.id] ?? 0) : undefined
+              }
+            />
+          ))}
+          {finished.length === 0 && (
+            <p className="text-muted-foreground text-sm italic">
+              Ei vielä ketään
+            </p>
+          )}
+        </div>
+      </div>
     </div>
   );
 }
@@ -303,12 +297,13 @@ function ScoreLeaderboard({
               {i === 0 ? "🥇" : i === 1 ? "🥈" : i === 2 ? "🥉" : `${i + 1}.`}
             </span>
             <span className="text-base font-medium flex-1">{p.name}</span>
-            <span className="text-base font-bold font-mono tabular-nums">
-              {p.score}
-            </span>
-            {showPoints && (
-              <span className="text-sm font-semibold text-primary font-mono tabular-nums w-14 text-right">
+            {showPoints ? (
+              <span className="text-sm font-semibold text-primary font-mono tabular-nums">
                 +{points[p.id] ?? 0} pts
+              </span>
+            ) : (
+              <span className="text-base font-bold font-mono tabular-nums">
+                {p.score}
               </span>
             )}
           </div>
