@@ -14,7 +14,7 @@ export function useIsRunning() {
 }
 
 export function useParticipantTime(id: string) {
-  return useStorage((root) => root.participantTimes.get(id));
+  return useStorage((root) => root.participantTimes[id]);
 }
 
 export function useHost() {
@@ -40,7 +40,7 @@ export function useRoundType() {
 }
 
 export function useParticipantScore(id: string) {
-  return useStorage((root) => root.participantScores.get(id));
+  return useStorage((root) => root.participantScores[id]);
 }
 
 export function useRoundInstructions() {
@@ -50,14 +50,14 @@ export function useRoundInstructions() {
 export function useHostRounds(): Map<string, HostRound> {
   return useStorage((root) => {
     if (!root.hostRounds) return new Map();
-    return new Map(root.hostRounds.entries());
+    return new Map(Object.entries(root.hostRounds) as [string, HostRound][]);
   });
 }
 
 export function useHostRound(host: string): HostRound | null {
   return useStorage((root) => {
     if (!root.hostRounds) return null;
-    return root.hostRounds.get(host) ?? null;
+    return (root.hostRounds[host] as unknown as HostRound) ?? null;
   });
 }
 
@@ -115,8 +115,8 @@ export function useCurrentRoundPoints(): Record<string, number> {
       participants: [...participants],
       host,
       roundType,
-      participantTimes: Object.fromEntries(root.participantTimes.entries()),
-      participantScores: Object.fromEntries(root.participantScores.entries()),
+      participantTimes: { ...root.participantTimes },
+      participantScores: { ...root.participantScores },
     });
   });
 }

@@ -500,8 +500,8 @@ export function useParticipants(): Participant[] {
       root.participants.map((p) => ({
         id: p,
         name: p,
-        completedTime: root.participantTimes.get(p),
-        score: root.participantScores.get(p),
+        completedTime: root.participantTimes[p],
+        score: root.participantScores[p],
       })),
     shallow,
   );
