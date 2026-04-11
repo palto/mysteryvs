@@ -393,16 +393,14 @@ function RoundParticipantCard({
             )}
             <span className="text-base font-medium">{participant.name}</span>
           </div>
-          <div className="flex items-center gap-2">
-            {isFinished && startTime && participant.completedTime ? (
-              <div className="flex items-center gap-1.5">
-                <span className="text-sm text-muted-foreground font-mono">
-                  {format(participant.completedTime - startTime, "mm:ss")}
-                </span>
-                <CheckCircle2 className="h-4 w-4 text-green-500 shrink-0" />
-              </div>
-            ) : null}
-          </div>
+          {isFinished && startTime && participant.completedTime ? (
+            <div className="flex items-center gap-1.5">
+              <span className="text-sm text-muted-foreground font-mono">
+                {format(participant.completedTime - startTime, "mm:ss")}
+              </span>
+              <CheckCircle2 className="h-4 w-4 text-green-500 shrink-0" />
+            </div>
+          ) : null}
         </CardContent>
       </Card>
     </button>
