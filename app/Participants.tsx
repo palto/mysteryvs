@@ -64,14 +64,34 @@ export function Participants() {
   );
 
   const results = roundEnded
-    ? [
-        ...finished.map((p) => ({
-          id: p.id,
-          name: p.name,
-          pts: currentPoints[p.id] ?? 0,
-        })),
-        ...inProgress.map((p) => ({ id: p.id, name: p.name, pts: 0 })),
-      ]
+    ? _.orderBy(
+        [
+          ...finished.map((p) => ({
+            id: p.id,
+            name: p.name,
+            pts: currentPoints[p.id] ?? 0,
+            isHost: false,
+          })),
+          ...inProgress.map((p) => ({
+            id: p.id,
+            name: p.name,
+            pts: 0,
+            isHost: false,
+          })),
+          ...(host
+            ? [
+                {
+                  id: host,
+                  name: host,
+                  pts: currentPoints[host] ?? 0,
+                  isHost: true,
+                },
+              ]
+            : []),
+        ],
+        [(r) => r.pts, (r) => (r.isHost ? 0 : 1)],
+        ["desc", "desc"],
+      )
     : null;
 
   return (
@@ -137,6 +157,7 @@ function ScoreRoundPanel({
   points: Record<string, number>;
   roundEnded: boolean;
 }) {
+  const host = useHost();
   const ranked = _.orderBy(
     participants.filter((p) => p.score !== undefined),
     ["score"],
@@ -144,20 +165,33 @@ function ScoreRoundPanel({
   );
   const unscored = participants.filter((p) => p.score === undefined);
 
+  const results = _.orderBy(
+    [
+      ...ranked.map((p) => ({
+        id: p.id,
+        name: p.name,
+        pts: points[p.id] ?? 0,
+        isHost: false,
+      })),
+      ...unscored.map((p) => ({
+        id: p.id,
+        name: p.name,
+        pts: 0,
+        isHost: false,
+      })),
+      ...(host
+        ? [{ id: host, name: host, pts: points[host] ?? 0, isHost: true }]
+        : []),
+    ],
+    [(r) => r.pts, (r) => (r.isHost ? 0 : 1)],
+    ["desc", "desc"],
+  );
+
   return (
     <div className="flex flex-col gap-6 w-full">
       <ScoreEntryForm participants={participants} />
-      {roundEnded && ranked.length > 0 && (
-        <ResultsLeaderboard
-          results={[
-            ...ranked.map((p) => ({
-              id: p.id,
-              name: p.name,
-              pts: points[p.id] ?? 0,
-            })),
-            ...unscored.map((p) => ({ id: p.id, name: p.name, pts: 0 })),
-          ]}
-        />
+      {roundEnded && results.length > 0 && (
+        <ResultsLeaderboard results={results} />
       )}
       {!roundEnded && ranked.length > 0 && (
         <ScoreLeaderboard ranked={ranked} total={participants.length} />
@@ -324,7 +358,7 @@ function ScoreLeaderboard({
 function ResultsLeaderboard({
   results,
 }: {
-  results: Array<{ id: string; name: string; pts: number }>;
+  results: Array<{ id: string; name: string; pts: number; isHost?: boolean }>;
 }) {
   return (
     <div className="w-full">
@@ -332,12 +366,19 @@ function ResultsLeaderboard({
         Lopputulos
       </h2>
       <div className="flex flex-col gap-1">
-        {results.map(({ id, name, pts }, i) => (
+        {results.map(({ id, name, pts, isHost }, i) => (
           <div key={id} className="flex items-center gap-3 px-1 py-2">
             <span className="text-sm w-6 shrink-0 text-center">
               {i === 0 ? "🥇" : i === 1 ? "🥈" : i === 2 ? "🥉" : `${i + 1}.`}
             </span>
-            <span className="text-base font-medium flex-1">{name}</span>
+            <span className="text-base font-medium flex-1">
+              {name}
+              {isHost && (
+                <span className="ml-1.5 text-xs text-muted-foreground font-normal">
+                  järj.
+                </span>
+              )}
+            </span>
             <span className="text-sm font-semibold text-primary font-mono tabular-nums">
               +{pts} pts
             </span>
