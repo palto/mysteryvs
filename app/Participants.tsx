@@ -90,9 +90,6 @@ export function Participants() {
                 startTime={startTime}
                 isRunning={isRunning}
                 roundEnded={roundEnded}
-                points={
-                  roundEnded ? (currentPoints[participant.id] ?? 0) : undefined
-                }
               />
             ))}
             {inProgress.length === 0 && (
@@ -116,9 +113,6 @@ export function Participants() {
                 isRunning={isRunning}
                 roundEnded={roundEnded}
                 rank={index + 1}
-                points={
-                  roundEnded ? (currentPoints[participant.id] ?? 0) : undefined
-                }
               />
             ))}
             {finished.length === 0 && (
@@ -360,14 +354,12 @@ function RoundParticipantCard({
   isRunning,
   roundEnded,
   rank,
-  points,
 }: {
   participant: Participant;
   startTime: number | null;
   isRunning: boolean;
   roundEnded: boolean;
   rank?: number;
-  points?: number;
 }) {
   const finish = useParticipantFinish(participant.id);
   const unFinish = useParticipantUnFinish(participant.id);
@@ -402,11 +394,6 @@ function RoundParticipantCard({
             <span className="text-base font-medium">{participant.name}</span>
           </div>
           <div className="flex items-center gap-2">
-            {points !== undefined && (
-              <span className="text-sm font-semibold text-primary font-mono tabular-nums">
-                +{points} pts
-              </span>
-            )}
             {isFinished && startTime && participant.completedTime ? (
               <div className="flex items-center gap-1.5">
                 <span className="text-sm text-muted-foreground font-mono">
