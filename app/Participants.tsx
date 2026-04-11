@@ -63,6 +63,18 @@ export function Participants() {
     ["completedTime"],
   );
 
+  if (roundEnded) {
+    const results = [
+      ...finished.map((p) => ({
+        id: p.id,
+        name: p.name,
+        pts: currentPoints[p.id] ?? 0,
+      })),
+      ...inProgress.map((p) => ({ id: p.id, name: p.name, pts: 0 })),
+    ];
+    return <ResultsLeaderboard results={results} />;
+  }
+
   return (
     <div className="grid grid-cols-2 gap-6 w-full">
       <div>
@@ -134,16 +146,25 @@ function ScoreRoundPanel({
     ["score"],
     ["desc"],
   );
+  const unscored = participants.filter((p) => p.score === undefined);
 
   return (
     <div className="flex flex-col gap-6 w-full">
       <ScoreEntryForm participants={participants} />
-      {ranked.length > 0 && (
-        <ScoreLeaderboard
-          ranked={ranked}
-          total={participants.length}
-          points={roundEnded ? points : {}}
+      {roundEnded && ranked.length > 0 && (
+        <ResultsLeaderboard
+          results={[
+            ...ranked.map((p) => ({
+              id: p.id,
+              name: p.name,
+              pts: points[p.id] ?? 0,
+            })),
+            ...unscored.map((p) => ({ id: p.id, name: p.name, pts: 0 })),
+          ]}
         />
+      )}
+      {!roundEnded && ranked.length > 0 && (
+        <ScoreLeaderboard ranked={ranked} total={participants.length} />
       )}
     </div>
   );
@@ -276,14 +297,11 @@ function ScoreRow({
 function ScoreLeaderboard({
   ranked,
   total,
-  points,
 }: {
   ranked: Participant[];
   total: number;
-  points: Record<string, number>;
 }) {
   const allEntered = ranked.length === total;
-  const showPoints = Object.keys(points).length > 0;
 
   return (
     <div className="w-full">
@@ -297,15 +315,36 @@ function ScoreLeaderboard({
               {i === 0 ? "🥇" : i === 1 ? "🥈" : i === 2 ? "🥉" : `${i + 1}.`}
             </span>
             <span className="text-base font-medium flex-1">{p.name}</span>
-            {showPoints ? (
-              <span className="text-sm font-semibold text-primary font-mono tabular-nums">
-                +{points[p.id] ?? 0} pts
-              </span>
-            ) : (
-              <span className="text-base font-bold font-mono tabular-nums">
-                {p.score}
-              </span>
-            )}
+            <span className="text-base font-bold font-mono tabular-nums">
+              {p.score}
+            </span>
+          </div>
+        ))}
+      </div>
+    </div>
+  );
+}
+
+function ResultsLeaderboard({
+  results,
+}: {
+  results: Array<{ id: string; name: string; pts: number }>;
+}) {
+  return (
+    <div className="w-full">
+      <h2 className="text-xs font-semibold uppercase tracking-widest text-muted-foreground mb-3">
+        Lopputulos
+      </h2>
+      <div className="flex flex-col gap-1">
+        {results.map(({ id, name, pts }, i) => (
+          <div key={id} className="flex items-center gap-3 px-1 py-2">
+            <span className="text-sm w-6 shrink-0 text-center">
+              {i === 0 ? "🥇" : i === 1 ? "🥈" : i === 2 ? "🥉" : `${i + 1}.`}
+            </span>
+            <span className="text-base font-medium flex-1">{name}</span>
+            <span className="text-sm font-semibold text-primary font-mono tabular-nums">
+              +{pts} pts
+            </span>
           </div>
         ))}
       </div>
