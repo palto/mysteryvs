@@ -63,59 +63,73 @@ export function Participants() {
     ["completedTime"],
   );
 
+  const results = roundEnded
+    ? [
+        ...finished.map((p) => ({
+          id: p.id,
+          name: p.name,
+          pts: currentPoints[p.id] ?? 0,
+        })),
+        ...inProgress.map((p) => ({ id: p.id, name: p.name, pts: 0 })),
+      ]
+    : null;
+
   return (
-    <div className="grid grid-cols-2 gap-6 w-full">
-      <div>
-        <h2 className="flex items-center gap-1.5 text-sm font-semibold mb-3 text-muted-foreground">
-          <Loader2 className="w-3.5 h-3.5" />
-          Matkalla
-        </h2>
-        <div className="flex flex-col gap-2">
-          {inProgress.map((participant) => (
-            <RoundParticipantCard
-              key={participant.id}
-              participant={participant}
-              startTime={startTime}
-              isRunning={isRunning}
-              roundEnded={roundEnded}
-              points={
-                roundEnded ? (currentPoints[participant.id] ?? 0) : undefined
-              }
-            />
-          ))}
-          {inProgress.length === 0 && (
-            <p className="text-muted-foreground text-sm italic">
-              Kaikki maalissa!
-            </p>
-          )}
+    <div className="flex flex-col gap-6 w-full">
+      <div className="grid grid-cols-2 gap-6 w-full">
+        <div>
+          <h2 className="flex items-center gap-1.5 text-sm font-semibold mb-3 text-muted-foreground">
+            <Loader2 className="w-3.5 h-3.5" />
+            Matkalla
+          </h2>
+          <div className="flex flex-col gap-2">
+            {inProgress.map((participant) => (
+              <RoundParticipantCard
+                key={participant.id}
+                participant={participant}
+                startTime={startTime}
+                isRunning={isRunning}
+                roundEnded={roundEnded}
+                points={
+                  roundEnded ? (currentPoints[participant.id] ?? 0) : undefined
+                }
+              />
+            ))}
+            {inProgress.length === 0 && (
+              <p className="text-muted-foreground text-sm italic">
+                Kaikki maalissa!
+              </p>
+            )}
+          </div>
+        </div>
+        <div>
+          <h2 className="flex items-center gap-1.5 text-sm font-semibold mb-3 text-muted-foreground">
+            <Flag className="w-3.5 h-3.5" />
+            Maalissa
+          </h2>
+          <div className="flex flex-col gap-2">
+            {finished.map((participant, index) => (
+              <RoundParticipantCard
+                key={participant.id}
+                participant={participant}
+                startTime={startTime}
+                isRunning={isRunning}
+                roundEnded={roundEnded}
+                rank={index + 1}
+                points={
+                  roundEnded ? (currentPoints[participant.id] ?? 0) : undefined
+                }
+              />
+            ))}
+            {finished.length === 0 && (
+              <p className="text-muted-foreground text-sm italic">
+                Ei vielä ketään
+              </p>
+            )}
+          </div>
         </div>
       </div>
-      <div>
-        <h2 className="flex items-center gap-1.5 text-sm font-semibold mb-3 text-muted-foreground">
-          <Flag className="w-3.5 h-3.5" />
-          Maalissa
-        </h2>
-        <div className="flex flex-col gap-2">
-          {finished.map((participant, index) => (
-            <RoundParticipantCard
-              key={participant.id}
-              participant={participant}
-              startTime={startTime}
-              isRunning={isRunning}
-              roundEnded={roundEnded}
-              rank={index + 1}
-              points={
-                roundEnded ? (currentPoints[participant.id] ?? 0) : undefined
-              }
-            />
-          ))}
-          {finished.length === 0 && (
-            <p className="text-muted-foreground text-sm italic">
-              Ei vielä ketään
-            </p>
-          )}
-        </div>
-      </div>
+      {results && <ResultsLeaderboard results={results} />}
     </div>
   );
 }
