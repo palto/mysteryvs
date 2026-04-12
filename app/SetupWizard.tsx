@@ -232,6 +232,7 @@ function Step1SelectHost() {
     const p = storage.get("participants");
     const idx = p.indexOf(name);
     if (idx !== -1) p.delete(idx);
+    storage.get("hostRounds").delete(name);
   }, []);
 
   const moveParticipant = useMutation(
