@@ -306,13 +306,12 @@ function Step1SelectHost() {
       <div>
         <NewPlayerDrawer />
       </div>
-      <div className="pt-4 border-t">
+      <div className="pt-2 border-t">
         <AlertDialog>
           <AlertDialogTrigger asChild>
             <Button
-              variant="ghost"
-              size="sm"
-              className="w-full text-muted-foreground hover:text-destructive"
+              variant="outline"
+              className="w-full border-destructive text-destructive hover:bg-destructive hover:text-destructive-foreground"
             >
               Nollaa turnauksen tulokset
             </Button>
