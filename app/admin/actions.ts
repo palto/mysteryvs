@@ -28,6 +28,7 @@ export async function removeParticipant(id: string) {
     const participants = root.get("participants");
     const index = participants.findIndex((p) => p === id);
     participants.delete(index);
+    root.get("hostRounds").delete(id);
     console.log(`Removed participant ${id}`);
   });
   revalidatePath("/admin");
