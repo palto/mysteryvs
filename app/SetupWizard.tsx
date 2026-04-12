@@ -23,6 +23,17 @@ import {
   useRoundInstructions,
   useRoundLength,
 } from "@/app/mysteryhooks";
+import {
+  AlertDialog,
+  AlertDialogAction,
+  AlertDialogCancel,
+  AlertDialogContent,
+  AlertDialogDescription,
+  AlertDialogFooter,
+  AlertDialogHeader,
+  AlertDialogTitle,
+  AlertDialogTrigger,
+} from "@/components/ui/alert-dialog";
 import { useStorage } from "@liveblocks/react/suspense";
 import { useParticipants } from "@/app/Participants";
 import { LiveMap } from "@liveblocks/client";
@@ -242,6 +253,19 @@ function Step1SelectHost() {
     [],
   );
 
+  const resetTournament = useMutation(({ storage }) => {
+    storage.update({
+      hostRounds: new LiveMap(),
+      startTime: null,
+      completedTime: null,
+      participantTimes: new LiveMap(),
+      participantScores: new LiveMap(),
+      host: null,
+      roundType: null,
+      roundInstructions: null,
+    });
+  }, []);
+
   function handleDragEnd(event: DragEndEvent) {
     const { active, over } = event;
     if (!over || active.id === over.id) return;
@@ -281,6 +305,39 @@ function Step1SelectHost() {
       </DndContext>
       <div>
         <NewPlayerDrawer />
+      </div>
+      <div className="pt-4 border-t">
+        <AlertDialog>
+          <AlertDialogTrigger asChild>
+            <Button
+              variant="ghost"
+              size="sm"
+              className="w-full text-muted-foreground hover:text-destructive"
+            >
+              Nollaa turnauksen tulokset
+            </Button>
+          </AlertDialogTrigger>
+          <AlertDialogContent>
+            <AlertDialogHeader>
+              <AlertDialogTitle>
+                Nollataan turnauksen tulokset?
+              </AlertDialogTitle>
+              <AlertDialogDescription>
+                Tämä poistaa kaikkien kierrosten tulokset pysyvästi. Toimintoa
+                ei voi peruuttaa.
+              </AlertDialogDescription>
+            </AlertDialogHeader>
+            <AlertDialogFooter>
+              <AlertDialogCancel>Peruuta</AlertDialogCancel>
+              <AlertDialogAction
+                className="bg-destructive text-destructive-foreground hover:bg-destructive/90"
+                onClick={resetTournament}
+              >
+                Nollaa tulokset
+              </AlertDialogAction>
+            </AlertDialogFooter>
+          </AlertDialogContent>
+        </AlertDialog>
       </div>
     </div>
   );
