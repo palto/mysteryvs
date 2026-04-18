@@ -9,7 +9,12 @@ import {
   useRoundType,
   useStartTime,
 } from "@/app/mysteryhooks";
-import { Check, CheckCircle2, Flag, Loader2 } from "lucide-react";
+import { Check, CheckCircle2, Flag, HelpCircle, Loader2 } from "lucide-react";
+import {
+  Popover,
+  PopoverContent,
+  PopoverTrigger,
+} from "@/components/ui/popover";
 import { format } from "date-fns";
 import { useRef, useState } from "react";
 
@@ -356,14 +361,80 @@ function ResultsLeaderboard({
 }: {
   results: Array<{ id: string; name: string; pts: number; isHost?: boolean }>;
 }) {
+  const roundType = useRoundType();
   const playerResults = results.filter((r) => !r.isHost);
   const hostEntry = results.find((r) => r.isHost);
+  const F = playerResults.filter((r) => r.pts > 0).length;
 
   return (
     <div className="w-full">
-      <h2 className="text-xs font-semibold uppercase tracking-widest text-muted-foreground mb-3">
-        Lopputulos
-      </h2>
+      <div className="flex items-center gap-2 mb-3">
+        <h2 className="text-xs font-semibold uppercase tracking-widest text-muted-foreground">
+          Lopputulos
+        </h2>
+        <Popover>
+          <PopoverTrigger asChild>
+            <button
+              className="text-muted-foreground hover:text-foreground transition-colors"
+              title="Miten pisteet lasketaan?"
+            >
+              <HelpCircle className="w-3.5 h-3.5" />
+            </button>
+          </PopoverTrigger>
+          <PopoverContent className="w-80" align="start">
+            <p className="text-xs font-semibold uppercase tracking-widest text-muted-foreground mb-3">
+              Pisteiden laskenta
+            </p>
+            {F === 0 ? (
+              <p className="text-xs text-muted-foreground">
+                {roundType === "time"
+                  ? "Kukaan ei maalissa — kaikki saavat 0 pistettä"
+                  : "Kukaan ei pisteytetty — kaikki saavat 0 pistettä"}
+              </p>
+            ) : (
+              <div className="flex flex-col gap-1">
+                <p className="text-xs text-muted-foreground mb-2">
+                  {F}{" "}
+                  {roundType === "time"
+                    ? "pelaajaa maalissa"
+                    : "pelaajaa pisteytetty"}{" "}
+                  — pisteet sijoituksen mukaan
+                </p>
+                {playerResults.map((r, i) => {
+                  const isFinisher = r.pts > 0;
+                  return (
+                    <div key={r.id} className="flex items-center gap-2 text-xs">
+                      <span className="w-20 text-muted-foreground shrink-0">
+                        {isFinisher
+                          ? `Sija ${i + 1} / ${F}`
+                          : roundType === "time"
+                            ? "DNF"
+                            : "Ei pisteitä"}
+                      </span>
+                      <span className="flex-1 font-medium">{r.name}</span>
+                      <span className="font-mono text-right shrink-0">
+                        {isFinisher ? `${F} - ${i} = +${r.pts} pts` : "+0 pts"}
+                      </span>
+                    </div>
+                  );
+                })}
+                {hostEntry && (
+                  <div className="flex items-center gap-2 text-xs pt-2 mt-1 border-t border-border">
+                    <span className="w-20 text-muted-foreground shrink-0">
+                      Järjestäjä
+                    </span>
+                    <span className="flex-1 font-medium">{hostEntry.name}</span>
+                    <span className="font-mono text-right shrink-0">
+                      = +{hostEntry.pts} pts (= 1. sija)
+                    </span>
+                  </div>
+                )}
+              </div>
+            )}
+          </PopoverContent>
+        </Popover>
+      </div>
+
       <div className="flex flex-col gap-1">
         {playerResults.map(({ id, name, pts }, i) => (
           <div key={id} className="flex items-center gap-3 px-1 py-2">
