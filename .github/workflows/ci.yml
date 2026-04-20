@@ -20,3 +20,7 @@ jobs:
       - run: npm ci
 
       - run: npm run verify
+
+      - run: npm run build
+        env:
+          LIVEBLOCKS_SECRET: sk_ci_placeholder
