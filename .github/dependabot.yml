@@ -37,3 +37,6 @@ updates:
       patch-updates:
         update-types:
           - "patch"
+        exclude-patterns:
+          - "@blocknote/*"
+          - "@liveblocks/*"
