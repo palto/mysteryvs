@@ -22,6 +22,9 @@ updates:
         patterns:
           - "next"
           - "eslint-config-next"
+      blocknote:
+        patterns:
+          - "@blocknote/*"
       liveblocks:
         patterns:
           - "@liveblocks/*"
