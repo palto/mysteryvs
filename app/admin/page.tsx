@@ -4,6 +4,8 @@ import { TopNav } from "@/app/TopNav";
 import { liveblocks } from "@/app/liveblocks/liveblocks";
 import { room } from "@/app/constants";
 
+export const dynamic = "force-dynamic";
+
 export default async function AdminPageServer() {
   const [participants, storage] = await Promise.all([
     getParticipants(),
