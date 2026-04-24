@@ -54,8 +54,8 @@
     "node": ">=24"
   },
   "devDependencies": {
-    "@tailwindcss/postcss": "^4.2.2",
-    "@tailwindcss/upgrade": "^4.2.2",
+    "@tailwindcss/postcss": "^4.2.4",
+    "@tailwindcss/upgrade": "^4.2.4",
     "@types/lodash": "^4.17.24",
     "@types/node": "^24",
     "@types/react": "19.2.14",
