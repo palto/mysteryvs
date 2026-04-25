@@ -139,6 +139,13 @@ components/ui/                  # Shadcn/ui components
 - Documentation page: `app/mcp/page.tsx`
 - **When adding, removing, or changing MCP tools, always update `app/mcp/page.tsx`** (the `TOOLS` array and `EXAMPLE_PROMPTS`) to keep the docs in sync.
 
+### Pull Requests
+
+First consider whether the PR has visible changes to the user or is purely technical (maintenance, refactoring, dependency updates, etc.).
+
+- **User-facing PRs**: Title and description should lead with what the user sees or experiences differently. Keep technical details brief at the end. E.g. "Show round info card on the active round page" not "Extract RoundInfoCard component for reuse".
+- **Technical PRs**: It is fine to use a technical title and description that focuses on the implementation change.
+
 ### Deployment
 
 - Deployed to Vercel at https://mysteeri.hevirinki.fi/
