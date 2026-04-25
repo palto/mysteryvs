@@ -4,9 +4,7 @@ import { Participants } from "@/app/Participants";
 import {
   useCompletedTime,
   useDescription,
-  useHost,
   useIsRunning,
-  useRoundInstructions,
   useRoundType,
   useStartTime,
 } from "@/app/mysteryhooks";
@@ -14,6 +12,7 @@ import { WakeLock } from "@/app/WakeLock";
 import ReactMarkdown from "react-markdown";
 import remarkGfm from "remark-gfm";
 import { SetupWizard } from "@/app/SetupWizard";
+import { RoundInfoCard } from "@/app/RoundInfoCard";
 import { Info, CheckCircle2 } from "lucide-react";
 
 export function MysteryRoundPage() {
@@ -21,9 +20,7 @@ export function MysteryRoundPage() {
   const isRunning = useIsRunning();
   const completedTime = useCompletedTime();
   const description = useDescription();
-  const roundInstructions = useRoundInstructions();
   const roundType = useRoundType();
-  const host = useHost();
   const isScoreMode = roundType === "score";
 
   return (
@@ -44,29 +41,7 @@ export function MysteryRoundPage() {
 
         {startTime && (
           <>
-            {/* Host banner */}
-            {host && (
-              <div className="flex items-center justify-between bg-muted/30 border rounded-xl px-5 py-3">
-                <div className="flex flex-col">
-                  <span className="text-xs text-muted-foreground">
-                    Järjestäjä
-                  </span>
-                  <span className="text-lg font-bold">{host}</span>
-                </div>
-              </div>
-            )}
-
-            {/* Instructions callout */}
-            {roundInstructions && (
-              <div className="flex gap-3 bg-muted/30 border rounded-xl p-4">
-                <Info className="h-4 w-4 text-muted-foreground shrink-0 mt-0.5" />
-                <div className="prose prose-sm dark:prose-invert">
-                  <ReactMarkdown remarkPlugins={[remarkGfm]}>
-                    {roundInstructions}
-                  </ReactMarkdown>
-                </div>
-              </div>
-            )}
+            <RoundInfoCard />
 
             {/* Status message */}
             {isRunning && (

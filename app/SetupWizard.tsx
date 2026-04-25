@@ -36,9 +36,8 @@ import {
 } from "@/components/ui/alert-dialog";
 import { useStorage } from "@liveblocks/react/suspense";
 import { useParticipants } from "@/app/Participants";
+import { RoundInfoCard } from "@/app/RoundInfoCard";
 import { LiveMap } from "@liveblocks/client";
-import ReactMarkdown from "react-markdown";
-import remarkGfm from "remark-gfm";
 import {
   DndContext,
   closestCenter,
@@ -514,12 +513,6 @@ function Step3Instructions() {
 // ---------------------------------------------------------------------------
 
 function Step4Start() {
-  const host = useHost()!;
-  const rawRoundType = useStorage((root) => root.roundType);
-  const roundInstructions = useRoundInstructions();
-  const roundLength = useRoundLength();
-  const roundMinutes = Math.round(roundLength / 60000);
-
   const startRound = useMutation(({ storage }) => {
     storage.update({
       startTime: Date.now(),
@@ -542,44 +535,7 @@ function Step4Start() {
         </p>
       </div>
 
-      <Card className="bg-muted/30">
-        <CardContent className="py-4 px-5 flex flex-col gap-3">
-          <div className="flex items-center justify-between">
-            <div className="flex flex-col">
-              <span className="text-xs text-muted-foreground">Järjestäjä</span>
-              <span className="text-lg font-bold">{host}</span>
-            </div>
-            <div className="flex flex-col items-end">
-              <span className="text-xs text-muted-foreground">Kierrosaika</span>
-              <span className="text-lg font-bold">{roundMinutes} min</span>
-            </div>
-          </div>
-          <div className="flex items-center gap-2 text-sm">
-            {rawRoundType === "score" ? (
-              <>
-                <Trophy className="w-4 h-4 text-primary shrink-0" />
-                <span className="font-medium">Pistekierros</span>
-              </>
-            ) : (
-              <>
-                <Clock className="w-4 h-4 text-primary shrink-0" />
-                <span className="font-medium">Aikakierros</span>
-              </>
-            )}
-          </div>
-          {roundInstructions ? (
-            <div className="prose prose-sm dark:prose-invert max-w-none">
-              <ReactMarkdown remarkPlugins={[remarkGfm]}>
-                {roundInstructions}
-              </ReactMarkdown>
-            </div>
-          ) : (
-            <p className="text-xs text-muted-foreground italic">
-              Ei ohjeita kirjoitettu.
-            </p>
-          )}
-        </CardContent>
-      </Card>
+      <RoundInfoCard />
 
       <div className="flex items-center gap-2">
         <Button
