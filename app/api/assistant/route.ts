@@ -20,23 +20,26 @@ export async function POST(req: Request) {
     },
   });
 
-  try {
-    const tools = await mcpClient.tools();
+  const tools = await mcpClient.tools();
 
-    const result = streamText({
-      model: gateway("anthropic/claude-sonnet-4-6"),
-      system:
-        "You are a helpful assistant for setting up mystery game tournament rounds. " +
-        "You can add/remove/reorder participants, set the tournament name and description, " +
-        "and configure the round length. Always confirm what you did after each action. " +
-        "Be concise and friendly.",
-      messages: await convertToModelMessages(messages),
-      tools,
-      stopWhen: stepCountIs(10),
-    });
+  const result = streamText({
+    model: gateway("anthropic/claude-sonnet-4-6"),
+    system:
+      "You are a helpful assistant for setting up mystery game tournament rounds. " +
+      "You can add/remove/reorder participants, set the tournament name and description, " +
+      "and configure the round length. Always confirm what you did after each action. " +
+      "Be concise and friendly.",
+    messages: await convertToModelMessages(messages),
+    tools,
+    stopWhen: stepCountIs(10),
+    onFinish: async () => {
+      await mcpClient.close();
+    },
+    onError: (error) => {
+      console.error("[assistant] stream error:", error);
+      mcpClient.close();
+    },
+  });
 
-    return result.toUIMessageStreamResponse();
-  } finally {
-    await mcpClient.close();
-  }
+  return result.toUIMessageStreamResponse();
 }
