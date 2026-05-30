@@ -10,6 +10,7 @@ const config = [
       "out/**",
       ".vercel/**",
       "next-env.d.ts",
+      "components/ai-elements/**",
     ],
   },
   ...coreWebVitals,

@@ -12,13 +12,20 @@ import {
   MessageResponse,
 } from "@/components/ai-elements/message";
 import {
+  Tool,
+  ToolContent,
+  ToolHeader,
+  ToolInput,
+  ToolOutput,
+} from "@/components/ai-elements/tool";
+import {
   PromptInput,
   PromptInputFooter,
   PromptInputSubmit,
   PromptInputTextarea,
 } from "@/components/ai-elements/prompt-input";
 import { useChat } from "@ai-sdk/react";
-import { DefaultChatTransport } from "ai";
+import { DefaultChatTransport, isStaticToolUIPart } from "ai";
 import { BotIcon } from "lucide-react";
 import { useMemo } from "react";
 
@@ -45,24 +52,49 @@ export function AssistantChat() {
             />
           )}
           {messages.map((message, i) => {
-            const textContent = message.parts
-              .filter((p) => p.type === "text")
-              .map((p) => p.text)
-              .join("");
-
-            if (!textContent) return null;
-
             const isLastAssistant =
               message.role === "assistant" && i === messages.length - 1;
+
+            const visibleParts = message.parts.filter(
+              (p) => p.type === "text" || isStaticToolUIPart(p),
+            );
+
+            if (visibleParts.length === 0) return null;
 
             return (
               <Message key={message.id} from={message.role}>
                 <MessageContent>
-                  <MessageResponse
-                    isAnimating={isLastAssistant && status === "streaming"}
-                  >
-                    {textContent}
-                  </MessageResponse>
+                  {visibleParts.map((part, j) => {
+                    if (part.type === "text") {
+                      return (
+                        <MessageResponse
+                          key={j}
+                          isAnimating={
+                            isLastAssistant && status === "streaming"
+                          }
+                        >
+                          {part.text}
+                        </MessageResponse>
+                      );
+                    }
+
+                    if (isStaticToolUIPart(part)) {
+                      return (
+                        <Tool key={j}>
+                          <ToolHeader type={part.type} state={part.state} />
+                          <ToolContent>
+                            <ToolInput input={part.input} />
+                            <ToolOutput
+                              output={part.output}
+                              errorText={part.errorText}
+                            />
+                          </ToolContent>
+                        </Tool>
+                      );
+                    }
+
+                    return null;
+                  })}
                 </MessageContent>
               </Message>
             );
