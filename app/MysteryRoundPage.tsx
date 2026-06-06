@@ -13,13 +13,9 @@ import ReactMarkdown from "react-markdown";
 import remarkGfm from "remark-gfm";
 import { SetupWizard } from "@/app/SetupWizard";
 import { RoundInfoCard } from "@/app/RoundInfoCard";
-import { Info, CheckCircle2, BotIcon } from "lucide-react";
-import { AssistantChat } from "@/app/AssistantChat";
-import { Button } from "@/components/ui/button";
-import { useState } from "react";
+import { Info, CheckCircle2 } from "lucide-react";
 
 export function MysteryRoundPage() {
-  const [showAssistant, setShowAssistant] = useState(false);
   const startTime = useStartTime();
   const isRunning = useIsRunning();
   const completedTime = useCompletedTime();
@@ -40,18 +36,6 @@ export function MysteryRoundPage() {
               </div>
             )}
             <SetupWizard />
-
-            <Button
-              variant="outline"
-              size="sm"
-              className="self-start gap-2"
-              onClick={() => setShowAssistant((v) => !v)}
-            >
-              <BotIcon className="size-4" />
-              {showAssistant ? "Hide AI Assistant" : "AI Assistant"}
-            </Button>
-
-            {showAssistant && <AssistantChat />}
           </>
         )}
 
