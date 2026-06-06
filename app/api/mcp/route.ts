@@ -81,13 +81,20 @@ function createMcpServer() {
 
   server.tool(
     "remove_participant",
-    "Remove a participant from the tournament",
+    "Remove a participant from the tournament. Matching is exact and " +
+      "case-sensitive, so before calling this you MUST call list_participants " +
+      "and use the username exactly as it appears there (same capitalization " +
+      "and spacing). If no participant matches what the user asked for, do not " +
+      "guess — show the user the current list and ask which one they mean.",
     { username: z.string().describe("Username to remove") },
     async ({ username }) => {
       await liveblocks.mutateStorage(room, async ({ root }) => {
         const participants = root.get("participants");
         const index = participants.findIndex((p) => p === username);
-        if (index === -1) throw new Error(`${username} not found`);
+        if (index === -1)
+          throw new Error(
+            `${username} not found. Call list_participants to see the exact usernames.`,
+          );
         participants.delete(index);
       });
       return {

@@ -14,7 +14,9 @@ const TOOLS = [
   },
   {
     name: "remove_participant",
-    description: "Removes a participant by username. Errors if not found.",
+    description:
+      "Removes a participant by username. Matching is exact and case-sensitive — " +
+      "check list_participants for the precise spelling first. Errors if not found.",
   },
   {
     name: "reorder_participants",
