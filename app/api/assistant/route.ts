@@ -32,6 +32,14 @@ export async function POST(req: Request) {
     messages: await convertToModelMessages(messages),
     tools,
     stopWhen: stepCountIs(10),
+    // Leave room for both the thinking budget and the final answer across all steps.
+    maxOutputTokens: 8000,
+    providerOptions: {
+      // Enable Anthropic extended thinking so the user can see the agent reason.
+      // Passed through the gateway under the real provider key ("anthropic").
+      // Low budget keeps latency/cost down; must stay below maxOutputTokens.
+      anthropic: { thinking: { type: "enabled", budgetTokens: 2048 } },
+    },
     onFinish: async () => {
       await mcpClient.close();
     },
@@ -41,5 +49,5 @@ export async function POST(req: Request) {
     },
   });
 
-  return result.toUIMessageStreamResponse();
+  return result.toUIMessageStreamResponse({ sendReasoning: true });
 }
