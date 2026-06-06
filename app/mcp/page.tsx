@@ -21,7 +21,9 @@ const TOOLS = [
   {
     name: "reorder_participants",
     description:
-      "Reorders the participant list. The full list must be provided in the desired order.",
+      "Reorders the participant list. Call list_participants first and provide " +
+      "the full list in the desired order, using the exact usernames. " +
+      "Order-only — does not add or remove anyone.",
   },
   {
     name: "get_tournament_state",

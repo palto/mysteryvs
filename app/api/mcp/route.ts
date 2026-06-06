@@ -232,7 +232,11 @@ function createMcpServer() {
 
   server.tool(
     "reorder_participants",
-    "Reorder the participant list. All current participants must be included.",
+    "Reorder the participant list. Before calling this you MUST call " +
+      "list_participants and build the new order from those exact usernames — " +
+      "every current participant must appear exactly once, spelled exactly as " +
+      "listed (matching is case-sensitive). Do not add, drop, or rename anyone; " +
+      "this only changes order.",
     {
       order: z
         .array(z.string())
@@ -246,13 +250,15 @@ function createMcpServer() {
         const missing = current.filter((p) => !order.includes(p));
         if (missing.length > 0) {
           throw new Error(
-            `Missing participants in new order: ${missing.join(", ")}`,
+            `Missing participants in new order: ${missing.join(", ")}. ` +
+              `Call list_participants for the exact current usernames.`,
           );
         }
         const extra = order.filter((p) => !current.includes(p));
         if (extra.length > 0) {
           throw new Error(
-            `Unknown participants in new order: ${extra.join(", ")}`,
+            `Unknown participants in new order: ${extra.join(", ")}. ` +
+              `Call list_participants for the exact current usernames.`,
           );
         }
 
