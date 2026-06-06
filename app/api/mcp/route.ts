@@ -81,13 +81,20 @@ function createMcpServer() {
 
   server.tool(
     "remove_participant",
-    "Remove a participant from the tournament",
+    "Remove a participant from the tournament. Matching is exact and " +
+      "case-sensitive, so before calling this you MUST call list_participants " +
+      "and use the username exactly as it appears there (same capitalization " +
+      "and spacing). If no participant matches what the user asked for, do not " +
+      "guess — show the user the current list and ask which one they mean.",
     { username: z.string().describe("Username to remove") },
     async ({ username }) => {
       await liveblocks.mutateStorage(room, async ({ root }) => {
         const participants = root.get("participants");
         const index = participants.findIndex((p) => p === username);
-        if (index === -1) throw new Error(`${username} not found`);
+        if (index === -1)
+          throw new Error(
+            `${username} not found. Call list_participants to see the exact usernames.`,
+          );
         participants.delete(index);
       });
       return {
@@ -225,7 +232,11 @@ function createMcpServer() {
 
   server.tool(
     "reorder_participants",
-    "Reorder the participant list. All current participants must be included.",
+    "Reorder the participant list. Before calling this you MUST call " +
+      "list_participants and build the new order from those exact usernames — " +
+      "every current participant must appear exactly once, spelled exactly as " +
+      "listed (matching is case-sensitive). Do not add, drop, or rename anyone; " +
+      "this only changes order.",
     {
       order: z
         .array(z.string())
@@ -239,13 +250,15 @@ function createMcpServer() {
         const missing = current.filter((p) => !order.includes(p));
         if (missing.length > 0) {
           throw new Error(
-            `Missing participants in new order: ${missing.join(", ")}`,
+            `Missing participants in new order: ${missing.join(", ")}. ` +
+              `Call list_participants for the exact current usernames.`,
           );
         }
         const extra = order.filter((p) => !current.includes(p));
         if (extra.length > 0) {
           throw new Error(
-            `Unknown participants in new order: ${extra.join(", ")}`,
+            `Unknown participants in new order: ${extra.join(", ")}. ` +
+              `Call list_participants for the exact current usernames.`,
           );
         }
 

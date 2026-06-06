@@ -14,12 +14,16 @@ const TOOLS = [
   },
   {
     name: "remove_participant",
-    description: "Removes a participant by username. Errors if not found.",
+    description:
+      "Removes a participant by username. Matching is exact and case-sensitive — " +
+      "check list_participants for the precise spelling first. Errors if not found.",
   },
   {
     name: "reorder_participants",
     description:
-      "Reorders the participant list. The full list must be provided in the desired order.",
+      "Reorders the participant list. Call list_participants first and provide " +
+      "the full list in the desired order, using the exact usernames. " +
+      "Order-only — does not add or remove anyone.",
   },
   {
     name: "get_tournament_state",
