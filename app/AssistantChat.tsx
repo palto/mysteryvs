@@ -26,10 +26,14 @@ import {
 } from "@/components/ai-elements/prompt-input";
 import { useChat } from "@ai-sdk/react";
 import { DefaultChatTransport, isStaticToolUIPart } from "ai";
-import { BotIcon } from "lucide-react";
 import { useMemo } from "react";
+import { cn } from "@/lib/utils";
 
-export function AssistantChat() {
+interface AssistantChatProps {
+  className?: string;
+}
+
+export function AssistantChat({ className }: AssistantChatProps) {
   const transport = useMemo(
     () => new DefaultChatTransport({ api: "/api/assistant" }),
     [],
@@ -37,12 +41,9 @@ export function AssistantChat() {
   const { messages, sendMessage, status, stop } = useChat({ transport });
 
   return (
-    <div className="flex flex-col h-[480px] border border-border rounded-xl overflow-hidden bg-card">
-      <div className="flex items-center gap-2 px-4 py-3 border-b border-border text-sm font-medium text-muted-foreground">
-        <BotIcon className="size-4" />
-        AI Assistant
-      </div>
-
+    <div
+      className={cn("flex flex-col h-full overflow-hidden bg-card", className)}
+    >
       <Conversation className="flex-1 min-h-0">
         <ConversationContent>
           {messages.length === 0 && (
