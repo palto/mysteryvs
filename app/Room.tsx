@@ -20,7 +20,10 @@ const defaultParticipants = [
 
 export function Room({ children }: { children: ReactNode }) {
   return (
-    <LiveblocksProvider authEndpoint="/api/liveblocks-auth">
+    <LiveblocksProvider
+      authEndpoint="/api/liveblocks-auth"
+      badgeLocation="bottom-left"
+    >
       <RoomProvider
         id={room}
         initialStorage={{
