@@ -37,7 +37,7 @@ import { useChat } from "@ai-sdk/react";
 import { DefaultChatTransport, isToolUIPart } from "ai";
 import type { UIMessage } from "ai";
 import { CheckIcon, CopyIcon, RefreshCcwIcon } from "lucide-react";
-import { useMemo, useState } from "react";
+import { useEffect, useMemo, useRef, useState } from "react";
 import { cn } from "@/lib/utils";
 
 interface AssistantChatProps {
@@ -63,9 +63,43 @@ export function AssistantChat({ className }: AssistantChatProps) {
     () => new DefaultChatTransport({ api: "/api/assistant" }),
     [],
   );
+
+  const [cutOff, setCutOff] = useState(false);
+  const wasStreamingRef = useRef(false);
+  const finishReceivedRef = useRef(false);
+
   const { messages, sendMessage, status, stop, error, regenerate } = useChat({
     transport,
+    onFinish: (_message, { finishReason }) => {
+      finishReceivedRef.current = true;
+      // "unknown" = stream closed without a finish event; "error" = explicit error
+      if (finishReason === "error" || finishReason === "unknown") {
+        setCutOff(true);
+      }
+    },
+    onError: () => {
+      // Error is surfaced via status==="error" UI below; just prevent false cut-off.
+      finishReceivedRef.current = true;
+    },
   });
+
+  useEffect(() => {
+    if (status === "streaming") {
+      wasStreamingRef.current = true;
+      finishReceivedRef.current = false;
+      setCutOff(false);
+    } else if (status === "submitted") {
+      setCutOff(false);
+      wasStreamingRef.current = false;
+    } else if (status === "ready" && wasStreamingRef.current) {
+      // Give onFinish a tick to fire; if it didn't, the stream was cut off abruptly.
+      const id = setTimeout(() => {
+        if (!finishReceivedRef.current) setCutOff(true);
+        wasStreamingRef.current = false;
+      }, 100);
+      return () => clearTimeout(id);
+    }
+  }, [status]);
 
   return (
     <div
@@ -170,6 +204,20 @@ export function AssistantChat({ className }: AssistantChatProps) {
               </Message>
             );
           })}
+
+          {cutOff && status === "ready" && (
+            <div className="mx-auto flex flex-col items-center gap-2 rounded-md border border-amber-500/40 bg-amber-500/10 p-3 text-center text-sm text-amber-700 dark:text-amber-400">
+              <span>Response was cut off — the request took too long.</span>
+              <button
+                type="button"
+                className="inline-flex items-center gap-1.5 rounded-md border border-amber-500/40 px-3 py-1 font-medium hover:bg-amber-500/20"
+                onClick={() => regenerate()}
+              >
+                <RefreshCcwIcon className="size-3.5" />
+                Retry
+              </button>
+            </div>
+          )}
 
           {status === "submitted" && (
             <Message from="assistant">
