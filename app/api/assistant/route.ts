@@ -3,6 +3,7 @@ import { createMCPClient } from "@ai-sdk/mcp";
 import { getVercelOidcToken } from "@vercel/oidc";
 
 export const dynamic = "force-dynamic";
+export const maxDuration = 60;
 
 export async function POST(req: Request) {
   const { messages } = await req.json();
