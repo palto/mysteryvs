@@ -32,22 +32,17 @@ export async function POST(req: Request) {
       "Be concise and friendly.",
     messages: await convertToModelMessages(messages),
     tools,
+    // A turn may chain tool calls; cap the number of model steps per turn.
     stopWhen: stepCountIs(10),
-    // Per-step output cap. With adaptive thinking the model self-budgets its
-    // reasoning, so this just bounds the visible answer per step.
+    // Upper bound on the visible answer per step (reasoning is budgeted separately).
     maxOutputTokens: 8000,
     providerOptions: {
-      // Adaptive thinking: the model decides when and how much to reason.
-      // Replaces the deprecated fixed `budgetTokens` budget on Sonnet 4.6.
-      // Passed through the gateway under the real provider key ("anthropic").
-      // Tune reasoning depth/cost via output_config.effort if needed.
+      // Adaptive thinking lets the model decide when and how much to reason.
+      // Routed through the gateway under the real provider key ("anthropic").
       anthropic: { thinking: { type: "adaptive" } },
     },
     onFinish: async ({ finishReason, totalUsage, steps }) => {
-      // Diagnostics for why a turn ended — the key signal for "cut off":
-      //   finishReason "length"     → hit maxOutputTokens
-      //   last step "tool-calls" at stepCount 10 → hit the step cap
-      //   anything in onError below → mid-stream failure
+      // Log how each turn ended (finish reason, token usage, tools used).
       console.log("[assistant] finished:", {
         finishReason,
         totalUsage,
@@ -65,9 +60,7 @@ export async function POST(req: Request) {
 
   return result.toUIMessageStreamResponse({
     sendReasoning: true,
-    // Surface the real error to the client instead of the SDK's masked default,
-    // so a mid-stream failure is visible in the UI rather than looking like a
-    // normal short answer.
+    // Forward the real error message to the client so failures are visible in the UI.
     onError: (error) => {
       console.error("[assistant] response stream error:", error);
       return error instanceof Error ? error.message : String(error);
