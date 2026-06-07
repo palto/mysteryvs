@@ -1,4 +1,4 @@
-import { streamText, gateway, convertToModelMessages, stepCountIs } from "ai";
+import { ToolLoopAgent, gateway, convertToModelMessages } from "ai";
 import { createMCPClient } from "@ai-sdk/mcp";
 import { getVercelOidcToken } from "@vercel/oidc";
 
@@ -23,17 +23,16 @@ export async function POST(req: Request) {
 
   const tools = await mcpClient.tools();
 
-  const result = streamText({
+  // ToolLoopAgent runs the tool-calling loop with the SDK's defaults
+  // (e.g. stopWhen: stepCountIs(20)).
+  const agent = new ToolLoopAgent({
     model: gateway("anthropic/claude-sonnet-4-6"),
-    system:
+    instructions:
       "You are a helpful assistant for setting up mystery game tournament rounds. " +
       "You can add/remove/reorder participants, set the tournament name and description, " +
       "and configure the round length. Always confirm what you did after each action. " +
       "Be concise and friendly.",
-    messages: await convertToModelMessages(messages),
     tools,
-    // A turn may chain tool calls; cap the number of model steps per turn.
-    stopWhen: stepCountIs(10),
     providerOptions: {
       // Adaptive thinking lets the model decide when and how much to reason.
       // Routed through the gateway under the real provider key ("anthropic").
@@ -50,17 +49,20 @@ export async function POST(req: Request) {
       });
       await mcpClient.close();
     },
-    onError: (error) => {
-      console.error("[assistant] stream error:", error);
-      mcpClient.close();
-    },
+  });
+
+  const result = await agent.stream({
+    messages: await convertToModelMessages(messages),
   });
 
   return result.toUIMessageStreamResponse({
     sendReasoning: true,
-    // Forward the real error message to the client so failures are visible in the UI.
+    // Forward the real error message to the client so failures are visible in
+    // the UI, and clean up the MCP client. The agent's onFinish only runs on
+    // success, so the error-path cleanup lives here.
     onError: (error) => {
-      console.error("[assistant] response stream error:", error);
+      console.error("[assistant] stream error:", error);
+      mcpClient.close();
       return error instanceof Error ? error.message : String(error);
     },
   });
