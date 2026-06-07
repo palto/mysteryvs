@@ -34,8 +34,6 @@ export async function POST(req: Request) {
     tools,
     // A turn may chain tool calls; cap the number of model steps per turn.
     stopWhen: stepCountIs(10),
-    // Upper bound on the visible answer per step (reasoning is budgeted separately).
-    maxOutputTokens: 8000,
     providerOptions: {
       // Adaptive thinking lets the model decide when and how much to reason.
       // Routed through the gateway under the real provider key ("anthropic").

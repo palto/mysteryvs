@@ -37,7 +37,7 @@ import { useChat } from "@ai-sdk/react";
 import { DefaultChatTransport, isToolUIPart } from "ai";
 import type { UIMessage } from "ai";
 import { CheckIcon, CopyIcon, RefreshCcwIcon } from "lucide-react";
-import { useMemo, useState } from "react";
+import { useState } from "react";
 import { cn } from "@/lib/utils";
 
 interface AssistantChatProps {
@@ -59,12 +59,8 @@ function messageText(message: UIMessage): string {
 }
 
 export function AssistantChat({ className }: AssistantChatProps) {
-  const transport = useMemo(
-    () => new DefaultChatTransport({ api: "/api/assistant" }),
-    [],
-  );
   const { messages, sendMessage, status, stop, error, regenerate } = useChat({
-    transport,
+    transport: new DefaultChatTransport({ api: "/api/assistant" }),
   });
 
   return (
