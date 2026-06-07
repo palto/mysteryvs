@@ -3,6 +3,7 @@ import { createMCPClient } from "@ai-sdk/mcp";
 import { getVercelOidcToken } from "@vercel/oidc";
 
 export const dynamic = "force-dynamic";
+export const maxDuration = 60;
 
 export async function POST(req: Request) {
   const { messages } = await req.json();
@@ -31,16 +32,24 @@ export async function POST(req: Request) {
       "Be concise and friendly.",
     messages: await convertToModelMessages(messages),
     tools,
+    // A turn may chain tool calls; cap the number of model steps per turn.
     stopWhen: stepCountIs(10),
-    // Leave room for both the thinking budget and the final answer across all steps.
+    // Upper bound on the visible answer per step (reasoning is budgeted separately).
     maxOutputTokens: 8000,
     providerOptions: {
-      // Enable Anthropic extended thinking so the user can see the agent reason.
-      // Passed through the gateway under the real provider key ("anthropic").
-      // Low budget keeps latency/cost down; must stay below maxOutputTokens.
-      anthropic: { thinking: { type: "enabled", budgetTokens: 2048 } },
+      // Adaptive thinking lets the model decide when and how much to reason.
+      // Routed through the gateway under the real provider key ("anthropic").
+      anthropic: { thinking: { type: "adaptive" } },
     },
-    onFinish: async () => {
+    onFinish: async ({ finishReason, totalUsage, steps }) => {
+      // Log how each turn ended (finish reason, token usage, tools used).
+      console.log("[assistant] finished:", {
+        finishReason,
+        totalUsage,
+        stepCount: steps.length,
+        stepFinishReasons: steps.map((s) => s.finishReason),
+        toolsCalled: steps.flatMap((s) => s.toolCalls.map((t) => t.toolName)),
+      });
       await mcpClient.close();
     },
     onError: (error) => {
@@ -49,5 +58,12 @@ export async function POST(req: Request) {
     },
   });
 
-  return result.toUIMessageStreamResponse({ sendReasoning: true });
+  return result.toUIMessageStreamResponse({
+    sendReasoning: true,
+    // Forward the real error message to the client so failures are visible in the UI.
+    onError: (error) => {
+      console.error("[assistant] response stream error:", error);
+      return error instanceof Error ? error.message : String(error);
+    },
+  });
 }
