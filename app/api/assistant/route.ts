@@ -1,4 +1,4 @@
-import { ToolLoopAgent, gateway, convertToModelMessages } from "ai";
+import { ToolLoopAgent, gateway, createAgentUIStreamResponse } from "ai";
 import { createMCPClient } from "@ai-sdk/mcp";
 import { getVercelOidcToken } from "@vercel/oidc";
 
@@ -51,11 +51,9 @@ export async function POST(req: Request) {
     },
   });
 
-  const result = await agent.stream({
-    messages: await convertToModelMessages(messages),
-  });
-
-  return result.toUIMessageStreamResponse({
+  return createAgentUIStreamResponse({
+    agent,
+    uiMessages: messages,
     sendReasoning: true,
     // Forward the real error message to the client so failures are visible in
     // the UI, and clean up the MCP client. The agent's onFinish only runs on
