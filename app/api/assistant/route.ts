@@ -53,9 +53,7 @@ export async function POST(req: Request) {
         totalUsage,
         stepCount: steps.length,
         stepFinishReasons: steps.map((s) => s.finishReason),
-        toolsCalled: steps.flatMap((s) =>
-          s.toolCalls.map((t) => t.toolName),
-        ),
+        toolsCalled: steps.flatMap((s) => s.toolCalls.map((t) => t.toolName)),
       });
       await mcpClient.close();
     },
