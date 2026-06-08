@@ -12,8 +12,8 @@
     "verify": "npm run type-check && npm run lint && npm run format:check"
   },
   "dependencies": {
-    "@ai-sdk/mcp": "^1.0.45",
-    "@ai-sdk/react": "^3.0.196",
+    "@ai-sdk/mcp": "^1.0.46",
+    "@ai-sdk/react": "^3.0.199",
     "@blocknote/core": "^0.51.4",
     "@blocknote/react": "^0.51.4",
     "@blocknote/shadcn": "^0.51.4",
@@ -67,7 +67,7 @@
     "tailwind-merge": "^3.6.0",
     "tailwindcss-animate": "^1.0.7",
     "ulid": "^3.0.2",
-    "use-stick-to-bottom": "^1.1.4",
+    "use-stick-to-bottom": "^1.1.6",
     "usehooks-ts": "^3.1.1",
     "vaul": "^1.1.2",
     "zod": "^4.4.3"
