@@ -4,6 +4,10 @@ import z from "zod";
 const envValidationResult = z
   .object({
     LIVEBLOCKS_SECRET: z.string(),
+    PIPEDREAM_CLIENT_ID: z.string(),
+    PIPEDREAM_CLIENT_SECRET: z.string(),
+    PIPEDREAM_PROJECT_ID: z.string(),
+    PIPEDREAM_ENVIRONMENT: z.string(),
   })
   .safeParse(process.env);
 
