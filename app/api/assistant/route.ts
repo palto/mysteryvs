@@ -8,12 +8,11 @@ import { VercelProvider } from "@composio/vercel";
 export const dynamic = "force-dynamic";
 export const maxDuration = 60;
 
-const composio = new Composio({
-  apiKey: process.env.COMPOSIO_API_KEY!,
-  provider: new VercelProvider(),
-});
-
 export async function POST(req: Request) {
+  const composio = new Composio({
+    apiKey: process.env.COMPOSIO_API_KEY!,
+    provider: new VercelProvider(),
+  });
   const { messages } = await req.json();
 
   const origin = new URL(req.url).origin;
