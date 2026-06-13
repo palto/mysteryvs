@@ -2,10 +2,16 @@ import { ToolLoopAgent, createAgentUIStreamResponse } from "ai";
 import { createMCPClient } from "@ai-sdk/mcp";
 import { getVercelOidcToken } from "@vercel/oidc";
 import { getUsername } from "@/app/login/getUsername";
-import { composio, GOOGLE_SHEETS_TOOLKIT } from "@/app/composio/composio";
+import { Composio } from "@composio/core";
+import { VercelProvider } from "@composio/vercel";
 
 export const dynamic = "force-dynamic";
 export const maxDuration = 60;
+
+const composio = new Composio({
+  apiKey: process.env.COMPOSIO_API_KEY!,
+  provider: new VercelProvider(),
+});
 
 export async function POST(req: Request) {
   const { messages } = await req.json();
@@ -30,7 +36,7 @@ export async function POST(req: Request) {
   // a connect link that the assistant surfaces in the conversation.
   const username = await getUsername();
   const sheetsTools = username
-    ? await composio.tools.get(username, { toolkits: [GOOGLE_SHEETS_TOOLKIT] })
+    ? await composio.tools.get(username, { toolkits: ["googlesheets"] })
     : {};
 
   const tools = { ...mcpTools, ...sheetsTools };
