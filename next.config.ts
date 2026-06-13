@@ -4,6 +4,8 @@ import z from "zod";
 const envValidationResult = z
   .object({
     LIVEBLOCKS_SECRET: z.string(),
+    COMPOSIO_API_KEY: z.string(),
+    COMPOSIO_GOOGLE_SHEETS_AUTH_CONFIG_ID: z.string(),
   })
   .safeParse(process.env);
 

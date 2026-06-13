@@ -3,6 +3,7 @@
 import * as DialogPrimitive from "@radix-ui/react-dialog";
 import { Button } from "@/components/ui/button";
 import { AssistantChat } from "@/app/AssistantChat";
+import { GoogleSheetsConnection } from "@/app/composio/GoogleSheetsConnection";
 import { BotIcon, XIcon } from "lucide-react";
 import { useState } from "react";
 import { cn } from "@/lib/utils";
@@ -39,11 +40,14 @@ export function AssistantFAB() {
               <BotIcon className="size-4" />
               AI Assistant
             </span>
-            <DialogPrimitive.Close asChild>
-              <Button variant="ghost" size="icon" className="h-8 w-8">
-                <XIcon className="size-4" />
-              </Button>
-            </DialogPrimitive.Close>
+            <div className="flex items-center gap-2">
+              <GoogleSheetsConnection />
+              <DialogPrimitive.Close asChild>
+                <Button variant="ghost" size="icon" className="h-8 w-8">
+                  <XIcon className="size-4" />
+                </Button>
+              </DialogPrimitive.Close>
+            </div>
           </div>
 
           <AssistantChat className="flex-1 min-h-0" />
