@@ -26,6 +26,7 @@ export function AssistantFAB() {
         <DialogPrimitive.Overlay className="fixed inset-0 z-50 bg-black/40 data-[state=open]:animate-in data-[state=closed]:animate-out data-[state=closed]:fade-out-0 data-[state=open]:fade-in-0" />
         <DialogPrimitive.Content
           forceMount
+          aria-describedby={undefined}
           className={cn(
             "fixed inset-y-0 right-0 z-[60] flex w-[420px] max-w-full flex-col",
             "bg-background border-l border-border shadow-xl",
@@ -35,10 +36,10 @@ export function AssistantFAB() {
           )}
         >
           <div className="flex items-center justify-between px-4 py-3 border-b border-border">
-            <span className="flex items-center gap-2 text-sm font-medium text-muted-foreground">
+            <DialogPrimitive.Title className="flex items-center gap-2 text-sm font-medium text-muted-foreground">
               <BotIcon className="size-4" />
               AI Assistant
-            </span>
+            </DialogPrimitive.Title>
             <DialogPrimitive.Close asChild>
               <Button variant="ghost" size="icon" className="h-8 w-8">
                 <XIcon className="size-4" />
