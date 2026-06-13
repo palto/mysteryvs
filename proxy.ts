@@ -24,7 +24,7 @@ export function proxy(request: NextRequest) {
   const response = NextResponse.next();
   response.cookies.set(USER_ID_COOKIE, crypto.randomUUID(), {
     httpOnly: true,
-    secure: process.env.NODE_ENV === "production",
+    secure: request.nextUrl.protocol === "https:",
     sameSite: "lax",
     maxAge: 60 * 60 * 24 * 365, // 1 year
     path: "/",
