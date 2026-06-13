@@ -1,7 +1,7 @@
 import { ToolLoopAgent, createAgentUIStreamResponse } from "ai";
 import { createMCPClient } from "@ai-sdk/mcp";
 import { getVercelOidcToken } from "@vercel/oidc";
-import { getUsername } from "@/app/login/getUsername";
+import { getUserId } from "@/app/userId";
 import { Composio } from "@composio/core";
 import { VercelProvider } from "@composio/vercel";
 
@@ -30,12 +30,16 @@ export async function POST(req: Request) {
 
   const mcpTools = await mcpClient.tools();
 
-  // Load Google Sheets tools for the logged-in user. Composio handles auth
-  // in-chat automatically — if the user hasn't connected yet, the tools return
-  // a connect link that the assistant surfaces in the conversation.
-  const username = await getUsername();
-  const sheetsTools = username
-    ? await (await composio.create(username)).tools()
+  // Load Google Sheets tools scoped to the user's secret id (not the
+  // freely-chosen player name), so a connection belongs to the person who made
+  // it and can't be reached by impersonating a player name. Composio handles
+  // auth in-chat automatically — if the user hasn't connected yet, the tools
+  // return a connect link that the assistant surfaces in the conversation.
+  // The id may be absent (proxy hasn't issued it yet); treat that as "not
+  // connected" rather than relying on the cookie always being present.
+  const userId = await getUserId();
+  const sheetsTools = userId
+    ? await (await composio.create(userId)).tools()
     : {};
 
   const tools = { ...mcpTools, ...sheetsTools };
