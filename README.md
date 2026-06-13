@@ -17,6 +17,10 @@ The production runs at https://mysteeri.hevirinki.fi/
 
 - Node.js v24
 - Liveblocks API secret. Set it in `.env` using variable `LIVEBLOCKS_SECRET`
+- Composio (for the AI assistant's Google Sheets integration). Set in `.env`:
+  - `COMPOSIO_API_KEY` — your Composio project API key
+
+All of the above must also be set in the Vercel project settings for deployment.
 
 ### Start dev server
 
