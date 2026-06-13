@@ -35,9 +35,7 @@ export async function POST(req: Request) {
   // a connect link that the assistant surfaces in the conversation.
   const username = await getUsername();
   const sheetsTools = username
-    ? await (
-        await composio.create(username, { toolkits: ["googlesheets"] })
-      ).tools()
+    ? await (await composio.create(username)).tools()
     : {};
 
   const tools = { ...mcpTools, ...sheetsTools };
