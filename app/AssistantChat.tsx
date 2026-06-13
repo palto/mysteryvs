@@ -48,7 +48,7 @@ const SUGGESTIONS = [
   "Add Alice and Bob",
   "Set the round length to 20 minutes",
   "Rename the tournament to Mystery Night",
-  "Export the results to a new Google Sheet",
+  "List the current participants",
 ];
 
 function messageText(message: UIMessage): string {
