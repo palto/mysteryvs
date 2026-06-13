@@ -4,7 +4,6 @@ import z from "zod";
 const envValidationResult = z
   .object({
     LIVEBLOCKS_SECRET: z.string(),
-    COMPOSIO_API_KEY: z.string(),
   })
   .safeParse(process.env);
 
