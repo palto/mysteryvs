@@ -6,28 +6,12 @@ import { AssistantChat } from "@/app/AssistantChat";
 import { BotIcon, XIcon } from "lucide-react";
 import { useState } from "react";
 import { cn } from "@/lib/utils";
-import type { UIMessage } from "ai";
 
 export function AssistantFAB() {
   const [open, setOpen] = useState(false);
-  const [initialMessages, setInitialMessages] = useState<UIMessage[]>([]);
-  const [historyLoaded, setHistoryLoaded] = useState(false);
-
-  function handleOpenChange(nextOpen: boolean) {
-    if (nextOpen && !historyLoaded) {
-      fetch("/api/chat-history")
-        .then((r) => r.json())
-        .then((msgs: UIMessage[]) => {
-          setInitialMessages(msgs);
-          setHistoryLoaded(true);
-        })
-        .catch(() => setHistoryLoaded(true));
-    }
-    setOpen(nextOpen);
-  }
 
   return (
-    <DialogPrimitive.Root open={open} onOpenChange={handleOpenChange}>
+    <DialogPrimitive.Root open={open} onOpenChange={setOpen}>
       <DialogPrimitive.Trigger asChild>
         <Button
           size="icon"
@@ -63,11 +47,7 @@ export function AssistantFAB() {
             </DialogPrimitive.Close>
           </div>
 
-          <AssistantChat
-            className="flex-1 min-h-0"
-            initialMessages={initialMessages}
-            historyLoaded={historyLoaded}
-          />
+          <AssistantChat className="flex-1 min-h-0" />
         </DialogPrimitive.Content>
       </DialogPrimitive.Portal>
     </DialogPrimitive.Root>

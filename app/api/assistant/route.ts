@@ -4,9 +4,6 @@ import { getVercelOidcToken } from "@vercel/oidc";
 import { getUserId } from "@/app/userId";
 import { Composio } from "@composio/core";
 import { VercelProvider } from "@composio/vercel";
-import { LiveMap } from "@liveblocks/client";
-import { liveblocks } from "@/app/liveblocks/liveblocks";
-import { room } from "@/app/constants";
 
 export const dynamic = "force-dynamic";
 export const maxDuration = 60;
@@ -40,8 +37,10 @@ export async function POST(req: Request) {
   // return a connect link that the assistant surfaces in the conversation.
   // The id may be absent (proxy hasn't issued it yet); treat that as "not
   // connected" rather than relying on the cookie always being present.
-  const uid = await getUserId();
-  const sheetsTools = uid ? await (await composio.create(uid)).tools() : {};
+  const userId = await getUserId();
+  const sheetsTools = userId
+    ? await (await composio.create(userId)).tools()
+    : {};
 
   const tools = { ...mcpTools, ...sheetsTools };
 
@@ -69,18 +68,8 @@ Be concise and friendly.`,
     agent,
     uiMessages: messages,
     sendReasoning: true,
-    onFinish: async ({ messages: savedMessages }) => {
+    onFinish: async () => {
       await mcpClient.close();
-      if (uid && savedMessages?.length) {
-        await liveblocks.mutateStorage(room, async ({ root }) => {
-          let chatHistories = root.get("chatHistories");
-          if (!chatHistories) {
-            chatHistories = new LiveMap<string, string>();
-            root.set("chatHistories", chatHistories);
-          }
-          chatHistories.set(uid, JSON.stringify(savedMessages));
-        });
-      }
     },
     onError: (error) => {
       console.error("[assistant] stream error:", error);

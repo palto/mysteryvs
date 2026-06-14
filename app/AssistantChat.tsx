@@ -33,18 +33,14 @@ import {
   PromptInputTextarea,
 } from "@/components/ai-elements/prompt-input";
 import { Spinner } from "@/components/ui/spinner";
+import { useMutation, useSelf, useStorage } from "@liveblocks/react/suspense";
+import { LiveMap } from "@liveblocks/client";
 import { useChat } from "@ai-sdk/react";
 import { DefaultChatTransport, isToolUIPart } from "ai";
 import type { UIMessage } from "ai";
 import { CheckIcon, CopyIcon, RefreshCcwIcon } from "lucide-react";
 import { useEffect, useRef, useState } from "react";
 import { cn } from "@/lib/utils";
-
-interface AssistantChatProps {
-  className?: string;
-  initialMessages?: UIMessage[];
-  historyLoaded?: boolean;
-}
 
 const SUGGESTIONS = [
   "Add Alice and Bob",
@@ -60,45 +56,68 @@ function messageText(message: UIMessage): string {
     .join("\n\n");
 }
 
-export function AssistantChat({
-  className,
-  initialMessages = [],
-  historyLoaded = true,
-}: AssistantChatProps) {
-  const {
-    messages,
-    sendMessage,
-    status,
-    stop,
-    error,
-    regenerate,
-    setMessages,
-  } = useChat({
-    transport: new DefaultChatTransport({ api: "/api/assistant" }),
-  });
+function parseHistory(raw: string | null): UIMessage[] {
+  if (!raw) return [];
+  try {
+    return JSON.parse(raw) as UIMessage[];
+  } catch {
+    return [];
+  }
+}
 
+export function AssistantChat({ className }: { className?: string }) {
+  const userId = useSelf((u) => u.id);
+
+  const rawHistory = useStorage(
+    (s) =>
+      (s.chatHistories as Record<string, string | undefined>)?.[userId] ?? null,
+  );
+
+  // Capture history once at mount — ref initializer runs exactly once.
+  const initialMessagesRef = useRef(null as UIMessage[] | null);
+  if (initialMessagesRef.current === null) {
+    initialMessagesRef.current = parseHistory(rawHistory);
+  }
+  const initialMessages = initialMessagesRef.current;
+
+  const { messages, sendMessage, status, stop, error, regenerate, setMessages } =
+    useChat({
+      transport: new DefaultChatTransport({ api: "/api/assistant" }),
+    });
+
+  // Apply stored history once on mount.
   const appliedRef = useRef(false);
   useEffect(() => {
-    if (historyLoaded && !appliedRef.current) {
+    if (!appliedRef.current && initialMessages.length > 0) {
       appliedRef.current = true;
-      if (initialMessages.length > 0) {
-        setMessages(initialMessages);
-      }
+      setMessages(initialMessages);
     }
-  }, [historyLoaded, initialMessages, setMessages]);
+  }, []); // eslint-disable-line react-hooks/exhaustive-deps
 
-  if (!historyLoaded) {
-    return (
-      <div
-        className={cn(
-          "flex items-center justify-center h-full bg-card",
-          className,
-        )}
-      >
-        <Spinner />
-      </div>
-    );
-  }
+  const saveHistory = useMutation(
+    ({ storage }, msgs: UIMessage[]) => {
+      if (!storage.get("chatHistories")) {
+        storage.set("chatHistories", new LiveMap());
+      }
+      storage.get("chatHistories")!.set(userId, JSON.stringify(msgs));
+    },
+    [userId],
+  );
+
+  // Save to Liveblocks after each completed AI response.
+  const wasActiveRef = useRef(false);
+  useEffect(() => {
+    if (status === "streaming" || status === "submitted") {
+      wasActiveRef.current = true;
+    } else if (
+      status === "ready" &&
+      wasActiveRef.current &&
+      messages.length > 0
+    ) {
+      wasActiveRef.current = false;
+      saveHistory(messages);
+    }
+  }, [status, messages, saveHistory]);
 
   return (
     <div
