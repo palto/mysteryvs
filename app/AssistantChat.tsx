@@ -65,10 +65,17 @@ export function AssistantChat({
   initialMessages = [],
   historyLoaded = true,
 }: AssistantChatProps) {
-  const { messages, sendMessage, status, stop, error, regenerate, setMessages } =
-    useChat({
-      transport: new DefaultChatTransport({ api: "/api/assistant" }),
-    });
+  const {
+    messages,
+    sendMessage,
+    status,
+    stop,
+    error,
+    regenerate,
+    setMessages,
+  } = useChat({
+    transport: new DefaultChatTransport({ api: "/api/assistant" }),
+  });
 
   const appliedRef = useRef(false);
   useEffect(() => {
@@ -82,7 +89,12 @@ export function AssistantChat({
 
   if (!historyLoaded) {
     return (
-      <div className={cn("flex items-center justify-center h-full bg-card", className)}>
+      <div
+        className={cn(
+          "flex items-center justify-center h-full bg-card",
+          className,
+        )}
+      >
         <Spinner />
       </div>
     );

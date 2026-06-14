@@ -41,9 +41,7 @@ export async function POST(req: Request) {
   // The id may be absent (proxy hasn't issued it yet); treat that as "not
   // connected" rather than relying on the cookie always being present.
   const uid = await getUserId();
-  const sheetsTools = uid
-    ? await (await composio.create(uid)).tools()
-    : {};
+  const sheetsTools = uid ? await (await composio.create(uid)).tools() : {};
 
   const tools = { ...mcpTools, ...sheetsTools };
 
