@@ -80,10 +80,17 @@ export function AssistantChat({ className }: { className?: string }) {
   }
   const initialMessages = initialMessagesRef.current;
 
-  const { messages, sendMessage, status, stop, error, regenerate, setMessages } =
-    useChat({
-      transport: new DefaultChatTransport({ api: "/api/assistant" }),
-    });
+  const {
+    messages,
+    sendMessage,
+    status,
+    stop,
+    error,
+    regenerate,
+    setMessages,
+  } = useChat({
+    transport: new DefaultChatTransport({ api: "/api/assistant" }),
+  });
 
   // Apply stored history once on mount.
   const appliedRef = useRef(false);
