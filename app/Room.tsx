@@ -39,6 +39,7 @@ export function Room({ children }: { children: ReactNode }) {
           roundType: null,
           roundInstructions: null,
           hostRounds: new LiveMap(),
+          chatHistories: new LiveMap(),
         }}
       >
         <ClientSideSuspense fallback={<div>Loading…</div>}>

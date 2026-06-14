@@ -37,11 +37,13 @@ import { useChat } from "@ai-sdk/react";
 import { DefaultChatTransport, isToolUIPart } from "ai";
 import type { UIMessage } from "ai";
 import { CheckIcon, CopyIcon, RefreshCcwIcon } from "lucide-react";
-import { useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import { cn } from "@/lib/utils";
 
 interface AssistantChatProps {
   className?: string;
+  initialMessages?: UIMessage[];
+  historyLoaded?: boolean;
 }
 
 const SUGGESTIONS = [
@@ -58,10 +60,33 @@ function messageText(message: UIMessage): string {
     .join("\n\n");
 }
 
-export function AssistantChat({ className }: AssistantChatProps) {
-  const { messages, sendMessage, status, stop, error, regenerate } = useChat({
-    transport: new DefaultChatTransport({ api: "/api/assistant" }),
-  });
+export function AssistantChat({
+  className,
+  initialMessages = [],
+  historyLoaded = true,
+}: AssistantChatProps) {
+  const { messages, sendMessage, status, stop, error, regenerate, setMessages } =
+    useChat({
+      transport: new DefaultChatTransport({ api: "/api/assistant" }),
+    });
+
+  const appliedRef = useRef(false);
+  useEffect(() => {
+    if (historyLoaded && !appliedRef.current) {
+      appliedRef.current = true;
+      if (initialMessages.length > 0) {
+        setMessages(initialMessages);
+      }
+    }
+  }, [historyLoaded, initialMessages, setMessages]);
+
+  if (!historyLoaded) {
+    return (
+      <div className={cn("flex items-center justify-center h-full bg-card", className)}>
+        <Spinner />
+      </div>
+    );
+  }
 
   return (
     <div

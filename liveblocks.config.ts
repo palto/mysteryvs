@@ -36,6 +36,7 @@ declare global {
       roundType: string | null;
       roundInstructions: string | null;
       hostRounds: LiveMap<string, HostRound>;
+      chatHistories: LiveMap<string, string>;
     };
 
     // Custom user info set when authenticating with a secret key
