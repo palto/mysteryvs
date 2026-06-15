@@ -12,8 +12,8 @@
     "verify": "npm run type-check && npm run lint && npm run format:check"
   },
   "dependencies": {
-    "@ai-sdk/mcp": "^1.0.46",
-    "@ai-sdk/react": "^3.0.200",
+    "@ai-sdk/mcp": "^1.0.48",
+    "@ai-sdk/react": "^3.0.204",
     "@blocknote/core": "^0.51.4",
     "@blocknote/react": "^0.51.4",
     "@blocknote/shadcn": "^0.51.4",
@@ -46,7 +46,7 @@
     "@streamdown/math": "^1.0.2",
     "@streamdown/mermaid": "^1.0.2",
     "@tailwindcss/typography": "^0.5.20",
-    "@tiptap/suggestion": "^3.26.0",
+    "@tiptap/suggestion": "^3.26.1",
     "@vercel/oidc": "^3.6.1",
     "ai": "^6.0.193",
     "class-variance-authority": "^0.7.1",
