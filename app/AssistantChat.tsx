@@ -33,11 +33,20 @@ import {
   PromptInputTextarea,
 } from "@/components/ai-elements/prompt-input";
 import { Spinner } from "@/components/ui/spinner";
+import { Button } from "@/components/ui/button";
+import * as DialogPrimitive from "@radix-ui/react-dialog";
 import { useChat } from "@ai-sdk/react";
 import { DefaultChatTransport, isToolUIPart } from "ai";
 import type { UIMessage } from "ai";
-import { CheckIcon, CopyIcon, RefreshCcwIcon } from "lucide-react";
-import { useState } from "react";
+import {
+  BotIcon,
+  CheckIcon,
+  CopyIcon,
+  RefreshCcwIcon,
+  Trash2Icon,
+  XIcon,
+} from "lucide-react";
+import { useEffect, useState } from "react";
 import { cn } from "@/lib/utils";
 
 interface AssistantChatProps {
@@ -51,6 +60,18 @@ const SUGGESTIONS = [
   "List the current participants",
 ];
 
+const STORAGE_KEY = "assistant-chat";
+
+function loadMessages(): UIMessage[] {
+  if (typeof window === "undefined") return [];
+  try {
+    const raw = window.sessionStorage.getItem(STORAGE_KEY);
+    return raw ? (JSON.parse(raw) as UIMessage[]) : [];
+  } catch {
+    return [];
+  }
+}
+
 function messageText(message: UIMessage): string {
   return message.parts
     .filter((p) => p.type === "text")
@@ -59,14 +80,75 @@ function messageText(message: UIMessage): string {
 }
 
 export function AssistantChat({ className }: AssistantChatProps) {
-  const { messages, sendMessage, status, stop, error, regenerate } = useChat({
+  const [initialMessages] = useState<UIMessage[]>(loadMessages);
+  const {
+    messages,
+    setMessages,
+    sendMessage,
+    status,
+    stop,
+    error,
+    regenerate,
+  } = useChat({
+    messages: initialMessages,
     transport: new DefaultChatTransport({ api: "/api/assistant" }),
   });
+
+  // Persist the conversation so it survives reloads/navigation within the tab.
+  // The AI SDK appends/updates `messages` while streaming, so this also
+  // captures messages as they arrive from the stream.
+  useEffect(() => {
+    if (typeof window === "undefined") return;
+    try {
+      if (messages.length === 0) {
+        window.sessionStorage.removeItem(STORAGE_KEY);
+      } else {
+        window.sessionStorage.setItem(STORAGE_KEY, JSON.stringify(messages));
+      }
+    } catch {
+      // ignore quota / serialization errors
+    }
+  }, [messages]);
+
+  function handleClear() {
+    setMessages([]);
+    if (typeof window !== "undefined") {
+      window.sessionStorage.removeItem(STORAGE_KEY);
+    }
+  }
 
   return (
     <div
       className={cn("flex flex-col h-full overflow-hidden bg-card", className)}
     >
+      <div className="flex items-center justify-between border-b border-border px-4 py-3">
+        <DialogPrimitive.Title className="flex items-center gap-2 text-sm font-medium text-muted-foreground">
+          <BotIcon className="size-4" />
+          AI Assistant
+        </DialogPrimitive.Title>
+        <div className="flex items-center gap-1">
+          <Button
+            type="button"
+            variant="ghost"
+            size="sm"
+            onClick={handleClear}
+            disabled={
+              messages.length === 0 ||
+              status === "streaming" ||
+              status === "submitted"
+            }
+          >
+            <Trash2Icon className="size-3.5" />
+            Clear
+          </Button>
+          <DialogPrimitive.Close asChild>
+            <Button variant="ghost" size="icon" className="h-8 w-8">
+              <XIcon className="size-4" />
+            </Button>
+          </DialogPrimitive.Close>
+        </div>
+      </div>
+
       <Conversation className="flex-1 min-h-0">
         <ConversationContent>
           {messages.length === 0 && (
