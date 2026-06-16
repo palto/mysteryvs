@@ -1,8 +1,15 @@
 "use server";
 import { cookies } from "next/headers";
 
+import {
+  SESSION_COOKIE,
+  createSessionToken,
+  sessionCookieOptions,
+  verifySessionToken,
+} from "@/app/login/session";
+
 /**
- * Sets a cookie "username" that identifies the user for all the requests
+ * Sets a signed session cookie that identifies the user for all the requests
  * @param formData
  */
 export async function loginFormSubmit(formData: FormData) {
@@ -16,13 +23,17 @@ export async function loginParticipant(username: string) {
   if (!username) {
     throw new Error("Username is required");
   }
-  cookieStore.set("username", username);
+  const token = await createSessionToken(username);
+  cookieStore.set(SESSION_COOKIE, token, sessionCookieOptions);
   console.log(`User ${username} logged in`);
 }
 
 export async function logout() {
   const cookieStore = await cookies();
-  const username = cookieStore.get("username")?.value;
+  const token = cookieStore.get(SESSION_COOKIE)?.value;
+  const username = token
+    ? (await verifySessionToken(token))?.username
+    : undefined;
   console.log(`User ${username} logged out`);
-  cookieStore.delete("username");
+  cookieStore.delete(SESSION_COOKIE);
 }
