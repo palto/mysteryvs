@@ -12,8 +12,8 @@
     "verify": "npm run type-check && npm run lint && npm run format:check"
   },
   "dependencies": {
-    "@ai-sdk/mcp": "^1.0.48",
-    "@ai-sdk/react": "^3.0.204",
+    "@ai-sdk/mcp": "^1.0.50",
+    "@ai-sdk/react": "^3.0.206",
     "@blocknote/core": "^0.51.4",
     "@blocknote/react": "^0.51.4",
     "@blocknote/shadcn": "^0.51.4",
@@ -78,8 +78,8 @@
     "node": ">=24"
   },
   "devDependencies": {
-    "@tailwindcss/postcss": "^4.3.0",
-    "@tailwindcss/upgrade": "^4.3.0",
+    "@tailwindcss/postcss": "^4.3.1",
+    "@tailwindcss/upgrade": "^4.3.1",
     "@types/lodash": "^4.17.24",
     "@types/node": "^24",
     "@types/react": "19.2.17",
