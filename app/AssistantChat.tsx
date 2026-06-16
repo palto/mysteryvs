@@ -250,21 +250,24 @@ export function AssistantChat({ className }: AssistantChatProps) {
         >
           <PromptInputTextarea placeholder="Ask me to set up the tournament…" />
           <PromptInputFooter>
-            <Button
-              type="button"
-              variant="ghost"
-              size="sm"
-              onClick={handleClear}
-              disabled={
-                messages.length === 0 ||
-                status === "streaming" ||
-                status === "submitted"
-              }
-            >
-              <Trash2Icon className="size-3.5" />
-              Clear
-            </Button>
-            <PromptInputSubmit status={status} onStop={stop} />
+            <div />
+            <div className="flex items-center gap-1">
+              <Button
+                type="button"
+                variant="ghost"
+                size="sm"
+                onClick={handleClear}
+                disabled={
+                  messages.length === 0 ||
+                  status === "streaming" ||
+                  status === "submitted"
+                }
+              >
+                <Trash2Icon className="size-3.5" />
+                Clear
+              </Button>
+              <PromptInputSubmit status={status} onStop={stop} />
+            </div>
           </PromptInputFooter>
         </PromptInput>
       </div>
