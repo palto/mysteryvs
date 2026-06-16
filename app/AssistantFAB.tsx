@@ -3,7 +3,7 @@
 import * as DialogPrimitive from "@radix-ui/react-dialog";
 import { Button } from "@/components/ui/button";
 import { AssistantChat } from "@/app/AssistantChat";
-import { BotIcon, XIcon } from "lucide-react";
+import { BotIcon } from "lucide-react";
 import { useState } from "react";
 import { cn } from "@/lib/utils";
 
@@ -35,18 +35,6 @@ export function AssistantFAB() {
             "duration-300",
           )}
         >
-          <div className="flex items-center justify-between px-4 py-3 border-b border-border">
-            <DialogPrimitive.Title className="flex items-center gap-2 text-sm font-medium text-muted-foreground">
-              <BotIcon className="size-4" />
-              AI Assistant
-            </DialogPrimitive.Title>
-            <DialogPrimitive.Close asChild>
-              <Button variant="ghost" size="icon" className="h-8 w-8">
-                <XIcon className="size-4" />
-              </Button>
-            </DialogPrimitive.Close>
-          </div>
-
           <AssistantChat className="flex-1 min-h-0" />
         </DialogPrimitive.Content>
       </DialogPrimitive.Portal>

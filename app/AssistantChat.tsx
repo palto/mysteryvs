@@ -34,10 +34,18 @@ import {
 } from "@/components/ai-elements/prompt-input";
 import { Spinner } from "@/components/ui/spinner";
 import { Button } from "@/components/ui/button";
+import * as DialogPrimitive from "@radix-ui/react-dialog";
 import { useChat } from "@ai-sdk/react";
 import { DefaultChatTransport, isToolUIPart } from "ai";
 import type { UIMessage } from "ai";
-import { CheckIcon, CopyIcon, RefreshCcwIcon, Trash2Icon } from "lucide-react";
+import {
+  BotIcon,
+  CheckIcon,
+  CopyIcon,
+  RefreshCcwIcon,
+  Trash2Icon,
+  XIcon,
+} from "lucide-react";
 import { useEffect, useState } from "react";
 import { cn } from "@/lib/utils";
 
@@ -113,6 +121,34 @@ export function AssistantChat({ className }: AssistantChatProps) {
     <div
       className={cn("flex flex-col h-full overflow-hidden bg-card", className)}
     >
+      <div className="flex items-center justify-between border-b border-border px-4 py-3">
+        <DialogPrimitive.Title className="flex items-center gap-2 text-sm font-medium text-muted-foreground">
+          <BotIcon className="size-4" />
+          AI Assistant
+        </DialogPrimitive.Title>
+        <div className="flex items-center gap-1">
+          <Button
+            type="button"
+            variant="ghost"
+            size="sm"
+            onClick={handleClear}
+            disabled={
+              messages.length === 0 ||
+              status === "streaming" ||
+              status === "submitted"
+            }
+          >
+            <Trash2Icon className="size-3.5" />
+            Clear
+          </Button>
+          <DialogPrimitive.Close asChild>
+            <Button variant="ghost" size="icon" className="h-8 w-8">
+              <XIcon className="size-4" />
+            </Button>
+          </DialogPrimitive.Close>
+        </div>
+      </div>
+
       <Conversation className="flex-1 min-h-0">
         <ConversationContent>
           {messages.length === 0 && (
@@ -251,23 +287,7 @@ export function AssistantChat({ className }: AssistantChatProps) {
           <PromptInputTextarea placeholder="Ask me to set up the tournament…" />
           <PromptInputFooter>
             <div />
-            <div className="flex items-center gap-1">
-              <Button
-                type="button"
-                variant="ghost"
-                size="sm"
-                onClick={handleClear}
-                disabled={
-                  messages.length === 0 ||
-                  status === "streaming" ||
-                  status === "submitted"
-                }
-              >
-                <Trash2Icon className="size-3.5" />
-                Clear
-              </Button>
-              <PromptInputSubmit status={status} onStop={stop} />
-            </div>
+            <PromptInputSubmit status={status} onStop={stop} />
           </PromptInputFooter>
         </PromptInput>
       </div>
