@@ -13,7 +13,7 @@
   },
   "dependencies": {
     "@ai-sdk/mcp": "^1.0.50",
-    "@ai-sdk/react": "^3.0.206",
+    "@ai-sdk/react": "^3.0.207",
     "@blocknote/core": "^0.51.4",
     "@blocknote/react": "^0.51.4",
     "@blocknote/shadcn": "^0.51.4",
