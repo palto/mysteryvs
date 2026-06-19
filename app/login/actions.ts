@@ -2,7 +2,9 @@
 import { cookies } from "next/headers";
 
 import {
+  ANONYMOUS_SESSION_MAX_AGE_S,
   SESSION_COOKIE,
+  SESSION_MAX_AGE_S,
   createSessionToken,
   sessionCookieOptions,
   verifySessionToken,
@@ -19,21 +21,42 @@ export async function loginFormSubmit(formData: FormData) {
 }
 
 export async function loginParticipant(username: string) {
-  const cookieStore = await cookies();
   if (!username) {
     throw new Error("Username is required");
   }
-  const token = await createSessionToken(username);
-  cookieStore.set(SESSION_COOKIE, token, sessionCookieOptions);
+  const cookieStore = await cookies();
+  const existingToken = cookieStore.get(SESSION_COOKIE)?.value;
+  const existingSession = existingToken
+    ? await verifySessionToken(existingToken)
+    : null;
+  const uid = existingSession?.uid ?? crypto.randomUUID();
+
+  const token = await createSessionToken({ uid, username }, SESSION_MAX_AGE_S);
+  cookieStore.set(
+    SESSION_COOKIE,
+    token,
+    sessionCookieOptions(SESSION_MAX_AGE_S),
+  );
   console.log(`User ${username} logged in`);
 }
 
 export async function logout() {
   const cookieStore = await cookies();
   const token = cookieStore.get(SESSION_COOKIE)?.value;
-  const username = token
-    ? (await verifySessionToken(token))?.username
-    : undefined;
-  console.log(`User ${username} logged out`);
-  cookieStore.delete(SESSION_COOKIE);
+  const session = token ? await verifySessionToken(token) : null;
+  console.log(`User ${session?.username} logged out`);
+
+  if (session?.uid) {
+    const anonymousToken = await createSessionToken(
+      { uid: session.uid },
+      ANONYMOUS_SESSION_MAX_AGE_S,
+    );
+    cookieStore.set(
+      SESSION_COOKIE,
+      anonymousToken,
+      sessionCookieOptions(ANONYMOUS_SESSION_MAX_AGE_S),
+    );
+  } else {
+    cookieStore.delete(SESSION_COOKIE);
+  }
 }
