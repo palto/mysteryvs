@@ -49,7 +49,10 @@ export async function verifySessionToken(
     return payload as unknown as Session;
   } catch (err) {
     if (err instanceof errors.JWTExpired) {
-      console.info("Session token expired");
+      const { uid, username, exp } = err.payload;
+      console.info(
+        `Session expired (uid=${uid}, username=${username ?? "none"}, expiredAt=${exp ? new Date(exp * 1000).toISOString() : "unknown"})`,
+      );
       return null;
     }
     console.error("Session verification failed:", err);
