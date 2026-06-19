@@ -43,11 +43,10 @@ export async function verifySessionToken(
 ): Promise<Session | null> {
   try {
     const { payload } = await jwtVerify(token, secret);
-    if (typeof payload.username !== "string") {
-      return null;
-    }
-    return { username: payload.username };
-  } catch {
+    return { username: payload.username as string };
+  } catch (err) {
+    const code = err instanceof Error ? err.name : "unknown";
+    console.warn(`Session verification failed: ${code}`);
     return null;
   }
 }
