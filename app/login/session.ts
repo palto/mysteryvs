@@ -1,4 +1,4 @@
-import { SignJWT, jwtVerify } from "jose";
+import { SignJWT, errors, jwtVerify } from "jose";
 
 const secret = new TextEncoder().encode(process.env.SESSION_SECRET);
 
@@ -48,6 +48,10 @@ export async function verifySessionToken(
     const { payload } = await jwtVerify(token, secret);
     return payload as unknown as Session;
   } catch (err) {
+    if (err instanceof errors.JWTExpired) {
+      console.info("Session token expired");
+      return null;
+    }
     console.error("Session verification failed:", err);
     return null;
   }
