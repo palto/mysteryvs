@@ -46,10 +46,7 @@ export async function verifySessionToken(
 ): Promise<Session | null> {
   try {
     const { payload } = await jwtVerify(token, secret);
-    return {
-      uid: payload.uid as string,
-      username: payload.username as string | undefined,
-    };
+    return payload as unknown as Session;
   } catch (err) {
     const code = err instanceof Error ? err.name : "unknown";
     console.warn(`Session verification failed: ${code}`);
