@@ -22,12 +22,19 @@ export interface Session {
 }
 
 /**
- * Creates a signed (HS256) JWT for the given session. The payload is
- * base64url-encoded and therefore readable, but the HMAC signature ensures it
- * cannot be altered without the server secret.
+ * Creates a signed (HS256) JWT for the given session. A fresh `uid` is
+ * generated when one isn't supplied, so callers never have to mint it
+ * themselves. The payload is base64url-encoded and therefore readable, but the
+ * HMAC signature ensures it cannot be altered without the server secret.
  */
-export async function createSessionToken(session: Session): Promise<string> {
-  return new SignJWT({ ...session })
+export async function createSessionToken(
+  session: Partial<Session> = {},
+): Promise<string> {
+  const payload: Session = {
+    uid: session.uid ?? crypto.randomUUID(),
+    username: session.username,
+  };
+  return new SignJWT({ ...payload })
     .setProtectedHeader({ alg: "HS256" })
     .setIssuedAt()
     .setExpirationTime(`${SESSION_MAX_AGE_S}s`)

@@ -23,7 +23,7 @@ export async function proxy(request: NextRequest) {
   }
 
   const response = NextResponse.next();
-  const token = await createSessionToken({ uid: crypto.randomUUID() });
+  const token = await createSessionToken();
   response.cookies.set(SESSION_COOKIE, token, sessionCookieOptions);
   return response;
 }
