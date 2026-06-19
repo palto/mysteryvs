@@ -48,8 +48,7 @@ export async function verifySessionToken(
     const { payload } = await jwtVerify(token, secret);
     return payload as unknown as Session;
   } catch (err) {
-    const code = err instanceof Error ? err.name : "unknown";
-    console.warn(`Session verification failed: ${code}`);
+    console.error("Session verification failed:", err);
     return null;
   }
 }
