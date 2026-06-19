@@ -2,9 +2,7 @@
 import { cookies } from "next/headers";
 
 import {
-  ANONYMOUS_SESSION_MAX_AGE_S,
   SESSION_COOKIE,
-  SESSION_MAX_AGE_S,
   createSessionToken,
   sessionCookieOptions,
   verifySessionToken,
@@ -31,12 +29,8 @@ export async function loginParticipant(username: string) {
     : null;
   const uid = existingSession?.uid ?? crypto.randomUUID();
 
-  const token = await createSessionToken({ uid, username }, SESSION_MAX_AGE_S);
-  cookieStore.set(
-    SESSION_COOKIE,
-    token,
-    sessionCookieOptions(SESSION_MAX_AGE_S),
-  );
+  const token = await createSessionToken({ uid, username });
+  cookieStore.set(SESSION_COOKIE, token, sessionCookieOptions);
   console.log(`User ${username} logged in`);
 }
 
@@ -47,15 +41,8 @@ export async function logout() {
   console.log(`User ${session?.username} logged out`);
 
   if (session?.uid) {
-    const anonymousToken = await createSessionToken(
-      { uid: session.uid },
-      ANONYMOUS_SESSION_MAX_AGE_S,
-    );
-    cookieStore.set(
-      SESSION_COOKIE,
-      anonymousToken,
-      sessionCookieOptions(ANONYMOUS_SESSION_MAX_AGE_S),
-    );
+    const anonymousToken = await createSessionToken({ uid: session.uid });
+    cookieStore.set(SESSION_COOKIE, anonymousToken, sessionCookieOptions);
   } else {
     cookieStore.delete(SESSION_COOKIE);
   }

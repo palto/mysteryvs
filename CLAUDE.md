@@ -61,7 +61,7 @@ The application uses Liveblocks for real-time collaboration. All shared state is
 ### Authentication & Session Management
 
 - Cookie-based authentication storing a **signed JWT** session cookie (`session`)
-- Token logic lives in `app/login/session.ts` (uses `jose`, HS256, signed with `SESSION_SECRET`, 30-day expiry). The payload is base64-readable but tamper-proof — an altered or expired token is rejected.
+- Token logic lives in `app/login/session.ts` (uses `jose`, HS256, signed with `SESSION_SECRET`, 1-year expiry). The payload is base64-readable but tamper-proof — an altered or expired token is rejected.
 - `getUsername()` helper (`app/login/getUsername.ts`) reads and verifies the session cookie, returning the username
 - Users must log in at `/login` before accessing main app
 - No password authentication - users simply select/enter their name

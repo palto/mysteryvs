@@ -5,21 +5,16 @@ const secret = new TextEncoder().encode(process.env.SESSION_SECRET);
 /** Name of the signed session cookie. */
 export const SESSION_COOKIE = "session";
 
-/** Lifetime of an authenticated session, in seconds (30 days). */
-export const SESSION_MAX_AGE_S = 60 * 60 * 24 * 30;
+/** Session lifetime in seconds (1 year). */
+export const SESSION_MAX_AGE_S = 60 * 60 * 24 * 365;
 
-/** Lifetime of an anonymous (pre-login) session, in seconds (1 year). */
-export const ANONYMOUS_SESSION_MAX_AGE_S = 60 * 60 * 24 * 365;
-
-export function sessionCookieOptions(maxAgeS: number) {
-  return {
-    httpOnly: true,
-    secure: process.env.NODE_ENV === "production",
-    sameSite: "lax" as const,
-    path: "/",
-    maxAge: maxAgeS,
-  };
-}
+export const sessionCookieOptions = {
+  httpOnly: true,
+  secure: process.env.NODE_ENV === "production",
+  sameSite: "lax" as const,
+  path: "/",
+  maxAge: SESSION_MAX_AGE_S,
+};
 
 export interface Session {
   uid: string;
@@ -31,14 +26,11 @@ export interface Session {
  * base64url-encoded and therefore readable, but the HMAC signature ensures it
  * cannot be altered without the server secret.
  */
-export async function createSessionToken(
-  session: Session,
-  maxAgeS: number,
-): Promise<string> {
+export async function createSessionToken(session: Session): Promise<string> {
   return new SignJWT({ ...session })
     .setProtectedHeader({ alg: "HS256" })
     .setIssuedAt()
-    .setExpirationTime(`${maxAgeS}s`)
+    .setExpirationTime(`${SESSION_MAX_AGE_S}s`)
     .sign(secret);
 }
 
