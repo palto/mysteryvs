@@ -30,11 +30,7 @@ export interface Session {
 export async function createSessionToken(
   session: Partial<Session> = {},
 ): Promise<string> {
-  const payload: Session = {
-    uid: session.uid ?? crypto.randomUUID(),
-    username: session.username,
-  };
-  return new SignJWT({ ...payload })
+  return new SignJWT({ ...session, uid: session.uid ?? crypto.randomUUID() })
     .setProtectedHeader({ alg: "HS256" })
     .setIssuedAt()
     .setExpirationTime(`${SESSION_MAX_AGE_S}s`)

@@ -28,10 +28,7 @@ export async function loginParticipant(username: string) {
     ? await verifySessionToken(existingToken)
     : null;
 
-  const token = await createSessionToken({
-    uid: existingSession?.uid,
-    username,
-  });
+  const token = await createSessionToken({ ...existingSession, username });
   cookieStore.set(SESSION_COOKIE, token, sessionCookieOptions);
   console.log(`User ${username} logged in`);
 }
