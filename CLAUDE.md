@@ -32,6 +32,7 @@ npm run verify       # Run all validations (type-check + lint + format check)
 ### Environment Variables
 
 - `LIVEBLOCKS_SECRET`: Required for real-time collaboration. Set in `.env` file.
+- `SESSION_SECRET`: Required. Secret (>=32 chars) used to sign session cookies. Generate with `openssl rand -base64 32`.
 - The application validates environment variables at build time in `next.config.ts` and will exit if missing.
 
 ## Architecture
@@ -59,11 +60,12 @@ The application uses Liveblocks for real-time collaboration. All shared state is
 
 ### Authentication & Session Management
 
-- Cookie-based authentication storing username
-- `getUsername()` helper (`app/login/getUsername.ts`) retrieves username from cookies
+- Cookie-based authentication storing a **signed JWT** session cookie (`session`)
+- Token logic lives in `app/login/session.ts` (uses `jose`, HS256, signed with `SESSION_SECRET`, 1-year expiry). The payload is base64-readable but tamper-proof — an altered or expired token is rejected.
+- `getUsername()` helper (`app/login/getUsername.ts`) reads and verifies the session cookie, returning the username
 - Users must log in at `/login` before accessing main app
 - No password authentication - users simply select/enter their name
-- Main page redirects to `/login` if no username cookie exists
+- Main page redirects to `/login` if no valid session cookie exists
 
 ### App Structure
 
