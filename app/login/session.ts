@@ -69,6 +69,9 @@ export async function verifySessionToken(
       return null;
     }
     if (!payload.sub) {
+      console.info(
+        `Session missing sub (ver=${payload.ver ?? "none"}, username=${payload.username ?? "none"}); treating as outdated`,
+      );
       return null;
     }
     return {
