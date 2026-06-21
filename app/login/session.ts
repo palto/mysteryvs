@@ -17,12 +17,17 @@ export const sessionCookieOptions = {
 };
 
 export interface Session {
-  uid: string;
+  /**
+   * Stable, unguessable user id. Stored in the JWT's registered `sub`
+   * (subject) claim — the standard place for the principal a token identifies.
+   */
+  sub: string;
+  /** Freely-chosen player name. A custom claim, set on login. */
   username?: string;
 }
 
 /**
- * Creates a signed (HS256) JWT for the given session. A fresh `uid` is
+ * Creates a signed (HS256) JWT for the given session. A fresh `sub` is
  * generated when one isn't supplied, so callers never have to mint it
  * themselves. The payload is base64url-encoded and therefore readable, but the
  * HMAC signature ensures it cannot be altered without the server secret.
@@ -30,8 +35,9 @@ export interface Session {
 export async function createSessionToken(
   session: Partial<Session> = {},
 ): Promise<string> {
-  return new SignJWT({ ...session, uid: session.uid ?? crypto.randomUUID() })
+  return new SignJWT({ username: session.username })
     .setProtectedHeader({ alg: "HS256" })
+    .setSubject(session.sub ?? crypto.randomUUID())
     .setIssuedAt()
     .setExpirationTime(`${SESSION_MAX_AGE_S}s`)
     .sign(secret);
@@ -46,12 +52,18 @@ export async function verifySessionToken(
 ): Promise<Session | null> {
   try {
     const { payload } = await jwtVerify(token, secret);
-    return payload as unknown as Session;
+    if (!payload.sub) {
+      return null;
+    }
+    return {
+      sub: payload.sub,
+      username: payload.username as string | undefined,
+    };
   } catch (err) {
     if (err instanceof errors.JWTExpired) {
-      const { uid, username, exp } = err.payload;
+      const { sub, username, exp } = err.payload;
       console.info(
-        `Session expired (uid=${uid}, username=${username ?? "none"}, expiredAt=${exp ? new Date(exp * 1000).toISOString() : "unknown"})`,
+        `Session expired (sub=${sub}, username=${username ?? "none"}, expiredAt=${exp ? new Date(exp * 1000).toISOString() : "unknown"})`,
       );
       return null;
     }

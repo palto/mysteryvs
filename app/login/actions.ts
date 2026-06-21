@@ -1,11 +1,11 @@
 "use server";
 import { cookies } from "next/headers";
 
+import { getSession } from "@/app/login/getSession";
 import {
   SESSION_COOKIE,
   createSessionToken,
   sessionCookieOptions,
-  verifySessionToken,
 } from "@/app/login/session";
 
 /**
@@ -22,25 +22,21 @@ export async function loginParticipant(username: string) {
   if (!username) {
     throw new Error("Username is required");
   }
-  const cookieStore = await cookies();
-  const existingToken = cookieStore.get(SESSION_COOKIE)?.value;
-  const existingSession = existingToken
-    ? await verifySessionToken(existingToken)
-    : null;
+  const existingSession = await getSession();
 
   const token = await createSessionToken({ ...existingSession, username });
+  const cookieStore = await cookies();
   cookieStore.set(SESSION_COOKIE, token, sessionCookieOptions);
-  console.log(`User ${username} logged in`);
+  console.info(`User ${username} logged in`);
 }
 
 export async function logout() {
-  const cookieStore = await cookies();
-  const token = cookieStore.get(SESSION_COOKIE)?.value;
-  const session = token ? await verifySessionToken(token) : null;
-  console.log(`User ${session?.username} logged out`);
+  const session = await getSession();
+  console.info(`User ${session?.username} logged out`);
 
-  if (session?.uid) {
-    const anonymousToken = await createSessionToken({ uid: session.uid });
+  const cookieStore = await cookies();
+  if (session?.sub) {
+    const anonymousToken = await createSessionToken({ sub: session.sub });
     cookieStore.set(SESSION_COOKIE, anonymousToken, sessionCookieOptions);
   } else {
     cookieStore.delete(SESSION_COOKIE);

@@ -9,13 +9,13 @@ import {
 /**
  * Issues a signed session to every visitor before they've logged in.
  *
- * The session carries a server-generated `uid` — a stable, unguessable per-user
+ * The session carries a server-generated `sub` — a stable, unguessable per-user
  * identity distinct from the freely-chosen player `username`. Because it's a
- * signed JWT, the client can't set or alter its own uid the way it could with a
+ * signed JWT, the client can't set or alter its own id the way it could with a
  * plain cookie. Server code keys per-user external resources (the Composio /
  * Google connection, and anything we add later) on this id, so impersonating a
  * player name does not grant access to another person's connected accounts.
- * Logging in later adds `username` to this same session, keeping the uid.
+ * Logging in later adds `username` to this same session, keeping the `sub`.
  */
 export async function proxy(request: NextRequest) {
   if (request.cookies.has(SESSION_COOKIE)) {
