@@ -62,7 +62,13 @@ export async function verifySessionToken(
 ): Promise<Session | null> {
   try {
     const { payload } = await jwtVerify(token, secret);
-    if (payload.ver !== SESSION_VERSION || !payload.sub) {
+    if (payload.ver !== SESSION_VERSION) {
+      console.info(
+        `Session version mismatch (found=${payload.ver ?? "none"}, expected=${SESSION_VERSION}, sub=${payload.sub ?? "none"}, username=${payload.username ?? "none"}); treating as outdated`,
+      );
+      return null;
+    }
+    if (!payload.sub) {
       return null;
     }
     return {
