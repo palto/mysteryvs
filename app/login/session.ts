@@ -68,10 +68,10 @@ export async function verifySessionToken(
       );
       return null;
     }
+    // `sub` is always set alongside `ver` at mint time, so a current-version,
+    // validly-signed token can't reach here without one. This guard exists to
+    // narrow `string | undefined` to `string` (and backstop a future bug).
     if (!payload.sub) {
-      console.info(
-        `Session missing sub (ver=${payload.ver ?? "none"}, username=${payload.username ?? "none"}); treating as outdated`,
-      );
       return null;
     }
     return {
