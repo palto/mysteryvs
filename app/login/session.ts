@@ -8,6 +8,15 @@ export const SESSION_COOKIE = "session";
 /** Session lifetime in seconds (1 year). */
 export const SESSION_MAX_AGE_S = 60 * 60 * 24 * 365;
 
+/**
+ * Schema version of the session payload, carried in a private `ver` claim.
+ * Bump this whenever the payload shape changes incompatibly: tokens minted by
+ * an older version fail verification and are reissued, so a deploy doesn't have
+ * to understand every historical layout. Tokens from before this claim existed
+ * have no `ver` and are likewise treated as outdated.
+ */
+export const SESSION_VERSION = 1;
+
 export const sessionCookieOptions = {
   httpOnly: true,
   secure: process.env.NODE_ENV === "production",
@@ -35,7 +44,7 @@ export interface Session {
 export async function createSessionToken(
   session: Partial<Session> = {},
 ): Promise<string> {
-  return new SignJWT({ username: session.username })
+  return new SignJWT({ ver: SESSION_VERSION, username: session.username })
     .setProtectedHeader({ alg: "HS256" })
     .setSubject(session.sub ?? crypto.randomUUID())
     .setIssuedAt()
@@ -44,15 +53,16 @@ export async function createSessionToken(
 }
 
 /**
- * Verifies a session token's signature and expiry. Returns the decoded session
- * or `null` if the token is missing, tampered with, or expired.
+ * Verifies a session token's signature, expiry, and schema version. Returns the
+ * decoded session, or `null` if the token is missing, tampered with, expired,
+ * or minted by an incompatible `SESSION_VERSION`.
  */
 export async function verifySessionToken(
   token: string,
 ): Promise<Session | null> {
   try {
     const { payload } = await jwtVerify(token, secret);
-    if (!payload.sub) {
+    if (payload.ver !== SESSION_VERSION || !payload.sub) {
       return null;
     }
     return {

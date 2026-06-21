@@ -4,6 +4,7 @@ import {
   SESSION_COOKIE,
   createSessionToken,
   sessionCookieOptions,
+  verifySessionToken,
 } from "@/app/login/session";
 
 /**
@@ -16,15 +17,20 @@ import {
  * Google connection, and anything we add later) on this id, so impersonating a
  * player name does not grant access to another person's connected accounts.
  * Logging in later adds `username` to this same session, keeping the `sub`.
+ *
+ * A cookie that's present but no longer valid — tampered, expired, or from an
+ * outdated `SESSION_VERSION` — is reissued just like a missing one, so a stale
+ * cookie can't strand a visitor without a usable session.
  */
 export async function proxy(request: NextRequest) {
-  if (request.cookies.has(SESSION_COOKIE)) {
+  const token = request.cookies.get(SESSION_COOKIE)?.value;
+  if (token && (await verifySessionToken(token))) {
     return NextResponse.next();
   }
 
   const response = NextResponse.next();
-  const token = await createSessionToken();
-  response.cookies.set(SESSION_COOKIE, token, sessionCookieOptions);
+  const freshToken = await createSessionToken();
+  response.cookies.set(SESSION_COOKIE, freshToken, sessionCookieOptions);
   return response;
 }
 
