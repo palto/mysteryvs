@@ -18,7 +18,7 @@ export const sessionCookieOptions = {
 
 export interface Session {
   /**
-   * Stable, unguessable user id. Stored in the JWT's registered `sub`
+   * Stable, server-issued user id. Stored in the JWT's registered `sub`
    * (subject) claim — the standard place for the principal a token identifies.
    */
   sub: string;
