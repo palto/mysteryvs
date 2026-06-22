@@ -1,6 +1,5 @@
 import { getParticipants } from "@/app/login/getParticipants";
 import { AdminPage } from "@/app/admin/AdminPage";
-import { TopNav } from "@/app/TopNav";
 import { liveblocks } from "@/app/liveblocks/liveblocks";
 import { room } from "@/app/constants";
 
@@ -12,14 +11,11 @@ export default async function AdminPageServer() {
     liveblocks.getStorageDocument(room, "json"),
   ]);
   return (
-    <>
-      <TopNav />
-      <AdminPage
-        participants={participants}
-        name={storage.name}
-        description={storage.description ?? ""}
-        roundLength={storage.roundLength ?? 20 * 60 * 1000}
-      />
-    </>
+    <AdminPage
+      participants={participants}
+      name={storage.name}
+      description={storage.description ?? ""}
+      roundLength={storage.roundLength ?? 20 * 60 * 1000}
+    />
   );
 }
