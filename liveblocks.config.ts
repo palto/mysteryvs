@@ -38,7 +38,9 @@ declare global {
       hostRounds: LiveMap<string, HostRound>;
     };
 
-    // Custom user info set when authenticating with a secret key
+    // Custom user info set when authenticating with a secret key.
+    // `id` is the stable, server-issued per-user id (the session `sub`);
+    // `info.name` is the freely-chosen display username.
     UserMeta: {
       id: string;
       info: {
