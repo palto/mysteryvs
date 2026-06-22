@@ -8,6 +8,15 @@ export const SESSION_COOKIE = "session";
 /** Session lifetime in seconds (1 year). */
 export const SESSION_MAX_AGE_S = 60 * 60 * 24 * 365;
 
+/**
+ * Schema version of the session payload, carried in a private `ver` claim.
+ * Bump this whenever the payload shape changes incompatibly: tokens minted by
+ * an older version fail verification and are reissued, so a deploy doesn't have
+ * to understand every historical layout. Tokens from before this claim existed
+ * have no `ver` and are likewise treated as outdated.
+ */
+export const SESSION_VERSION = 1;
+
 export const sessionCookieOptions = {
   httpOnly: true,
   secure: process.env.NODE_ENV === "production",
@@ -17,12 +26,17 @@ export const sessionCookieOptions = {
 };
 
 export interface Session {
-  uid: string;
+  /**
+   * Stable, server-issued user id. Stored in the JWT's registered `sub`
+   * (subject) claim — the standard place for the principal a token identifies.
+   */
+  sub: string;
+  /** Freely-chosen player name. A custom claim, set on login. */
   username?: string;
 }
 
 /**
- * Creates a signed (HS256) JWT for the given session. A fresh `uid` is
+ * Creates a signed (HS256) JWT for the given session. A fresh `sub` is
  * generated when one isn't supplied, so callers never have to mint it
  * themselves. The payload is base64url-encoded and therefore readable, but the
  * HMAC signature ensures it cannot be altered without the server secret.
@@ -30,28 +44,45 @@ export interface Session {
 export async function createSessionToken(
   session: Partial<Session> = {},
 ): Promise<string> {
-  return new SignJWT({ ...session, uid: session.uid ?? crypto.randomUUID() })
+  return new SignJWT({ ver: SESSION_VERSION, username: session.username })
     .setProtectedHeader({ alg: "HS256" })
+    .setSubject(session.sub ?? crypto.randomUUID())
     .setIssuedAt()
     .setExpirationTime(`${SESSION_MAX_AGE_S}s`)
     .sign(secret);
 }
 
 /**
- * Verifies a session token's signature and expiry. Returns the decoded session
- * or `null` if the token is missing, tampered with, or expired.
+ * Verifies a session token's signature, expiry, and schema version. Returns the
+ * decoded session, or `null` if the token is missing, tampered with, expired,
+ * or minted by an incompatible `SESSION_VERSION`.
  */
 export async function verifySessionToken(
   token: string,
 ): Promise<Session | null> {
   try {
     const { payload } = await jwtVerify(token, secret);
-    return payload as unknown as Session;
+    if (payload.ver !== SESSION_VERSION) {
+      console.info(
+        `Session version mismatch (found=${payload.ver ?? "none"}, expected=${SESSION_VERSION}, sub=${payload.sub ?? "none"}, username=${payload.username ?? "none"}); treating as outdated`,
+      );
+      return null;
+    }
+    // `sub` is always set alongside `ver` at mint time, so a current-version,
+    // validly-signed token can't reach here without one. This guard exists to
+    // narrow `string | undefined` to `string` (and backstop a future bug).
+    if (!payload.sub) {
+      return null;
+    }
+    return {
+      sub: payload.sub,
+      username: payload.username as string | undefined,
+    };
   } catch (err) {
     if (err instanceof errors.JWTExpired) {
-      const { uid, username, exp } = err.payload;
+      const { sub, username, exp } = err.payload;
       console.info(
-        `Session expired (uid=${uid}, username=${username ?? "none"}, expiredAt=${exp ? new Date(exp * 1000).toISOString() : "unknown"})`,
+        `Session expired (sub=${sub}, username=${username ?? "none"}, expiredAt=${exp ? new Date(exp * 1000).toISOString() : "unknown"})`,
       );
       return null;
     }

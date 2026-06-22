@@ -1,13 +1,5 @@
-import { cookies } from "next/headers";
-
-import { SESSION_COOKIE, verifySessionToken } from "@/app/login/session";
+import { getSession } from "@/app/login/getSession";
 
 export async function getUsername(): Promise<string | undefined> {
-  const cookieStore = await cookies();
-  const token = cookieStore.get(SESSION_COOKIE)?.value;
-  if (!token) {
-    return undefined;
-  }
-  const session = await verifySessionToken(token);
-  return session?.username;
+  return (await getSession())?.username;
 }
