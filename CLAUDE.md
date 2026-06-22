@@ -155,7 +155,7 @@ components/
 
 ### Tech Stack
 
-- **Next.js 15** with App Router (React 19)
+- **Next.js 16** with App Router (React 19)
 - **TypeScript** with strict mode enabled
 - **Liveblocks** for real-time state synchronization (incl. `@liveblocks/react-blocknote` + **BlockNote** for rich-text setup instructions)
 - **Vercel AI SDK** (`ai`, `@ai-sdk/react`, `@ai-sdk/mcp`) + **Composio** for the AI assistant
