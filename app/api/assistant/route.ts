@@ -68,6 +68,10 @@ Be concise and friendly.`,
     agent,
     uiMessages: messages,
     sendReasoning: true,
+    // Surface token usage to the client so the chat can show a context-window
+    // meter. The `finish` part carries the cumulative usage for the turn.
+    messageMetadata: ({ part }) =>
+      part.type === "finish" ? { totalUsage: part.totalUsage } : undefined,
     onFinish: async () => {
       await mcpClient.close();
     },
