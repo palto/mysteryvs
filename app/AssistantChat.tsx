@@ -367,7 +367,9 @@ export function AssistantChat({ className }: AssistantChatProps) {
                 <PromptInputSelectTrigger>
                   <PromptInputSelectValue />
                 </PromptInputSelectTrigger>
-                <PromptInputSelectContent>
+                {/* z-50 default sits below the assistant panel's z-[60]
+                (AssistantFAB.tsx); bump above it so the dropdown is visible. */}
+                <PromptInputSelectContent className="z-[70]">
                   {ASSISTANT_MODELS.map((m) => (
                     <PromptInputSelectItem key={m.id} value={m.id}>
                       {m.label}
