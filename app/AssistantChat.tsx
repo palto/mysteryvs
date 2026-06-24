@@ -32,12 +32,25 @@ import {
   PromptInputSubmit,
   PromptInputTextarea,
 } from "@/components/ai-elements/prompt-input";
+import {
+  Context,
+  ContextCacheUsage,
+  ContextContent,
+  ContextContentBody,
+  ContextContentFooter,
+  ContextContentHeader,
+  ContextInputUsage,
+  ContextOutputUsage,
+  ContextReasoningUsage,
+  ContextTrigger,
+  type ContextPricing,
+} from "@/components/ai-elements/context";
 import { Spinner } from "@/components/ui/spinner";
 import { Button } from "@/components/ui/button";
 import * as DialogPrimitive from "@radix-ui/react-dialog";
 import { useChat } from "@ai-sdk/react";
 import { DefaultChatTransport, isToolUIPart } from "ai";
-import type { UIMessage } from "ai";
+import type { LanguageModelUsage, UIMessage } from "ai";
 import {
   BotIcon,
   CheckIcon,
@@ -62,14 +75,39 @@ const SUGGESTIONS = [
 
 const STORAGE_KEY = "assistant-chat";
 
-function loadMessages(): UIMessage[] {
+// Context window of the model used in app/api/assistant/route.ts; drives the
+// usage meter. Pricing for cost is supplied per-turn via message metadata.
+const MODEL_CONTEXT_WINDOW = 200_000;
+
+// Token usage and pricing attached to assistant messages via the server's
+// messageMetadata. Pricing comes from the AI Gateway model metadata.
+type AssistantMetadata = {
+  totalUsage?: LanguageModelUsage;
+  pricing?: ContextPricing;
+};
+type AssistantUIMessage = UIMessage<AssistantMetadata>;
+
+function loadMessages(): AssistantUIMessage[] {
   if (typeof window === "undefined") return [];
   try {
     const raw = window.sessionStorage.getItem(STORAGE_KEY);
-    return raw ? (JSON.parse(raw) as UIMessage[]) : [];
+    return raw ? (JSON.parse(raw) as AssistantUIMessage[]) : [];
   } catch {
     return [];
   }
+}
+
+// The most recent turn's usage metadata. The model's input tokens already
+// cover the whole prior conversation, so input + output approximates how full
+// the context window is right now.
+function latestMetadata(
+  messages: AssistantUIMessage[],
+): AssistantMetadata | undefined {
+  for (let i = messages.length - 1; i >= 0; i--) {
+    const metadata = messages[i].metadata;
+    if (metadata?.totalUsage) return metadata;
+  }
+  return undefined;
 }
 
 function messageText(message: UIMessage): string {
@@ -80,7 +118,7 @@ function messageText(message: UIMessage): string {
 }
 
 export function AssistantChat({ className }: AssistantChatProps) {
-  const [initialMessages] = useState<UIMessage[]>(loadMessages);
+  const [initialMessages] = useState<AssistantUIMessage[]>(loadMessages);
   const {
     messages,
     setMessages,
@@ -89,10 +127,13 @@ export function AssistantChat({ className }: AssistantChatProps) {
     stop,
     error,
     regenerate,
-  } = useChat({
+  } = useChat<AssistantUIMessage>({
     messages: initialMessages,
     transport: new DefaultChatTransport({ api: "/api/assistant" }),
   });
+
+  const meta = latestMetadata(messages);
+  const usage = meta?.totalUsage;
 
   // Persist the conversation so it survives reloads/navigation within the tab.
   // The AI SDK appends/updates `messages` while streaming, so this also
@@ -286,7 +327,30 @@ export function AssistantChat({ className }: AssistantChatProps) {
         >
           <PromptInputTextarea placeholder="Ask me to set up the tournament…" />
           <PromptInputFooter>
-            <div />
+            {usage ? (
+              <Context
+                maxTokens={MODEL_CONTEXT_WINDOW}
+                usedTokens={
+                  (usage.inputTokens ?? 0) + (usage.outputTokens ?? 0)
+                }
+                usage={usage}
+                pricing={meta?.pricing}
+              >
+                <ContextTrigger />
+                <ContextContent>
+                  <ContextContentHeader />
+                  <ContextContentBody>
+                    <ContextInputUsage />
+                    <ContextOutputUsage />
+                    <ContextReasoningUsage />
+                    <ContextCacheUsage />
+                  </ContextContentBody>
+                  <ContextContentFooter />
+                </ContextContent>
+              </Context>
+            ) : (
+              <div />
+            )}
             <PromptInputSubmit status={status} onStop={stop} />
           </PromptInputFooter>
         </PromptInput>
