@@ -2,15 +2,12 @@ import { ToolLoopAgent, createAgentUIStreamResponse, gateway } from "ai";
 import { createMCPClient } from "@ai-sdk/mcp";
 import { getVercelOidcToken } from "@vercel/oidc";
 import { getUserId } from "@/app/userId";
+import { resolveModelId } from "@/app/assistantModels";
 import { Composio } from "@composio/core";
 import { VercelProvider } from "@composio/vercel";
 
 export const dynamic = "force-dynamic";
 export const maxDuration = 60;
-
-// The AI Gateway model id. Used both to run the agent and to look up the
-// model's pricing from the gateway (so cost is authoritative and self-updating).
-const MODEL = "anthropic/claude-haiku-4.5";
 
 // Per-token USD pricing, sent to the client so the chat can show cost.
 export type ModelPricing = {
@@ -20,17 +17,21 @@ export type ModelPricing = {
   cacheCreationInputTokens?: number;
 };
 
-// The gateway model list rarely changes; cache it across warm invocations.
-let pricingCache: { at: number; pricing?: ModelPricing } | undefined;
+// The gateway model list rarely changes; cache it per model across warm
+// invocations so switching models returns the right pricing, not a stale entry.
+const pricingCache = new Map<string, { at: number; pricing?: ModelPricing }>();
 const PRICING_TTL_MS = 60 * 60 * 1000;
 
-async function getModelPricing(): Promise<ModelPricing | undefined> {
-  if (pricingCache && Date.now() - pricingCache.at < PRICING_TTL_MS) {
-    return pricingCache.pricing;
+async function getModelPricing(
+  modelId: string,
+): Promise<ModelPricing | undefined> {
+  const cached = pricingCache.get(modelId);
+  if (cached && Date.now() - cached.at < PRICING_TTL_MS) {
+    return cached.pricing;
   }
   try {
     const { models } = await gateway.getAvailableModels();
-    const p = models.find((m) => m.id === MODEL)?.pricing;
+    const p = models.find((m) => m.id === modelId)?.pricing;
     const pricing = p
       ? {
           input: Number(p.input),
@@ -45,12 +46,12 @@ async function getModelPricing(): Promise<ModelPricing | undefined> {
               : undefined,
         }
       : undefined;
-    pricingCache = { at: Date.now(), pricing };
+    pricingCache.set(modelId, { at: Date.now(), pricing });
     return pricing;
   } catch (error) {
     console.error("[assistant] failed to fetch gateway pricing:", error);
     // Keep serving the chat without cost rather than failing the request.
-    return pricingCache?.pricing;
+    return cached?.pricing;
   }
 }
 
@@ -59,7 +60,8 @@ export async function POST(req: Request) {
     apiKey: process.env.COMPOSIO_API_KEY!,
     provider: new VercelProvider(),
   });
-  const { messages } = await req.json();
+  const { messages, model } = await req.json();
+  const modelId = resolveModelId(model);
 
   const origin = new URL(req.url).origin;
   const oidcToken = await getVercelOidcToken();
@@ -90,10 +92,10 @@ export async function POST(req: Request) {
 
   const tools = { ...mcpTools, ...sheetsTools };
 
-  const pricing = await getModelPricing();
+  const pricing = await getModelPricing(modelId);
 
   const agent = new ToolLoopAgent({
-    model: MODEL,
+    model: modelId,
     instructions: `\
 You are a helpful assistant for setting up mystery game tournament rounds.
 You can add/remove/reorder participants, set the tournament name and description, and configure the round length.

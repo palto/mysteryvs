@@ -33,6 +33,17 @@ import {
   PromptInputTextarea,
 } from "@/components/ai-elements/prompt-input";
 import {
+  ModelSelector,
+  ModelSelectorContent,
+  ModelSelectorEmpty,
+  ModelSelectorInput,
+  ModelSelectorItem,
+  ModelSelectorList,
+  ModelSelectorLogo,
+  ModelSelectorName,
+  ModelSelectorTrigger,
+} from "@/components/ai-elements/model-selector";
+import {
   Context,
   ContextCacheUsage,
   ContextContent,
@@ -47,6 +58,11 @@ import {
 } from "@/components/ai-elements/context";
 import { Spinner } from "@/components/ui/spinner";
 import { Button } from "@/components/ui/button";
+import {
+  ASSISTANT_MODELS,
+  DEFAULT_MODEL_ID,
+  getAssistantModel,
+} from "@/app/assistantModels";
 import * as DialogPrimitive from "@radix-ui/react-dialog";
 import { useChat } from "@ai-sdk/react";
 import { DefaultChatTransport, isToolUIPart } from "ai";
@@ -54,6 +70,7 @@ import type { LanguageModelUsage, UIMessage } from "ai";
 import {
   BotIcon,
   CheckIcon,
+  ChevronsUpDownIcon,
   CopyIcon,
   RefreshCcwIcon,
   Trash2Icon,
@@ -74,10 +91,7 @@ const SUGGESTIONS = [
 ];
 
 const STORAGE_KEY = "assistant-chat";
-
-// Context window of the model used in app/api/assistant/route.ts; drives the
-// usage meter. Pricing for cost is supplied per-turn via message metadata.
-const MODEL_CONTEXT_WINDOW = 200_000;
+const MODEL_STORAGE_KEY = "assistant-model";
 
 // Token usage and pricing attached to assistant messages via the server's
 // messageMetadata. Pricing comes from the AI Gateway model metadata.
@@ -94,6 +108,18 @@ function loadMessages(): AssistantUIMessage[] {
     return raw ? (JSON.parse(raw) as AssistantUIMessage[]) : [];
   } catch {
     return [];
+  }
+}
+
+function loadModel(): string {
+  if (typeof window === "undefined") return DEFAULT_MODEL_ID;
+  try {
+    const raw = window.sessionStorage.getItem(MODEL_STORAGE_KEY);
+    // Validate against the current list — getAssistantModel falls back to the
+    // default if the stored id is unknown.
+    return raw ? getAssistantModel(raw).id : DEFAULT_MODEL_ID;
+  } catch {
+    return DEFAULT_MODEL_ID;
   }
 }
 
@@ -119,6 +145,8 @@ function messageText(message: UIMessage): string {
 
 export function AssistantChat({ className }: AssistantChatProps) {
   const [initialMessages] = useState<AssistantUIMessage[]>(loadMessages);
+  const [model, setModel] = useState<string>(loadModel);
+  const [modelPickerOpen, setModelPickerOpen] = useState(false);
   const {
     messages,
     setMessages,
@@ -134,6 +162,8 @@ export function AssistantChat({ className }: AssistantChatProps) {
 
   const meta = latestMetadata(messages);
   const usage = meta?.totalUsage;
+  const selectedModel = getAssistantModel(model);
+  const contextWindow = selectedModel.contextWindow;
 
   // Persist the conversation so it survives reloads/navigation within the tab.
   // The AI SDK appends/updates `messages` while streaming, so this also
@@ -150,6 +180,16 @@ export function AssistantChat({ className }: AssistantChatProps) {
       // ignore quota / serialization errors
     }
   }, [messages]);
+
+  // Remember the chosen model for the tab, mirroring the chat-history persistence.
+  useEffect(() => {
+    if (typeof window === "undefined") return;
+    try {
+      window.sessionStorage.setItem(MODEL_STORAGE_KEY, model);
+    } catch {
+      // ignore quota errors
+    }
+  }, [model]);
 
   function handleClear() {
     setMessages([]);
@@ -203,7 +243,9 @@ export function AssistantChat({ className }: AssistantChatProps) {
                   <Suggestion
                     key={suggestion}
                     suggestion={suggestion}
-                    onClick={(text) => sendMessage({ text })}
+                    onClick={(text) =>
+                      sendMessage({ text }, { body: { model } })
+                    }
                   />
                 ))}
               </Suggestions>
@@ -282,7 +324,9 @@ export function AssistantChat({ className }: AssistantChatProps) {
                   {message.role === "assistant" && !isStreaming && (
                     <AssistantMessageActions
                       text={messageText(message)}
-                      onRegenerate={() => regenerate({ messageId: message.id })}
+                      onRegenerate={() =>
+                        regenerate({ messageId: message.id, body: { model } })
+                      }
                     />
                   )}
                 </MessageContent>
@@ -307,7 +351,7 @@ export function AssistantChat({ className }: AssistantChatProps) {
               <button
                 type="button"
                 className="inline-flex items-center gap-1.5 rounded-md border border-destructive/40 px-3 py-1 font-medium hover:bg-destructive/20"
-                onClick={() => regenerate()}
+                onClick={() => regenerate({ body: { model } })}
               >
                 <RefreshCcwIcon className="size-3.5" />
                 Retry
@@ -322,35 +366,86 @@ export function AssistantChat({ className }: AssistantChatProps) {
         <PromptInput
           onSubmit={({ text }) => {
             if (!text.trim()) return;
-            sendMessage({ text });
+            sendMessage({ text }, { body: { model } });
           }}
         >
           <PromptInputTextarea placeholder="Ask me to set up the tournament…" />
           <PromptInputFooter>
-            {usage ? (
-              <Context
-                maxTokens={MODEL_CONTEXT_WINDOW}
-                usedTokens={
-                  (usage.inputTokens ?? 0) + (usage.outputTokens ?? 0)
-                }
-                usage={usage}
-                pricing={meta?.pricing}
+            <div className="flex items-center gap-1">
+              <ModelSelector
+                open={modelPickerOpen}
+                onOpenChange={setModelPickerOpen}
               >
-                <ContextTrigger />
-                <ContextContent>
-                  <ContextContentHeader />
-                  <ContextContentBody>
-                    <ContextInputUsage />
-                    <ContextOutputUsage />
-                    <ContextReasoningUsage />
-                    <ContextCacheUsage />
-                  </ContextContentBody>
-                  <ContextContentFooter />
-                </ContextContent>
-              </Context>
-            ) : (
-              <div />
-            )}
+                <ModelSelectorTrigger asChild>
+                  <Button
+                    type="button"
+                    variant="ghost"
+                    size="sm"
+                    className="gap-1.5 px-2 font-medium text-muted-foreground"
+                  >
+                    <ModelSelectorLogo provider={selectedModel.provider} />
+                    {selectedModel.label}
+                    <ChevronsUpDownIcon className="size-3.5 opacity-50" />
+                  </Button>
+                </ModelSelectorTrigger>
+                {/* DialogContent defaults to z-50, below the assistant panel's
+                z-[60] (AssistantFAB.tsx); bump above it so the palette shows. */}
+                <ModelSelectorContent
+                  className="z-[70] max-w-sm"
+                  title="Select a model"
+                >
+                  <ModelSelectorInput placeholder="Search models…" />
+                  <ModelSelectorList>
+                    <ModelSelectorEmpty>No models found.</ModelSelectorEmpty>
+                    {ASSISTANT_MODELS.map((m) => (
+                      <ModelSelectorItem
+                        key={m.id}
+                        value={`${m.label} ${m.description}`}
+                        onSelect={() => {
+                          setModel(m.id);
+                          setModelPickerOpen(false);
+                        }}
+                      >
+                        <ModelSelectorLogo provider={m.provider} />
+                        <div className="flex flex-col">
+                          <ModelSelectorName>{m.label}</ModelSelectorName>
+                          <span className="text-xs text-muted-foreground">
+                            {m.description}
+                          </span>
+                        </div>
+                        {model === m.id ? (
+                          <CheckIcon className="ml-auto size-4" />
+                        ) : (
+                          <div className="ml-auto size-4" />
+                        )}
+                      </ModelSelectorItem>
+                    ))}
+                  </ModelSelectorList>
+                </ModelSelectorContent>
+              </ModelSelector>
+              {usage ? (
+                <Context
+                  maxTokens={contextWindow}
+                  usedTokens={
+                    (usage.inputTokens ?? 0) + (usage.outputTokens ?? 0)
+                  }
+                  usage={usage}
+                  pricing={meta?.pricing}
+                >
+                  <ContextTrigger />
+                  <ContextContent>
+                    <ContextContentHeader />
+                    <ContextContentBody>
+                      <ContextInputUsage />
+                      <ContextOutputUsage />
+                      <ContextReasoningUsage />
+                      <ContextCacheUsage />
+                    </ContextContentBody>
+                    <ContextContentFooter />
+                  </ContextContent>
+                </Context>
+              ) : null}
+            </div>
             <PromptInputSubmit status={status} onStop={stop} />
           </PromptInputFooter>
         </PromptInput>
