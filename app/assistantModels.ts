@@ -6,8 +6,12 @@
 export type AssistantModel = {
   /** AI Gateway model id, e.g. "anthropic/claude-haiku-4.5". */
   id: string;
-  /** Label shown in the selector dropdown. */
+  /** Label shown in the selector. */
   label: string;
+  /** Short sublabel describing the model's tradeoff. */
+  description: string;
+  /** Provider slug for the ai-elements model-selector logo (models.dev). */
+  provider: string;
   /** Context window in tokens; drives the chat's usage meter. */
   contextWindow: number;
 };
@@ -16,16 +20,22 @@ export const ASSISTANT_MODELS: AssistantModel[] = [
   {
     id: "anthropic/claude-haiku-4.5",
     label: "Claude Haiku 4.5",
+    description: "Fast and affordable",
+    provider: "anthropic",
     contextWindow: 200_000,
   },
   {
     id: "anthropic/claude-sonnet-4.6",
     label: "Claude Sonnet 4.6",
+    description: "Balanced speed and capability",
+    provider: "anthropic",
     contextWindow: 200_000,
   },
   {
     id: "anthropic/claude-opus-4.8",
     label: "Claude Opus 4.8",
+    description: "Most capable",
+    provider: "anthropic",
     contextWindow: 200_000,
   },
 ];

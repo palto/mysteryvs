@@ -29,14 +29,20 @@ import {
 import {
   PromptInput,
   PromptInputFooter,
-  PromptInputSelect,
-  PromptInputSelectContent,
-  PromptInputSelectItem,
-  PromptInputSelectTrigger,
-  PromptInputSelectValue,
   PromptInputSubmit,
   PromptInputTextarea,
 } from "@/components/ai-elements/prompt-input";
+import {
+  ModelSelector,
+  ModelSelectorContent,
+  ModelSelectorEmpty,
+  ModelSelectorInput,
+  ModelSelectorItem,
+  ModelSelectorList,
+  ModelSelectorLogo,
+  ModelSelectorName,
+  ModelSelectorTrigger,
+} from "@/components/ai-elements/model-selector";
 import {
   Context,
   ContextCacheUsage,
@@ -64,6 +70,7 @@ import type { LanguageModelUsage, UIMessage } from "ai";
 import {
   BotIcon,
   CheckIcon,
+  ChevronsUpDownIcon,
   CopyIcon,
   RefreshCcwIcon,
   Trash2Icon,
@@ -139,6 +146,7 @@ function messageText(message: UIMessage): string {
 export function AssistantChat({ className }: AssistantChatProps) {
   const [initialMessages] = useState<AssistantUIMessage[]>(loadMessages);
   const [model, setModel] = useState<string>(loadModel);
+  const [modelPickerOpen, setModelPickerOpen] = useState(false);
   const {
     messages,
     setMessages,
@@ -154,7 +162,8 @@ export function AssistantChat({ className }: AssistantChatProps) {
 
   const meta = latestMetadata(messages);
   const usage = meta?.totalUsage;
-  const contextWindow = getAssistantModel(model).contextWindow;
+  const selectedModel = getAssistantModel(model);
+  const contextWindow = selectedModel.contextWindow;
 
   // Persist the conversation so it survives reloads/navigation within the tab.
   // The AI SDK appends/updates `messages` while streaming, so this also
@@ -363,20 +372,57 @@ export function AssistantChat({ className }: AssistantChatProps) {
           <PromptInputTextarea placeholder="Ask me to set up the tournament…" />
           <PromptInputFooter>
             <div className="flex items-center gap-1">
-              <PromptInputSelect value={model} onValueChange={setModel}>
-                <PromptInputSelectTrigger>
-                  <PromptInputSelectValue />
-                </PromptInputSelectTrigger>
-                {/* z-50 default sits below the assistant panel's z-[60]
-                (AssistantFAB.tsx); bump above it so the dropdown is visible. */}
-                <PromptInputSelectContent className="z-[70]">
-                  {ASSISTANT_MODELS.map((m) => (
-                    <PromptInputSelectItem key={m.id} value={m.id}>
-                      {m.label}
-                    </PromptInputSelectItem>
-                  ))}
-                </PromptInputSelectContent>
-              </PromptInputSelect>
+              <ModelSelector
+                open={modelPickerOpen}
+                onOpenChange={setModelPickerOpen}
+              >
+                <ModelSelectorTrigger asChild>
+                  <Button
+                    type="button"
+                    variant="ghost"
+                    size="sm"
+                    className="gap-1.5 px-2 font-medium text-muted-foreground"
+                  >
+                    <ModelSelectorLogo provider={selectedModel.provider} />
+                    {selectedModel.label}
+                    <ChevronsUpDownIcon className="size-3.5 opacity-50" />
+                  </Button>
+                </ModelSelectorTrigger>
+                {/* DialogContent defaults to z-50, below the assistant panel's
+                z-[60] (AssistantFAB.tsx); bump above it so the palette shows. */}
+                <ModelSelectorContent
+                  className="z-[70] max-w-sm"
+                  title="Select a model"
+                >
+                  <ModelSelectorInput placeholder="Search models…" />
+                  <ModelSelectorList>
+                    <ModelSelectorEmpty>No models found.</ModelSelectorEmpty>
+                    {ASSISTANT_MODELS.map((m) => (
+                      <ModelSelectorItem
+                        key={m.id}
+                        value={`${m.label} ${m.description}`}
+                        onSelect={() => {
+                          setModel(m.id);
+                          setModelPickerOpen(false);
+                        }}
+                      >
+                        <ModelSelectorLogo provider={m.provider} />
+                        <div className="flex flex-col">
+                          <ModelSelectorName>{m.label}</ModelSelectorName>
+                          <span className="text-xs text-muted-foreground">
+                            {m.description}
+                          </span>
+                        </div>
+                        {model === m.id ? (
+                          <CheckIcon className="ml-auto size-4" />
+                        ) : (
+                          <div className="ml-auto size-4" />
+                        )}
+                      </ModelSelectorItem>
+                    ))}
+                  </ModelSelectorList>
+                </ModelSelectorContent>
+              </ModelSelector>
               {usage ? (
                 <Context
                   maxTokens={contextWindow}
