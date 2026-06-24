@@ -117,7 +117,7 @@ Be concise and friendly.`,
   return createAgentUIStreamResponse({
     agent,
     uiMessages: messages,
-    sendReasoning: false,
+    sendReasoning: true,
     // Surface token usage and pricing to the client so the chat can show a
     // context-window meter and cost. The `finish` part carries the cumulative
     // usage for the turn.
