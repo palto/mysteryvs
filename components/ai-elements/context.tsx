@@ -10,7 +10,6 @@ import { Progress } from "@/components/ui/progress";
 import { cn } from "@/lib/utils";
 import type { LanguageModelUsage } from "ai";
 import { type ComponentProps, createContext, useContext } from "react";
-import { getUsage } from "tokenlens";
 
 const PERCENT_MAX = 100;
 const ICON_RADIUS = 10;
@@ -18,13 +17,35 @@ const ICON_VIEWBOX = 24;
 const ICON_CENTER = 12;
 const ICON_STROKE_WIDTH = 2;
 
-type ModelId = string;
+// Per-token USD pricing, e.g. from the Vercel AI Gateway's model metadata.
+export type ContextPricing = {
+  input: number;
+  output: number;
+  cachedInputTokens?: number;
+  cacheCreationInputTokens?: number;
+};
 
 type ContextSchema = {
   usedTokens: number;
   maxTokens: number;
   usage?: LanguageModelUsage;
-  modelId?: ModelId;
+  pricing?: ContextPricing;
+};
+
+// Cost of `tokens` at a per-token rate, or undefined when the rate is unknown.
+const costOf = (tokens: number, perToken: number | undefined) =>
+  perToken === undefined ? undefined : tokens * perToken;
+
+// Format a USD cost, keeping a couple of significant digits for sub-cent
+// amounts so cheap models don't all collapse to "$0.00".
+const formatCost = (usd: number) => {
+  if (usd > 0 && usd < 0.01) {
+    return `$${usd.toPrecision(2)}`;
+  }
+  return new Intl.NumberFormat("en-US", {
+    style: "currency",
+    currency: "USD",
+  }).format(usd);
 };
 
 const ContextContext = createContext<ContextSchema | null>(null);
@@ -45,7 +66,7 @@ export const Context = ({
   usedTokens,
   maxTokens,
   usage,
-  modelId,
+  pricing,
   ...props
 }: ContextProps) => (
   <ContextContext.Provider
@@ -53,7 +74,7 @@ export const Context = ({
       usedTokens,
       maxTokens,
       usage,
-      modelId,
+      pricing,
     }}
   >
     <HoverCard closeDelay={0} openDelay={0} {...props} />
@@ -195,23 +216,14 @@ export const ContextContentFooter = ({
   className,
   ...props
 }: ContextContentFooterProps) => {
-  const { modelId, usage } = useContextValue();
-  const costUSD = modelId
-    ? getUsage({
-        modelId,
-        usage: {
-          input: usage?.inputTokens ?? 0,
-          output: usage?.outputTokens ?? 0,
-        },
-      }).costUSD?.totalUSD
-    : undefined;
-  const totalCost =
-    costUSD === undefined
+  const { pricing, usage } = useContextValue();
+  const inputCost = costOf(usage?.inputTokens ?? 0, pricing?.input);
+  const outputCost = costOf(usage?.outputTokens ?? 0, pricing?.output);
+  const costUSD =
+    inputCost === undefined && outputCost === undefined
       ? undefined
-      : new Intl.NumberFormat("en-US", {
-          style: "currency",
-          currency: "USD",
-        }).format(costUSD);
+      : (inputCost ?? 0) + (outputCost ?? 0);
+  const totalCost = costUSD === undefined ? undefined : formatCost(costUSD);
 
   return (
     <div
@@ -238,7 +250,7 @@ export const ContextInputUsage = ({
   children,
   ...props
 }: ContextInputUsageProps) => {
-  const { usage, modelId } = useContextValue();
+  const { usage, pricing } = useContextValue();
   const inputTokens = usage?.inputTokens ?? 0;
 
   if (children) {
@@ -249,19 +261,9 @@ export const ContextInputUsage = ({
     return null;
   }
 
-  const inputCost = modelId
-    ? getUsage({
-        modelId,
-        usage: { input: inputTokens, output: 0 },
-      }).costUSD?.totalUSD
-    : undefined;
+  const inputCost = costOf(inputTokens, pricing?.input);
   const inputCostText =
-    inputCost === undefined
-      ? undefined
-      : new Intl.NumberFormat("en-US", {
-          style: "currency",
-          currency: "USD",
-        }).format(inputCost);
+    inputCost === undefined ? undefined : formatCost(inputCost);
 
   return (
     <div
@@ -281,7 +283,7 @@ export const ContextOutputUsage = ({
   children,
   ...props
 }: ContextOutputUsageProps) => {
-  const { usage, modelId } = useContextValue();
+  const { usage, pricing } = useContextValue();
   const outputTokens = usage?.outputTokens ?? 0;
 
   if (children) {
@@ -292,19 +294,9 @@ export const ContextOutputUsage = ({
     return null;
   }
 
-  const outputCost = modelId
-    ? getUsage({
-        modelId,
-        usage: { input: 0, output: outputTokens },
-      }).costUSD?.totalUSD
-    : undefined;
+  const outputCost = costOf(outputTokens, pricing?.output);
   const outputCostText =
-    outputCost === undefined
-      ? undefined
-      : new Intl.NumberFormat("en-US", {
-          style: "currency",
-          currency: "USD",
-        }).format(outputCost);
+    outputCost === undefined ? undefined : formatCost(outputCost);
 
   return (
     <div
@@ -324,7 +316,7 @@ export const ContextReasoningUsage = ({
   children,
   ...props
 }: ContextReasoningUsageProps) => {
-  const { usage, modelId } = useContextValue();
+  const { usage, pricing } = useContextValue();
   const reasoningTokens = usage?.reasoningTokens ?? 0;
 
   if (children) {
@@ -335,19 +327,10 @@ export const ContextReasoningUsage = ({
     return null;
   }
 
-  const reasoningCost = modelId
-    ? getUsage({
-        modelId,
-        usage: { reasoningTokens },
-      }).costUSD?.totalUSD
-    : undefined;
+  // Reasoning tokens are billed at the output rate.
+  const reasoningCost = costOf(reasoningTokens, pricing?.output);
   const reasoningCostText =
-    reasoningCost === undefined
-      ? undefined
-      : new Intl.NumberFormat("en-US", {
-          style: "currency",
-          currency: "USD",
-        }).format(reasoningCost);
+    reasoningCost === undefined ? undefined : formatCost(reasoningCost);
 
   return (
     <div
@@ -367,7 +350,7 @@ export const ContextCacheUsage = ({
   children,
   ...props
 }: ContextCacheUsageProps) => {
-  const { usage, modelId } = useContextValue();
+  const { usage, pricing } = useContextValue();
   const cacheTokens = usage?.cachedInputTokens ?? 0;
 
   if (children) {
@@ -378,19 +361,9 @@ export const ContextCacheUsage = ({
     return null;
   }
 
-  const cacheCost = modelId
-    ? getUsage({
-        modelId,
-        usage: { cacheReads: cacheTokens, input: 0, output: 0 },
-      }).costUSD?.totalUSD
-    : undefined;
+  const cacheCost = costOf(cacheTokens, pricing?.cachedInputTokens);
   const cacheCostText =
-    cacheCost === undefined
-      ? undefined
-      : new Intl.NumberFormat("en-US", {
-          style: "currency",
-          currency: "USD",
-        }).format(cacheCost);
+    cacheCost === undefined ? undefined : formatCost(cacheCost);
 
   return (
     <div

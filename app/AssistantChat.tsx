@@ -43,6 +43,7 @@ import {
   ContextOutputUsage,
   ContextReasoningUsage,
   ContextTrigger,
+  type ContextPricing,
 } from "@/components/ai-elements/context";
 import { Spinner } from "@/components/ui/spinner";
 import { Button } from "@/components/ui/button";
@@ -74,14 +75,16 @@ const SUGGESTIONS = [
 
 const STORAGE_KEY = "assistant-chat";
 
-// Keep in sync with the model used in app/api/assistant/route.ts. The context
-// window drives the usage meter; tokenlens doesn't yet know this model's
-// pricing, so the cost breakdown degrades gracefully to "—".
-const MODEL_ID = "anthropic/claude-haiku-4.5";
+// Context window of the model used in app/api/assistant/route.ts; drives the
+// usage meter. Pricing for cost is supplied per-turn via message metadata.
 const MODEL_CONTEXT_WINDOW = 200_000;
 
-// Token usage attached to assistant messages via the server's messageMetadata.
-type AssistantMetadata = { totalUsage?: LanguageModelUsage };
+// Token usage and pricing attached to assistant messages via the server's
+// messageMetadata. Pricing comes from the AI Gateway model metadata.
+type AssistantMetadata = {
+  totalUsage?: LanguageModelUsage;
+  pricing?: ContextPricing;
+};
 type AssistantUIMessage = UIMessage<AssistantMetadata>;
 
 function loadMessages(): AssistantUIMessage[] {
@@ -94,15 +97,15 @@ function loadMessages(): AssistantUIMessage[] {
   }
 }
 
-// The most recent turn's usage. The model's input tokens already cover the
-// whole prior conversation, so input + output approximates how full the
-// context window is right now.
-function latestUsage(
+// The most recent turn's usage metadata. The model's input tokens already
+// cover the whole prior conversation, so input + output approximates how full
+// the context window is right now.
+function latestMetadata(
   messages: AssistantUIMessage[],
-): LanguageModelUsage | undefined {
+): AssistantMetadata | undefined {
   for (let i = messages.length - 1; i >= 0; i--) {
-    const usage = messages[i].metadata?.totalUsage;
-    if (usage) return usage;
+    const metadata = messages[i].metadata;
+    if (metadata?.totalUsage) return metadata;
   }
   return undefined;
 }
@@ -129,7 +132,8 @@ export function AssistantChat({ className }: AssistantChatProps) {
     transport: new DefaultChatTransport({ api: "/api/assistant" }),
   });
 
-  const usage = latestUsage(messages);
+  const meta = latestMetadata(messages);
+  const usage = meta?.totalUsage;
 
   // Persist the conversation so it survives reloads/navigation within the tab.
   // The AI SDK appends/updates `messages` while streaming, so this also
@@ -330,7 +334,7 @@ export function AssistantChat({ className }: AssistantChatProps) {
                   (usage.inputTokens ?? 0) + (usage.outputTokens ?? 0)
                 }
                 usage={usage}
-                modelId={MODEL_ID}
+                pricing={meta?.pricing}
               >
                 <ContextTrigger />
                 <ContextContent>

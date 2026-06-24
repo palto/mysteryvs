@@ -1,4 +1,4 @@
-import { ToolLoopAgent, createAgentUIStreamResponse } from "ai";
+import { ToolLoopAgent, createAgentUIStreamResponse, gateway } from "ai";
 import { createMCPClient } from "@ai-sdk/mcp";
 import { getVercelOidcToken } from "@vercel/oidc";
 import { getUserId } from "@/app/userId";
@@ -7,6 +7,52 @@ import { VercelProvider } from "@composio/vercel";
 
 export const dynamic = "force-dynamic";
 export const maxDuration = 60;
+
+// The AI Gateway model id. Used both to run the agent and to look up the
+// model's pricing from the gateway (so cost is authoritative and self-updating).
+const MODEL = "anthropic/claude-haiku-4.5";
+
+// Per-token USD pricing, sent to the client so the chat can show cost.
+export type ModelPricing = {
+  input: number;
+  output: number;
+  cachedInputTokens?: number;
+  cacheCreationInputTokens?: number;
+};
+
+// The gateway model list rarely changes; cache it across warm invocations.
+let pricingCache: { at: number; pricing?: ModelPricing } | undefined;
+const PRICING_TTL_MS = 60 * 60 * 1000;
+
+async function getModelPricing(): Promise<ModelPricing | undefined> {
+  if (pricingCache && Date.now() - pricingCache.at < PRICING_TTL_MS) {
+    return pricingCache.pricing;
+  }
+  try {
+    const { models } = await gateway.getAvailableModels();
+    const p = models.find((m) => m.id === MODEL)?.pricing;
+    const pricing = p
+      ? {
+          input: Number(p.input),
+          output: Number(p.output),
+          cachedInputTokens:
+            p.cachedInputTokens != null
+              ? Number(p.cachedInputTokens)
+              : undefined,
+          cacheCreationInputTokens:
+            p.cacheCreationInputTokens != null
+              ? Number(p.cacheCreationInputTokens)
+              : undefined,
+        }
+      : undefined;
+    pricingCache = { at: Date.now(), pricing };
+    return pricing;
+  } catch (error) {
+    console.error("[assistant] failed to fetch gateway pricing:", error);
+    // Keep serving the chat without cost rather than failing the request.
+    return pricingCache?.pricing;
+  }
+}
 
 export async function POST(req: Request) {
   const composio = new Composio({
@@ -44,8 +90,10 @@ export async function POST(req: Request) {
 
   const tools = { ...mcpTools, ...sheetsTools };
 
+  const pricing = await getModelPricing();
+
   const agent = new ToolLoopAgent({
-    model: "anthropic/claude-haiku-4.5",
+    model: MODEL,
     instructions: `\
 You are a helpful assistant for setting up mystery game tournament rounds.
 You can add/remove/reorder participants, set the tournament name and description, and configure the round length.
@@ -68,10 +116,13 @@ Be concise and friendly.`,
     agent,
     uiMessages: messages,
     sendReasoning: true,
-    // Surface token usage to the client so the chat can show a context-window
-    // meter. The `finish` part carries the cumulative usage for the turn.
+    // Surface token usage and pricing to the client so the chat can show a
+    // context-window meter and cost. The `finish` part carries the cumulative
+    // usage for the turn.
     messageMetadata: ({ part }) =>
-      part.type === "finish" ? { totalUsage: part.totalUsage } : undefined,
+      part.type === "finish"
+        ? { totalUsage: part.totalUsage, pricing }
+        : undefined,
     onFinish: async () => {
       await mcpClient.close();
     },
