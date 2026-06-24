@@ -38,6 +38,20 @@ export const ASSISTANT_MODELS: AssistantModel[] = [
     provider: "anthropic",
     contextWindow: 200_000,
   },
+  {
+    id: "deepseek/deepseek-v3.2",
+    label: "DeepSeek V3.2",
+    description: "Strong open model, very low cost",
+    provider: "deepseek",
+    contextWindow: 128_000,
+  },
+  {
+    id: "alibaba/qwen3-max",
+    label: "Qwen3 Max",
+    description: "Alibaba's flagship",
+    provider: "qwen",
+    contextWindow: 256_000,
+  },
 ];
 
 /** The default model — the first (fastest/cheapest) in the curated list. */
