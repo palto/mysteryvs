@@ -32,6 +32,13 @@ export const ASSISTANT_MODELS: AssistantModel[] = [
     contextWindow: 128_000,
   },
   {
+    id: "alibaba/qwen-3-32b",
+    label: "Qwen 3 32B",
+    description: "$0.16 / $0.64 per M",
+    provider: "qwen",
+    contextWindow: 128_000,
+  },
+  {
     id: "anthropic/claude-haiku-4.5",
     label: "Claude Haiku 4.5",
     description: "$1.00 / $5.00 per M",
