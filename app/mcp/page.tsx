@@ -34,6 +34,11 @@ const TOOLS = [
       "Returns per-participant results for the current or last round, sorted by finish time. Shows elapsed seconds, DNF status, and points earned this round.",
   },
   {
+    name: "get_round_state",
+    description:
+      "Returns the current round's host, type, length, instructions, status, and per-participant progress (finished/elapsed time or score).",
+  },
+  {
     name: "set_tournament_name",
     description: "Sets the tournament name.",
   },
@@ -53,6 +58,7 @@ const EXAMPLE_PROMPTS = [
   "Remove Charlie from the participants",
   "What is the current tournament name and description?",
   "Show me the results from the last round",
+  "What's the status of the current round?",
   "Set the round length to 15 minutes",
 ];
 
