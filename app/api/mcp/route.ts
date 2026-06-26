@@ -182,6 +182,77 @@ function createMcpServer() {
   );
 
   server.tool(
+    "get_round_state",
+    "Get the current round's host, type, length, instructions, status, " +
+      "and per-participant progress (finished/elapsed time for time rounds, " +
+      "or score for score rounds).",
+    {},
+    async () => {
+      const storage = await liveblocks.getStorageDocument(room, "json");
+      const allParticipants = (storage.participants as string[]) ?? [];
+      const host = (storage.host as string | null) ?? null;
+      const roundType =
+        (storage.roundType as "time" | "score" | null) ?? "time";
+      const roundLength = storage.roundLength as number | null;
+      const roundInstructions =
+        (storage.roundInstructions as string | null) ?? null;
+      const startTime = storage.startTime as number | null;
+      const completedTime = storage.completedTime as number | null;
+      const participantTimes = (storage.participantTimes ?? {}) as Record<
+        string,
+        number
+      >;
+      const participantScores = (storage.participantScores ?? {}) as Record<
+        string,
+        number
+      >;
+
+      const status =
+        startTime === null
+          ? "not_started"
+          : completedTime === null
+            ? "in_progress"
+            : "completed";
+
+      const nonHostParticipants = allParticipants.filter((p) => p !== host);
+
+      const participants =
+        roundType === "time"
+          ? nonHostParticipants.map((username) => {
+              const finishTime = participantTimes[username] ?? null;
+              const elapsedSeconds =
+                finishTime !== null && startTime !== null
+                  ? Math.round((finishTime - startTime) / 1000)
+                  : null;
+              return {
+                username,
+                finished: finishTime !== null,
+                elapsedSeconds,
+              };
+            })
+          : nonHostParticipants.map((username) => ({
+              username,
+              score: participantScores[username] ?? null,
+            }));
+
+      const state = {
+        host,
+        roundType,
+        roundLengthMinutes: roundLength ? roundLength / 60000 : 20,
+        roundInstructions,
+        status,
+        startTime,
+        completedTime,
+        participants,
+      };
+
+      return {
+        content: [{ type: "text", text: JSON.stringify(state, null, 2) }],
+      };
+    },
+  );
+
+  server.tool(
     "set_tournament_name",
     "Set the tournament name",
     { name: z.string().describe("New tournament name") },
