@@ -9,7 +9,8 @@ import { Liveblocks, LiveblocksError } from "@liveblocks/node";
 // Must match `room` in app/constants.ts.
 const ROOM_ID = "hevilan:pti-2025-syksy";
 
-const baseUrl = process.env.LIVEBLOCKS_BASE_URL ?? "http://localhost:1153";
+const baseUrl =
+  process.env.NEXT_PUBLIC_LIVEBLOCKS_BASE_URL ?? "http://localhost:1153";
 
 // The dev server only ever accepts the magic "sk_localdev" key, so don't
 // inherit LIVEBLOCKS_SECRET from the environment — it could be a real key.
