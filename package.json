@@ -10,7 +10,7 @@
     "type-check": "tsc --noEmit",
     "format:check": "prettier --check .",
     "verify": "npm run type-check && npm run lint && npm run format:check",
-    "env:pull": "npx vercel@54.18.7 env pull --yes"
+    "env:pull": "npx vercel env pull --yes"
   },
   "dependencies": {
     "@ai-sdk/mcp": "^1.0.55",
