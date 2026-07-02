@@ -22,6 +22,14 @@ The production runs at https://mysteeri.hevirinki.fi/
 
 All of the above must also be set in the Vercel project settings for deployment.
 
+Instead of setting these manually, you can pull the Development environment variables
+configured in Vercel straight into `.env.local`:
+
+```
+npx vercel link   # one-time, links this checkout to the Vercel project
+npm run env:pull
+```
+
 ### Start dev server
 
 ```
