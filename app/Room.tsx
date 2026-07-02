@@ -28,6 +28,9 @@ export function Room({
   return (
     <LiveblocksProvider
       authEndpoint="/api/liveblocks-auth"
+      // Point at a local `npx liveblocks dev` server instead of the Liveblocks
+      // cloud. Undefined (the default) means the cloud endpoint is used.
+      baseUrl={process.env.NEXT_PUBLIC_LIVEBLOCKS_BASE_URL}
       badgeLocation="bottom-left"
     >
       <RoomProvider

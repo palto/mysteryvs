@@ -18,7 +18,23 @@ npm i
 
 ```bash
 npm run dev          # Start Next.js development server
+npm run dev:liveblocks # Start the local Liveblocks dev server (port 1153)
+npm run dev:liveblocks:seed # Seed the tournament room on the local dev server
 ```
+
+#### Local development with the Liveblocks dev server
+
+Instead of connecting to the Liveblocks cloud, you can run everything locally against the open-source [Liveblocks dev server](https://liveblocks.io/docs/tools/dev-server):
+
+1. Start the dev server in one terminal: `npm run dev:liveblocks` (listens on `http://localhost:1153`; room data persists across restarts in the gitignored `.liveblocks/` directory as per-room SQLite databases).
+2. Seed the tournament room once per fresh `.liveblocks/` directory: `npm run dev:liveblocks:seed` (server components read room storage via the REST API and would 404 before any client has connected; the script is idempotent and mirrors the `initialStorage` in `app/Room.tsx`).
+3. In `.env.local`, set:
+   - `LIVEBLOCKS_SECRET=sk_localdev` (magic secret key accepted by the dev server)
+   - `LIVEBLOCKS_BASE_URL=http://localhost:1153` (server SDK, `app/liveblocks/liveblocks.ts`)
+   - `NEXT_PUBLIC_LIVEBLOCKS_BASE_URL=http://localhost:1153` (browser client, `app/Room.tsx`)
+4. Run `npm run dev` as usual.
+
+When the `*_BASE_URL` variables are unset (the default, and in production), the app connects to the Liveblocks cloud exactly as before. The dev server supports Storage, Presence, Yjs, access-token auth, and the `@liveblocks/node` REST API; Comments/Notifications/AI Copilots are not supported (their APIs return empty dummy data).
 
 ### Build & Deploy
 
@@ -33,7 +49,8 @@ npm run verify       # Run all validations (type-check + lint + format check)
 
 ### Environment Variables
 
-- `LIVEBLOCKS_SECRET`: Required for real-time collaboration. Set in `.env` file.
+- `LIVEBLOCKS_SECRET`: Required for real-time collaboration. Set in `.env` file. Use `sk_localdev` when running against the local Liveblocks dev server.
+- `LIVEBLOCKS_BASE_URL` / `NEXT_PUBLIC_LIVEBLOCKS_BASE_URL`: Optional. Point the server SDK and browser client at a local Liveblocks dev server (e.g. `http://localhost:1153`). Leave unset to use the Liveblocks cloud.
 - `SESSION_SECRET`: Required. Secret (>=32 chars) used to sign session cookies. Generate with `openssl rand -base64 32`.
 - `COMPOSIO_API_KEY`: Required for the AI assistant (used by `app/api/assistant/route.ts` to connect external Composio tools).
 - The application validates environment variables at build time in `next.config.ts` and will exit if missing.
