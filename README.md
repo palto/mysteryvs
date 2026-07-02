@@ -43,7 +43,9 @@ The app should now run at http://localhost:3000
 
 Instead of a real `LIVEBLOCKS_SECRET`, you can run everything against the open-source
 [Liveblocks dev server](https://liveblocks.io/docs/tools/dev-server), fully offline, no
-account and no `.env.local` editing needed:
+account and no `.env.local` editing needed. This requires [Bun](https://bun.sh) to be
+installed (`curl -fsSL https://bun.sh/install | bash`) — the Liveblocks dev server runs
+on it, unrelated to the rest of the app:
 
 ```
 npm run dev:local
