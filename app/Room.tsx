@@ -18,7 +18,13 @@ const defaultParticipants = [
   "GinToni",
 ];
 
-export function Room({ children }: { children: ReactNode }) {
+export function Room({
+  nav,
+  children,
+}: {
+  nav?: ReactNode;
+  children: ReactNode;
+}) {
   return (
     <LiveblocksProvider
       authEndpoint="/api/liveblocks-auth"
@@ -41,6 +47,7 @@ export function Room({ children }: { children: ReactNode }) {
           hostRounds: new LiveMap(),
         }}
       >
+        {nav}
         <ClientSideSuspense fallback={<div>Loading…</div>}>
           {children}
         </ClientSideSuspense>
