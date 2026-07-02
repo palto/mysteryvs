@@ -29,7 +29,7 @@ Instead of connecting to the Liveblocks cloud, you can run everything locally ag
 2. In `.env.local`, set:
    - `LIVEBLOCKS_SECRET=sk_localdev` (magic secret key accepted by the dev server)
    - `NEXT_PUBLIC_LIVEBLOCKS_BASE_URL=http://localhost:1153` (read by both the server SDK in `app/liveblocks/liveblocks.ts` and the browser client in `app/Room.tsx` — a base URL isn't secret, so one variable covers both)
-3. Run `npm run dev` as usual. A `predev` hook (`scripts/seed-local-liveblocks.mjs --optional`) automatically seeds the tournament room on first run — server components read room storage via the REST API and would 404 before any client has connected. It's idempotent (only seeds a room that doesn't exist yet, so it never overwrites live data) and mirrors the `initialStorage` in `app/Room.tsx`. It no-ops when `NEXT_PUBLIC_LIVEBLOCKS_BASE_URL` isn't set (cloud mode), and warns instead of failing if the local dev server isn't running yet. Run `npm run dev:liveblocks:seed` directly to reseed by hand (e.g. after wiping `.liveblocks/`).
+3. Run `npm run dev` as usual — the tournament room is seeded automatically. `instrumentation.ts` runs `seedLocalLiveblocksRoomIfNeeded()` (`app/liveblocks/seedLocalRoom.ts`) once when the Next.js server boots: it's a no-op unless `NEXT_PUBLIC_LIVEBLOCKS_BASE_URL` is set (cloud mode), a no-op if the room already exists (checked via `getRoom` before writing anything, so it never re-touches or overwrites live data), and it warns instead of failing if the local dev server isn't reachable yet. Seeding exists because server components read room storage via the REST API and would 404 before any client has connected. Its starting data comes from `app/liveblocks/initialStorageData.ts`, the single source of truth also used by `initialStorage` in `app/Room.tsx`.
 
 When `NEXT_PUBLIC_LIVEBLOCKS_BASE_URL` is unset (the default, and in production), the app connects to the Liveblocks cloud exactly as before. The dev server supports Storage, Presence, Yjs, access-token auth, and the `@liveblocks/node` REST API; Comments/Notifications/AI Copilots are not supported (their APIs return empty dummy data).
 
@@ -110,7 +110,10 @@ app/
 ├── mysteryhooks.ts             # Custom Liveblocks storage hooks + points math
 ├── constants.ts                # Re-exports the room id
 ├── userId.ts                   # getUserId() (stable session sub)
-├── liveblocks/liveblocks.ts    # Liveblocks node client
+├── liveblocks/
+│   ├── liveblocks.ts            # Liveblocks node client
+│   ├── initialStorageData.ts   # Shared starting data for new rooms (name/description/participants)
+│   └── seedLocalRoom.ts        # Seeds the local dev server's room (called from instrumentation.ts)
 ├── login/                      # Authentication flow
 │   ├── page.tsx                # Login page server component
 │   ├── LoginClientPage.tsx     # Login UI (client component)

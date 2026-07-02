@@ -3,10 +3,8 @@
   "version": "0.1.0",
   "private": true,
   "scripts": {
-    "predev": "node --env-file-if-exists=.env --env-file-if-exists=.env.local scripts/seed-local-liveblocks.mjs --optional",
     "dev": "next dev",
     "dev:liveblocks": "liveblocks dev",
-    "dev:liveblocks:seed": "node --env-file-if-exists=.env --env-file-if-exists=.env.local scripts/seed-local-liveblocks.mjs",
     "build": "next build",
     "start": "next start",
     "lint": "eslint .",
