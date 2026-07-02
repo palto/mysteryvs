@@ -1,61 +1,38 @@
 "use client";
-import { useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import { useMutation } from "@liveblocks/react/suspense";
+import { useCreateBlockNote } from "@blocknote/react";
+import { BlockNoteView } from "@blocknote/shadcn";
+import type { BlockNoteEditor } from "@blocknote/core";
+import "@blocknote/core/fonts/inter.css";
+import "@blocknote/shadcn/style.css";
 import { useDescription } from "@/app/mysteryhooks";
 import { Button } from "@/components/ui/button";
-import { Textarea } from "@/components/ui/textarea";
 import ReactMarkdown from "react-markdown";
 import remarkGfm from "remark-gfm";
-import { Pencil, Plus } from "lucide-react";
+import { Check, Pencil, Plus, X } from "lucide-react";
 
 export function EditableTournamentDescription() {
   const description = useDescription();
-  const [draft, setDraft] = useState<string | null>(null);
+  const [isEditing, setIsEditing] = useState(false);
 
   const setDescription = useMutation(({ storage }, value: string) => {
     storage.set("description", value);
   }, []);
 
-  function save() {
-    if (draft === null) return;
-    setDescription(draft.trim());
-    setDraft(null);
+  async function handleSave(editor: BlockNoteEditor) {
+    const markdown = await editor.blocksToMarkdownLossy(editor.document);
+    setDescription(markdown.trim());
+    setIsEditing(false);
   }
 
-  if (draft !== null) {
+  if (isEditing) {
     return (
-      <div className="flex flex-col gap-2">
-        <Textarea
-          autoFocus
-          value={draft}
-          onChange={(e) => setDraft(e.target.value)}
-          onKeyDown={(e) => {
-            if (e.key === "Enter" && (e.ctrlKey || e.metaKey)) {
-              e.preventDefault();
-              save();
-            } else if (e.key === "Escape") {
-              e.preventDefault();
-              setDraft(null);
-            }
-          }}
-          rows={6}
-          className="font-mono text-sm"
-          aria-label="Turnauksen kuvaus (tukee markdownia)"
-        />
-        <div className="flex items-center gap-2">
-          <Button size="sm" onClick={save} title="Tallenna (Ctrl+Enter)">
-            Tallenna
-          </Button>
-          <Button
-            size="sm"
-            variant="ghost"
-            onClick={() => setDraft(null)}
-            title="Peruuta (Esc)"
-          >
-            Peruuta
-          </Button>
-        </div>
-      </div>
+      <DescriptionEditor
+        initialMarkdown={description}
+        onSave={handleSave}
+        onCancel={() => setIsEditing(false)}
+      />
     );
   }
 
@@ -65,7 +42,7 @@ export function EditableTournamentDescription() {
         variant="ghost"
         size="sm"
         className="self-start text-muted-foreground"
-        onClick={() => setDraft("")}
+        onClick={() => setIsEditing(true)}
       >
         <Plus /> Lisää kuvaus
       </Button>
@@ -81,10 +58,50 @@ export function EditableTournamentDescription() {
         variant="ghost"
         size="sm"
         className="self-start text-muted-foreground"
-        onClick={() => setDraft(description)}
+        onClick={() => setIsEditing(true)}
       >
         <Pencil /> Muokkaa kuvausta
       </Button>
+    </div>
+  );
+}
+
+function DescriptionEditor({
+  initialMarkdown,
+  onSave,
+  onCancel,
+}: {
+  initialMarkdown: string;
+  onSave: (editor: BlockNoteEditor) => void;
+  onCancel: () => void;
+}) {
+  const editor = useCreateBlockNote();
+  const loadedRef = useRef(false);
+
+  useEffect(() => {
+    if (loadedRef.current || !initialMarkdown) return;
+    loadedRef.current = true;
+    (async () => {
+      const blocks = await editor.tryParseMarkdownToBlocks(initialMarkdown);
+      editor.replaceBlocks(editor.document, blocks);
+    })();
+  }, [editor, initialMarkdown]);
+
+  return (
+    <div className="flex flex-col gap-2">
+      <div className="rounded-md border">
+        <BlockNoteView editor={editor} theme="dark" />
+      </div>
+      <div className="flex items-center gap-2">
+        <Button size="sm" onClick={() => onSave(editor)}>
+          <Check className="w-4 h-4 mr-1" />
+          Tallenna
+        </Button>
+        <Button size="sm" variant="ghost" onClick={onCancel}>
+          <X className="w-4 h-4 mr-1" />
+          Peruuta
+        </Button>
+      </div>
     </div>
   );
 }
