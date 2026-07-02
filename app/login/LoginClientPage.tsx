@@ -3,29 +3,18 @@
 import { ParticipantLoginButton } from "@/app/login/ParticipantLoginButton";
 import { NewPlayerDrawer } from "@/app/login/NewPlayerDrawer";
 import { useParticipants } from "@/app/Participants";
-import { useDescription, useName } from "@/app/mysteryhooks";
-import ReactMarkdown from "react-markdown";
-import remarkGfm from "remark-gfm";
+import { EditableTournamentTitle } from "@/app/EditableTournamentTitle";
+import { EditableTournamentDescription } from "@/app/EditableTournamentDescription";
 
 export function LoginClientPage() {
   const participants = useParticipants();
-  const tournamentName = useName();
-  const description = useDescription();
 
   return (
     <div className="flex flex-col items-center px-4 py-12 gap-12 max-w-2xl mx-auto">
       {/* Welcome hero */}
-      <div className="text-center flex flex-col gap-2">
-        <h1 className="text-4xl font-bold">{tournamentName}</h1>
-        {description ? (
-          <div className="prose prose-sm dark:prose-invert text-center">
-            <ReactMarkdown remarkPlugins={[remarkGfm]}>
-              {description}
-            </ReactMarkdown>
-          </div>
-        ) : (
-          <p className="text-muted-foreground text-base">Tervetuloa mukaan!</p>
-        )}
+      <div className="flex flex-col items-center gap-2">
+        <EditableTournamentTitle />
+        <EditableTournamentDescription />
       </div>
 
       {/* Participant selection */}

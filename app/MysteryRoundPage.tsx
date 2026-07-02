@@ -3,14 +3,13 @@ import { Timer } from "@/components/ui/timer";
 import { Participants } from "@/app/Participants";
 import {
   useCompletedTime,
-  useDescription,
   useIsRunning,
   useRoundType,
   useStartTime,
 } from "@/app/mysteryhooks";
 import { WakeLock } from "@/app/WakeLock";
-import ReactMarkdown from "react-markdown";
-import remarkGfm from "remark-gfm";
+import { EditableTournamentTitle } from "@/app/EditableTournamentTitle";
+import { EditableTournamentDescription } from "@/app/EditableTournamentDescription";
 import { SetupWizard } from "@/app/SetupWizard";
 import { RoundInfoCard } from "@/app/RoundInfoCard";
 import { Info, CheckCircle2 } from "lucide-react";
@@ -19,7 +18,6 @@ export function MysteryRoundPage() {
   const startTime = useStartTime();
   const isRunning = useIsRunning();
   const completedTime = useCompletedTime();
-  const description = useDescription();
   const roundType = useRoundType();
   const isScoreMode = roundType === "score";
 
@@ -28,13 +26,8 @@ export function MysteryRoundPage() {
       <main className="flex flex-col gap-6 w-full max-w-2xl">
         {!startTime && (
           <>
-            {description && (
-              <div className="prose prose-sm dark:prose-invert">
-                <ReactMarkdown remarkPlugins={[remarkGfm]}>
-                  {description}
-                </ReactMarkdown>
-              </div>
-            )}
+            <EditableTournamentTitle />
+            <EditableTournamentDescription />
             <SetupWizard />
           </>
         )}

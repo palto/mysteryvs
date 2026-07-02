@@ -16,6 +16,7 @@ function GithubIcon({ size = 24 }: { size?: number }) {
 }
 import { getUsername } from "@/app/login/getUsername";
 import { AvatarMenu } from "@/app/AvatarMenu";
+import { TopNavTitle } from "@/app/TopNavTitle";
 import { liveblocks } from "@/app/liveblocks/liveblocks";
 import { room } from "@/app/constants";
 
@@ -26,12 +27,7 @@ export async function TopNav() {
 
   return (
     <nav className="sticky top-0 z-50 flex items-center justify-between px-6 py-3 border-b border-border bg-background">
-      <Link
-        href="/"
-        className="font-semibold text-lg hover:text-muted-foreground"
-      >
-        {title ?? "Mystery Versus"}
-      </Link>
+      <TopNavTitle initialName={title ?? "Mystery Versus"} />
       <div className="flex items-center gap-3">
         <a
           href="https://github.com/palto/mysteryvs"

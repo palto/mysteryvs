@@ -31,8 +31,7 @@ export default function RootLayout({
       <body
         className={`${geistSans.variable} ${geistMono.variable} antialiased`}
       >
-        <TopNav />
-        <Room>{children}</Room>
+        <Room nav={<TopNav />}>{children}</Room>
         <AssistantFAB />
       </body>
     </html>
