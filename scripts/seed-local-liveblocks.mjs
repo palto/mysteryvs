@@ -4,7 +4,17 @@
 // rooms whose storage is already initialized.
 //
 // Usage: npm run dev:liveblocks:seed
+// Also runs automatically before `npm run dev` (see the "predev" npm script)
+// with --optional, which no-ops when NEXT_PUBLIC_LIVEBLOCKS_BASE_URL isn't
+// set (i.e. developing against the Liveblocks cloud) and warns instead of
+// failing if the local dev server isn't running yet.
 import { Liveblocks, LiveblocksError } from "@liveblocks/node";
+
+const optional = process.argv.includes("--optional");
+
+if (optional && !process.env.NEXT_PUBLIC_LIVEBLOCKS_BASE_URL) {
+  process.exit(0);
+}
 
 // Must match `room` in app/constants.ts.
 const ROOM_ID = "hevilan:pti-2025-syksy";
@@ -39,25 +49,39 @@ const initialStorage = {
 };
 
 try {
-  await liveblocks.createRoom(ROOM_ID, { defaultAccesses: [] });
-  console.log(`Created room "${ROOM_ID}"`);
-} catch (error) {
-  if (error instanceof LiveblocksError && error.status === 409) {
-    console.log(`Room "${ROOM_ID}" already exists`);
-  } else {
-    throw error;
+  try {
+    await liveblocks.createRoom(ROOM_ID, { defaultAccesses: [] });
+    console.log(`Created room "${ROOM_ID}"`);
+  } catch (error) {
+    if (error instanceof LiveblocksError && error.status === 409) {
+      console.log(`Room "${ROOM_ID}" already exists`);
+    } else {
+      throw error;
+    }
   }
-}
 
-try {
-  await liveblocks.initializeStorageDocument(ROOM_ID, initialStorage);
-  console.log(`Initialized storage for "${ROOM_ID}"`);
-} catch (error) {
-  if (error instanceof LiveblocksError && error.status === 409) {
-    console.log(`Storage for "${ROOM_ID}" already initialized, leaving as-is`);
-  } else {
-    throw error;
+  try {
+    await liveblocks.initializeStorageDocument(ROOM_ID, initialStorage);
+    console.log(`Initialized storage for "${ROOM_ID}"`);
+  } catch (error) {
+    if (error instanceof LiveblocksError && error.status === 409) {
+      console.log(
+        `Storage for "${ROOM_ID}" already initialized, leaving as-is`,
+      );
+    } else {
+      throw error;
+    }
   }
-}
 
-console.log(`Done. Local Liveblocks at ${baseUrl} is ready.`);
+  console.log(`Done. Local Liveblocks at ${baseUrl} is ready.`);
+} catch (error) {
+  if (optional) {
+    console.warn(
+      `Could not reach the local Liveblocks dev server at ${baseUrl}. ` +
+        `Start it with \`npm run dev:liveblocks\` in another terminal. ` +
+        `Continuing without seeding — the app will fail to load until it's running.`,
+    );
+    process.exit(0);
+  }
+  throw error;
+}

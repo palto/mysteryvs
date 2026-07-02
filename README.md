@@ -45,8 +45,7 @@ Instead of a real `LIVEBLOCKS_SECRET`, you can run everything against the open-s
 [Liveblocks dev server](https://liveblocks.io/docs/tools/dev-server), fully offline:
 
 ```
-npm run dev:liveblocks         # in one terminal — local Liveblocks server on :1153
-npm run dev:liveblocks:seed    # once, to seed the tournament room
+npm run dev:liveblocks    # in one terminal — local Liveblocks server on :1153
 ```
 
 Then set in `.env.local`:
@@ -56,7 +55,8 @@ LIVEBLOCKS_SECRET=sk_localdev
 NEXT_PUBLIC_LIVEBLOCKS_BASE_URL=http://localhost:1153
 ```
 
-and run `npm run dev` as usual. See `CLAUDE.md` for details.
+and run `npm run dev` as usual — it seeds the tournament room automatically on
+first run. See `CLAUDE.md` for details.
 
 ## Deployment
 

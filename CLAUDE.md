@@ -19,7 +19,6 @@ npm i
 ```bash
 npm run dev          # Start Next.js development server
 npm run dev:liveblocks # Start the local Liveblocks dev server (port 1153)
-npm run dev:liveblocks:seed # Seed the tournament room on the local dev server
 ```
 
 #### Local development with the Liveblocks dev server
@@ -27,11 +26,10 @@ npm run dev:liveblocks:seed # Seed the tournament room on the local dev server
 Instead of connecting to the Liveblocks cloud, you can run everything locally against the open-source [Liveblocks dev server](https://liveblocks.io/docs/tools/dev-server):
 
 1. Start the dev server in one terminal: `npm run dev:liveblocks` (listens on `http://localhost:1153`; room data persists across restarts in the gitignored `.liveblocks/` directory as per-room SQLite databases).
-2. Seed the tournament room once per fresh `.liveblocks/` directory: `npm run dev:liveblocks:seed` (server components read room storage via the REST API and would 404 before any client has connected; the script is idempotent and mirrors the `initialStorage` in `app/Room.tsx`).
-3. In `.env.local`, set:
+2. In `.env.local`, set:
    - `LIVEBLOCKS_SECRET=sk_localdev` (magic secret key accepted by the dev server)
    - `NEXT_PUBLIC_LIVEBLOCKS_BASE_URL=http://localhost:1153` (read by both the server SDK in `app/liveblocks/liveblocks.ts` and the browser client in `app/Room.tsx` — a base URL isn't secret, so one variable covers both)
-4. Run `npm run dev` as usual.
+3. Run `npm run dev` as usual. A `predev` hook (`scripts/seed-local-liveblocks.mjs --optional`) automatically seeds the tournament room on first run — server components read room storage via the REST API and would 404 before any client has connected. It's idempotent (only seeds a room that doesn't exist yet, so it never overwrites live data) and mirrors the `initialStorage` in `app/Room.tsx`. It no-ops when `NEXT_PUBLIC_LIVEBLOCKS_BASE_URL` isn't set (cloud mode), and warns instead of failing if the local dev server isn't running yet. Run `npm run dev:liveblocks:seed` directly to reseed by hand (e.g. after wiping `.liveblocks/`).
 
 When `NEXT_PUBLIC_LIVEBLOCKS_BASE_URL` is unset (the default, and in production), the app connects to the Liveblocks cloud exactly as before. The dev server supports Storage, Presence, Yjs, access-token auth, and the `@liveblocks/node` REST API; Comments/Notifications/AI Copilots are not supported (their APIs return empty dummy data).
 
