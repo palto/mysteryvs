@@ -16,7 +16,11 @@ export async function POST() {
     },
   });
 
-  session.allow(`hevilan:*`, session.FULL_ACCESS);
+  // The app only uses Storage/Presence/Yjs, all covered by "room:write".
+  // The explicit scope (instead of session.FULL_ACCESS, i.e. "*:write") also
+  // works with the local Liveblocks dev server, which doesn't accept the
+  // wildcard scope.
+  session.allow(`hevilan:*`, ["room:write"]);
 
   const { status, body } = await session.authorize();
   return new Response(body, { status });

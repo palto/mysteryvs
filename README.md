@@ -39,6 +39,25 @@ npm run dev
 
 The app should now run at http://localhost:3000
 
+### Developing without a Liveblocks account
+
+Instead of a real `LIVEBLOCKS_SECRET`, you can run everything against the open-source
+[Liveblocks dev server](https://liveblocks.io/docs/tools/dev-server), fully offline:
+
+```
+npm run dev:liveblocks    # in one terminal — local Liveblocks server on :1153
+```
+
+Then set in `.env.local`:
+
+```
+LIVEBLOCKS_SECRET=sk_localdev
+NEXT_PUBLIC_LIVEBLOCKS_BASE_URL=http://localhost:1153
+```
+
+and run `npm run dev` as usual — it seeds the tournament room automatically on
+first run. See `CLAUDE.md` for details.
+
 ## Deployment
 
 The app is deployed using Vercel. The deployment is triggered automatically when changes are pushed to the main branch.
