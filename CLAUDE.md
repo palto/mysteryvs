@@ -17,21 +17,17 @@ npm i
 ### Development
 
 ```bash
-npm run dev          # Start Next.js development server
-npm run dev:liveblocks # Start the local Liveblocks dev server (port 1153)
+npm run dev          # Start Next.js development server (connects to the Liveblocks cloud)
+npm run dev:local     # Start Next.js + a local Liveblocks dev server together, zero setup
 ```
 
 #### Local development with the Liveblocks dev server
 
-Instead of connecting to the Liveblocks cloud, you can run everything locally against the open-source [Liveblocks dev server](https://liveblocks.io/docs/tools/dev-server):
+Instead of connecting to the Liveblocks cloud, `npm run dev:local` runs everything locally against the open-source [Liveblocks dev server](https://liveblocks.io/docs/tools/dev-server) — a single command, no Liveblocks account and no `.env.local` editing required. Under the hood (`package.json`'s `dev:local` script) it uses `concurrently` to start `liveblocks dev` (port 1153) and, once `wait-on` confirms that port is open, `next dev` with `LIVEBLOCKS_SECRET=sk_localdev` and `NEXT_PUBLIC_LIVEBLOCKS_BASE_URL=http://localhost:1153` injected directly into that process only — nothing is written to `.env.local`. `-k` kills both processes together on exit (e.g. Ctrl+C). Room data persists across restarts in the gitignored `.liveblocks/` directory as per-room SQLite databases.
 
-1. Start the dev server in one terminal: `npm run dev:liveblocks` (listens on `http://localhost:1153`; room data persists across restarts in the gitignored `.liveblocks/` directory as per-room SQLite databases).
-2. In `.env.local`, set:
-   - `LIVEBLOCKS_SECRET=sk_localdev` (magic secret key accepted by the dev server)
-   - `NEXT_PUBLIC_LIVEBLOCKS_BASE_URL=http://localhost:1153` (read by both the server SDK in `app/liveblocks/liveblocks.ts` and the browser client in `app/Room.tsx` — a base URL isn't secret, so one variable covers both)
-3. Run `npm run dev` as usual — the tournament room is seeded automatically. `instrumentation.ts` runs `seedLocalLiveblocksRoomIfNeeded()` (`app/liveblocks/seedLocalRoom.ts`) once when the Next.js server boots: it's a no-op unless `NEXT_PUBLIC_LIVEBLOCKS_BASE_URL` is set (cloud mode), a no-op if the room already exists (checked via `getRoom` before writing anything, so it never re-touches or overwrites live data), and it warns instead of failing if the local dev server isn't reachable yet. Seeding exists because server components read room storage via the REST API and would 404 before any client has connected. Its starting data comes from `app/liveblocks/initialStorageData.ts`, the single source of truth also used by `initialStorage` in `app/Room.tsx`.
+The tournament room is seeded automatically: `instrumentation.ts` runs `seedLocalLiveblocksRoomIfNeeded()` (`app/liveblocks/seedLocalRoom.ts`) once when the Next.js server boots. It's a no-op unless `NEXT_PUBLIC_LIVEBLOCKS_BASE_URL` is set (i.e. it does nothing under plain `npm run dev`), and a no-op if the room already exists (checked via `getRoom` before writing anything, so it never re-touches or overwrites live data). Seeding exists because server components read room storage via the REST API and would 404 before any client has connected. Its starting data comes from `app/liveblocks/initialStorageData.ts`, the single source of truth also used by `initialStorage` in `app/Room.tsx`.
 
-When `NEXT_PUBLIC_LIVEBLOCKS_BASE_URL` is unset (the default, and in production), the app connects to the Liveblocks cloud exactly as before. The dev server supports Storage, Presence, Yjs, access-token auth, and the `@liveblocks/node` REST API; Comments/Notifications/AI Copilots are not supported (their APIs return empty dummy data).
+`npm run dev` is untouched — plain `next dev`, connecting to the Liveblocks cloud as configured in `.env.local`/`.env` (see Environment Variables below). The dev server (local mode) supports Storage, Presence, Yjs, access-token auth, and the `@liveblocks/node` REST API; Comments/Notifications/AI Copilots are not supported (their APIs return empty dummy data).
 
 ### Build & Deploy
 
@@ -46,8 +42,8 @@ npm run verify       # Run all validations (type-check + lint + format check)
 
 ### Environment Variables
 
-- `LIVEBLOCKS_SECRET`: Required for real-time collaboration. Set in `.env` file. Use `sk_localdev` when running against the local Liveblocks dev server.
-- `NEXT_PUBLIC_LIVEBLOCKS_BASE_URL`: Optional. Points both the server SDK and browser client at a local Liveblocks dev server (e.g. `http://localhost:1153`). Leave unset to use the Liveblocks cloud.
+- `LIVEBLOCKS_SECRET`: Required for real-time collaboration. Set in `.env` file. `npm run dev:local` injects `sk_localdev` automatically; only needed by hand for `npm run dev` (cloud mode).
+- `NEXT_PUBLIC_LIVEBLOCKS_BASE_URL`: Optional. Points both the server SDK and browser client at a local Liveblocks dev server (e.g. `http://localhost:1153`). `npm run dev:local` sets this automatically. Leave unset to use the Liveblocks cloud.
 - `SESSION_SECRET`: Required. Secret (>=32 chars) used to sign session cookies. Generate with `openssl rand -base64 32`.
 - `COMPOSIO_API_KEY`: Required for the AI assistant (used by `app/api/assistant/route.ts` to connect external Composio tools).
 - The application validates environment variables at build time in `next.config.ts` and will exit if missing.
