@@ -183,3 +183,19 @@ First consider whether the PR has visible changes to the user or is purely techn
 - Deployed to Vercel at https://mysteeri.hevirinki.fi/
 - Auto-deploys on push to main branch
 - Requires `LIVEBLOCKS_SECRET`, `SESSION_SECRET`, and `COMPOSIO_API_KEY` environment variables in Vercel settings
+- Every push (including branches) also gets a Vercel preview deployment, which is a good way to verify a change actually works before/instead of relying solely on local `npm run dev`
+
+### Verifying Changes Against a Preview Deployment
+
+Preview deployments are gated by Vercel's deployment protection (SSO), so plain `curl`/`fetch` gets redirected to `vercel.com/sso-api`. Bypass it with the `VERCEL_AUTOMATION_BYPASS_SECRET` env var:
+
+```bash
+# Set a bypass cookie, then reuse it for subsequent requests
+curl -c cookies.txt -H "x-vercel-protection-bypass: $VERCEL_AUTOMATION_BYPASS_SECRET" \
+     -H "x-vercel-set-bypass-cookie: true" "<preview-url>/"
+curl -b cookies.txt "<preview-url>/some/path"
+```
+
+The bypass cookie (`_vercel_jwt`) is valid for 7 days once set, so it doesn't need to be resent on every request in the same cookie jar. This only bypasses Vercel's deployment protection — the app's own `/login` session is separate and still applies.
+
+Preview deployment URLs for a branch/PR can be found via the Vercel MCP tools (`list_deployments` for the `mysteryvs` project) or the deployment's GitHub check/comment.
