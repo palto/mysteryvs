@@ -4,7 +4,7 @@
   "private": true,
   "scripts": {
     "dev": "next dev",
-    "dev:local": "concurrently -n liveblocks,next -c blue,green -k \"npm run dev:liveblocks\" \"wait-on tcp:1153 && LIVEBLOCKS_SECRET=sk_localdev NEXT_PUBLIC_LIVEBLOCKS_BASE_URL=http://localhost:1153 next dev\"",
+    "dev:local": "concurrently -n liveblocks,next -c blue,green -k \"npm run dev:liveblocks\" \"wait-on tcp:1153 && cross-env LIVEBLOCKS_SECRET=sk_localdev NEXT_PUBLIC_LIVEBLOCKS_BASE_URL=http://localhost:1153 next dev\"",
     "dev:liveblocks": "liveblocks dev",
     "build": "next build",
     "start": "next start",
@@ -90,6 +90,7 @@
     "@types/react": "19.2.17",
     "@types/react-dom": "19.2.3",
     "concurrently": "^10.0.3",
+    "cross-env": "^10.1.0",
     "eslint": "^9",
     "eslint-config-next": "16.2.9",
     "eslint-config-prettier": "^10.1.8",
