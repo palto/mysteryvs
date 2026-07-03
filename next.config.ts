@@ -1,33 +1,26 @@
 import type { NextConfig } from "next";
+import { connect } from "node:net";
 import z from "zod";
 
 const LOCAL_DEV_SERVER_URL = "http://localhost:1153";
 
-// Detects a running `npx liveblocks dev` server so local development needs
-// no environment variables at all. Checks for the dev server's own
-// signature text (not just an open port) to avoid false positives from an
-// unrelated service, and only ever runs when no cloud secret or manual
-// base URL is already configured, so a real Liveblocks cloud connection is
-// never silently overridden.
-async function detectLocalLiveblocksDevServer(): Promise<boolean> {
-  try {
-    const res = await fetch(LOCAL_DEV_SERVER_URL, {
-      signal: AbortSignal.timeout(500),
+function isPortOpen(port: number, timeoutMs = 500): Promise<boolean> {
+  return new Promise((resolve) => {
+    const socket = connect({ port, host: "localhost", timeout: timeoutMs });
+    socket.once("connect", () => {
+      socket.destroy();
+      resolve(true);
     });
-    const body = await res.text();
-    return body.includes("Liveblocks dev server");
-  } catch {
-    return false;
-  }
+    socket.once("error", () => resolve(false));
+    socket.once("timeout", () => {
+      socket.destroy();
+      resolve(false);
+    });
+  });
 }
 
 export default async function nextConfig(): Promise<NextConfig> {
-  const hasCloudSecret = Boolean(process.env.LIVEBLOCKS_SECRET);
-  const hasManualBaseUrl = Boolean(process.env.NEXT_PUBLIC_LIVEBLOCKS_BASE_URL);
-  const useLocalDevServer =
-    !hasCloudSecret &&
-    !hasManualBaseUrl &&
-    (await detectLocalLiveblocksDevServer());
+  const useLocalDevServer = await isPortOpen(1153);
 
   if (useLocalDevServer) {
     // Real process.env mutation so every piece of server code in this
@@ -40,10 +33,7 @@ export default async function nextConfig(): Promise<NextConfig> {
 
   const envValidationResult = z
     .object({
-      LIVEBLOCKS_SECRET:
-        hasCloudSecret || useLocalDevServer
-          ? z.string().optional()
-          : z.string(),
+      LIVEBLOCKS_SECRET: useLocalDevServer ? z.string().optional() : z.string(),
       SESSION_SECRET: z.string().min(32),
     })
     .safeParse(process.env);
