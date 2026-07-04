@@ -21,7 +21,7 @@ npm run dev          # Start Next.js development server
 npm run room:init    # Create + seed the configured Liveblocks room (idempotent)
 ```
 
-`room:init` creates the room (`NEXT_PUBLIC_LIVEBLOCKS_ROOM`, defaults to the production room) if it doesn't exist and seeds its storage **only when empty** — it never overwrites an already-seeded room, so it is safe to re-run and safe against production. Run it once when pointing at a fresh room; otherwise the server-side functions (login participant list, `/admin`, `TopNav`, MCP tools) throw because the Liveblocks SDK requires the room to already exist.
+Room initialization (create the room if it doesn't exist, seed its storage only when empty) lives in `app/liveblocks/initRoom.ts` and runs automatically on every server startup via `instrumentation.ts` (`register()`), so `npm run dev` / `npm start` provision the room on their own. `room:init` runs the same idempotent logic standalone — it never overwrites an already-seeded room, so it's safe to re-run and safe against production. Use it when you want to provision a room without booting the full server (e.g. before a first deploy).
 
 ### Build & Deploy
 
