@@ -18,10 +18,9 @@ npm i
 
 ```bash
 npm run dev          # Start Next.js development server
-npm run room:init    # Create + seed the configured Liveblocks room (idempotent)
 ```
 
-`room:init` creates the room (`NEXT_PUBLIC_LIVEBLOCKS_ROOM`, defaults to the production room) if it doesn't exist and seeds its storage **only when empty** — it never overwrites an already-seeded room, so it is safe to re-run and safe against production. Run it once when pointing at a fresh room; otherwise the server-side functions (login participant list, `/admin`, `TopNav`, MCP tools) throw because the Liveblocks SDK requires the room to already exist.
+Room initialization (create the room if it doesn't exist, seed its storage only when empty) lives in `app/liveblocks/initRoom.ts` and runs automatically on every server startup via `instrumentation.ts` (`register()`), so `npm run dev` / `npm start` provision the room on their own — it never overwrites an already-seeded room, so it's safe against production.
 
 ### Build & Deploy
 
@@ -39,7 +38,7 @@ npm run verify       # Run all validations (type-check + lint + format check)
 - `LIVEBLOCKS_SECRET`: Required for real-time collaboration. Set in `.env` file.
 - `SESSION_SECRET`: Required. Secret (>=32 chars) used to sign session cookies. Generate with `openssl rand -base64 32`.
 - `COMPOSIO_API_KEY`: Required for the AI assistant (used by `app/api/assistant/route.ts` to connect external Composio tools).
-- `NEXT_PUBLIC_LIVEBLOCKS_ROOM`: Optional. Overrides the room id (defaults to `hevilan:pti-2025-syksy`). Must keep the `hevilan:` prefix so the auth grant in `app/api/liveblocks-auth/route.ts` matches. Set a personal room (e.g. `hevilan:dev-<name>`) to avoid polluting the shared production room, then run `npm run room:init`.
+- `NEXT_PUBLIC_LIVEBLOCKS_ROOM`: Optional. Overrides the room id (defaults to `hevilan:pti-2025-syksy`). Must keep the `hevilan:` prefix so the auth grant in `app/api/liveblocks-auth/route.ts` matches. Set a personal room (e.g. `hevilan:dev-<name>`) to avoid polluting the shared production room — the room is provisioned automatically the next time you start the server.
 - The application validates environment variables at build time in `next.config.ts` and will exit if missing.
 
 ## Architecture
