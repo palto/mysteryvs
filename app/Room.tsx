@@ -6,17 +6,8 @@ import {
   RoomProvider,
   ClientSideSuspense,
 } from "@liveblocks/react/suspense";
-import { LiveList, LiveMap } from "@liveblocks/client";
 import { room } from "@/app/constants";
-
-const defaultParticipants = [
-  "murgo",
-  "Janne",
-  "grrooovy",
-  "Alex (VE's)",
-  "Maksi",
-  "GinToni",
-];
+import { initialStorage } from "@/app/liveblocks/initialStorage";
 
 export function Room({
   nav,
@@ -30,23 +21,7 @@ export function Room({
       authEndpoint="/api/liveblocks-auth"
       badgeLocation="bottom-left"
     >
-      <RoomProvider
-        id={room}
-        initialStorage={{
-          name: "PTI Mysteeri 2025",
-          description: "",
-          participants: new LiveList(defaultParticipants),
-          startTime: null,
-          completedTime: null,
-          participantTimes: new LiveMap(),
-          participantScores: new LiveMap(),
-          host: null,
-          roundLength: null,
-          roundType: null,
-          roundInstructions: null,
-          hostRounds: new LiveMap(),
-        }}
-      >
+      <RoomProvider id={room} initialStorage={initialStorage()}>
         {nav}
         <ClientSideSuspense fallback={<div>Loading…</div>}>
           {children}
