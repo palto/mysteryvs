@@ -1,15 +1,15 @@
-import { loadEnvConfig } from "@next/env";
+import nextEnv from "@next/env";
 
 // Load .env / .env.local BEFORE importing modules that read process.env at
 // module-eval time (constants.ts reads NEXT_PUBLIC_LIVEBLOCKS_ROOM;
 // liveblocks.ts reads LIVEBLOCKS_SECRET). Hence the dynamic imports below.
-loadEnvConfig(process.cwd());
+nextEnv.loadEnvConfig(process.cwd());
 
 async function main() {
-  const { liveblocks } = await import("../app/liveblocks/liveblocks");
-  const { room } = await import("../app/constants");
+  const { liveblocks } = await import("../app/liveblocks/liveblocks.ts");
+  const { room } = await import("../app/constants.ts");
   const { initialStoragePlainLson } =
-    await import("../app/liveblocks/initialStorage");
+    await import("../app/liveblocks/initialStorage.ts");
 
   await liveblocks.getOrCreateRoom(room, { defaultAccesses: [] });
 

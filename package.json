@@ -11,7 +11,7 @@
     "format:check": "prettier --check .",
     "verify": "npm run type-check && npm run lint && npm run format:check",
     "env:pull": "npx vercel env pull --yes",
-    "room:init": "tsx scripts/init-room.ts"
+    "room:init": "node scripts/init-room.mts"
   },
   "dependencies": {
     "@ai-sdk/mcp": "^1.0.55",
@@ -94,7 +94,6 @@
     "postcss": "^8",
     "prettier": "3.8.5",
     "tailwindcss": "^4.3.0",
-    "tsx": "^4.23.0",
     "typescript": "^6"
   }
 }
