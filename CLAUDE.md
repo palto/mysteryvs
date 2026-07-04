@@ -51,8 +51,6 @@ npm run verify       # Run all validations (type-check + lint + format check)
 3. Run `npm run dev` in a second terminal. The room is created and seeded automatically on startup (`app/liveblocks/initRoom.ts`) — no manual seed step needed.
 4. Drive the actual feature rather than just reading the code: open `http://localhost:3000/login`, add/select a player, log in, and exercise the relevant flow (start a round, edit the description, call an MCP tool against `/api/mcp`, etc.). A headless browser (e.g. Playwright) works well for this in a non-interactive session.
 
-Gotcha: if `LIVEBLOCKS_SECRET` is already exported in the surrounding shell environment (common in some sandboxes/CI runners), Next.js gives that real env var precedence over `.env.local`, silently overriding the intended `sk_localdev` value — the local dev server will then reject requests with "you can only use sk_localdev as the secret key". If that happens despite `.env.local` looking correct, check `echo $LIVEBLOCKS_SECRET` and override it inline for the command, e.g. `LIVEBLOCKS_SECRET=sk_localdev npm run dev`.
-
 ## Architecture
 
 ### Real-time State Management with Liveblocks
