@@ -42,6 +42,17 @@ npm run verify       # Run all validations (type-check + lint + format check)
 - `NEXT_PUBLIC_LIVEBLOCKS_BASE_URL`: Optional. Points the Liveblocks client (`app/Room.tsx`) and node SDK (`app/liveblocks/liveblocks.ts`) — including the automatic room provisioning in `app/liveblocks/initRoom.ts` — at a [local Liveblocks dev server](https://liveblocks.io/docs/tools/dev-server) (`npx liveblocks dev`, defaults to `http://localhost:1153`) instead of Liveblocks cloud. Leave unset for cloud. See README for the full local setup.
 - The application validates environment variables at build time in `next.config.ts` and will exit if missing.
 
+### Verifying Changes Locally
+
+`npm run verify` only checks types/lint/formatting — it does not prove a feature works. To actually exercise a change end-to-end, run the app against the [local Liveblocks dev server](https://liveblocks.io/docs/tools/dev-server) instead of cloud (no real Liveblocks account needed, and it won't touch the shared production room):
+
+1. Start the dev server in one terminal: `npx liveblocks dev` (binds `http://localhost:1153`, requires [Bun](https://bun.sh/)) — or `docker compose up` if on Windows, which works around a Windows-only path bug in the CLI (see `docker-compose.yml` and the README's "Running Liveblocks locally" section for details).
+2. In `.env.local`, set `NEXT_PUBLIC_LIVEBLOCKS_BASE_URL=http://localhost:1153`. Leave `LIVEBLOCKS_SECRET` unset — it defaults to `sk_localdev`, the only secret the local dev server accepts.
+3. Run `npm run dev` in a second terminal. The room is created and seeded automatically on startup (`app/liveblocks/initRoom.ts`) — no manual seed step needed.
+4. Drive the actual feature rather than just reading the code: open `http://localhost:3000/login`, add/select a player, log in, and exercise the relevant flow (start a round, edit the description, call an MCP tool against `/api/mcp`, etc.). A headless browser (e.g. Playwright) works well for this in a non-interactive session.
+
+Gotcha: if `LIVEBLOCKS_SECRET` is already exported in the surrounding shell environment (common in some sandboxes/CI runners), Next.js gives that real env var precedence over `.env.local`, silently overriding the intended `sk_localdev` value — the local dev server will then reject requests with "you can only use sk_localdev as the secret key". If that happens despite `.env.local` looking correct, check `echo $LIVEBLOCKS_SECRET` and override it inline for the command, e.g. `LIVEBLOCKS_SECRET=sk_localdev npm run dev`.
+
 ## Architecture
 
 ### Real-time State Management with Liveblocks
