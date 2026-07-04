@@ -17,6 +17,9 @@ The production runs at https://mysteeri.hevirinki.fi/
 
 - Node.js v24
 - Liveblocks API secret. Set it in `.env` using variable `LIVEBLOCKS_SECRET`
+  (optional — if unset, defaults to `sk_localdev` for use with the [local dev
+  server](#running-liveblocks-locally); a real secret is required for
+  Liveblocks cloud)
 - Composio (for the AI assistant's Google Sheets integration). Set in `.env`:
   - `COMPOSIO_API_KEY` — your Composio project API key
 
@@ -59,9 +62,11 @@ local `.liveblocks/` directory.
 In `.env.local`, set:
 
 ```
-LIVEBLOCKS_SECRET=sk_localdev
 NEXT_PUBLIC_LIVEBLOCKS_BASE_URL=http://localhost:1153
 ```
+
+(`LIVEBLOCKS_SECRET` defaults to `sk_localdev` automatically when unset, so
+you don't need to set it yourself.)
 
 Then run `npm run dev` as usual in a second terminal — the room is created and
 seeded automatically on startup (see `app/liveblocks/initRoom.ts`), no manual

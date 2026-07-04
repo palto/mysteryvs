@@ -35,7 +35,7 @@ npm run verify       # Run all validations (type-check + lint + format check)
 
 ### Environment Variables
 
-- `LIVEBLOCKS_SECRET`: Required for real-time collaboration. Set in `.env` file.
+- `LIVEBLOCKS_SECRET`: Set in `.env` file. Optional — defaults to `sk_localdev` when unset, which only works against the [local Liveblocks dev server](https://liveblocks.io/docs/tools/dev-server) (see `NEXT_PUBLIC_LIVEBLOCKS_BASE_URL` below). A real secret is required for Liveblocks cloud.
 - `SESSION_SECRET`: Required. Secret (>=32 chars) used to sign session cookies. Generate with `openssl rand -base64 32`.
 - `COMPOSIO_API_KEY`: Required for the AI assistant (used by `app/api/assistant/route.ts` to connect external Composio tools).
 - `NEXT_PUBLIC_LIVEBLOCKS_ROOM`: Optional. Overrides the room id (defaults to `hevilan:pti-2025-syksy`). Must keep the `hevilan:` prefix so the auth grant in `app/api/liveblocks-auth/route.ts` matches. Set a personal room (e.g. `hevilan:dev-<name>`) to avoid polluting the shared production room — the room is provisioned automatically the next time you start the server.
