@@ -47,25 +47,33 @@ The app should now run at http://localhost:3000
 Instead of using the hosted Liveblocks cloud, you can run
 [Liveblocks' local dev server](https://liveblocks.io/docs/tools/dev-server) so
 you don't need a real Liveblocks account and don't touch the shared production
-room. It requires [Bun](https://bun.sh/) (`npm install -g bun`), or run it via
-Docker instead: `docker run -p 1153:1153 ghcr.io/liveblocks/cli dev`.
+room.
 
-**On Windows, use the Docker command above instead of `npx liveblocks dev`.**
-Native Windows hits a bug in the CLI (as of `liveblocks@1.6.2`) where a
-path-traversal safety check hardcodes a forward slash while
-`path.resolve` returns backslash-separated paths on Windows, so the check
-always fails — every room lookup throws `Error: Invalid internal ID`,
-regardless of room id or data state. Docker sidesteps this since it runs
-Linux internally.
+The easiest way, on any OS, is Docker Compose:
 
-In one terminal:
+```
+docker compose up
+```
+
+This starts a server at `http://localhost:1153` (config in
+`docker-compose.yml`) and persists room data in a named Docker volume across
+restarts.
+
+Alternatively, if you have [Bun](https://bun.sh/) installed
+(`npm install -g bun`), you can run the CLI directly:
 
 ```
 npx liveblocks dev
 ```
 
-This starts a server at `http://localhost:1153` and persists room data to a
-local `.liveblocks/` directory.
+This starts the same server at `http://localhost:1153` and persists room data
+to a local `.liveblocks/` directory. **Avoid this on Windows** — native
+Windows hits a bug in the CLI (as of `liveblocks@1.6.2`) where a
+path-traversal safety check hardcodes a forward slash while `path.resolve`
+returns backslash-separated paths on Windows, so the check always fails —
+every room lookup throws `Error: Invalid internal ID`, regardless of room id
+or data state. Use `docker compose up` instead, which sidesteps this since it
+runs Linux internally.
 
 In `.env.local`, set:
 
