@@ -39,6 +39,35 @@ npm run dev
 
 The app should now run at http://localhost:3000
 
+### Running Liveblocks locally
+
+Instead of using the hosted Liveblocks cloud, you can run
+[Liveblocks' local dev server](https://liveblocks.io/docs/tools/dev-server) so
+you don't need a real Liveblocks account and don't touch the shared production
+room. It requires [Bun](https://bun.sh/) (`npm install -g bun`), or run it via
+Docker instead: `docker run -p 1153:1153 ghcr.io/liveblocks/cli dev`.
+
+In one terminal:
+
+```
+npx liveblocks dev
+```
+
+This starts a server at `http://localhost:1153` and persists room data to a
+local `.liveblocks/` directory.
+
+In `.env.local`, set:
+
+```
+LIVEBLOCKS_SECRET=sk_localdev
+NEXT_PUBLIC_LIVEBLOCKS_BASE_URL=http://localhost:1153
+```
+
+Then run `npm run dev` as usual in a second terminal — the room is created and
+seeded automatically on startup (see `app/liveblocks/initRoom.ts`), no manual
+seed step needed. Note the local dev server doesn't support Comments,
+Notifications, or AI Copilots, but this app doesn't use any of those.
+
 ## Deployment
 
 The app is deployed using Vercel. The deployment is triggered automatically when changes are pushed to the main branch.

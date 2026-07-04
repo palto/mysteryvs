@@ -39,6 +39,7 @@ npm run verify       # Run all validations (type-check + lint + format check)
 - `SESSION_SECRET`: Required. Secret (>=32 chars) used to sign session cookies. Generate with `openssl rand -base64 32`.
 - `COMPOSIO_API_KEY`: Required for the AI assistant (used by `app/api/assistant/route.ts` to connect external Composio tools).
 - `NEXT_PUBLIC_LIVEBLOCKS_ROOM`: Optional. Overrides the room id (defaults to `hevilan:pti-2025-syksy`). Must keep the `hevilan:` prefix so the auth grant in `app/api/liveblocks-auth/route.ts` matches. Set a personal room (e.g. `hevilan:dev-<name>`) to avoid polluting the shared production room — the room is provisioned automatically the next time you start the server.
+- `NEXT_PUBLIC_LIVEBLOCKS_BASE_URL`: Optional. Points the Liveblocks client (`app/Room.tsx`) and node SDK (`app/liveblocks/liveblocks.ts`) — including the automatic room provisioning in `app/liveblocks/initRoom.ts` — at a [local Liveblocks dev server](https://liveblocks.io/docs/tools/dev-server) (`npx liveblocks dev`, defaults to `http://localhost:1153`) instead of Liveblocks cloud. Leave unset for cloud. See README for the full local setup.
 - The application validates environment variables at build time in `next.config.ts` and will exit if missing.
 
 ## Architecture
