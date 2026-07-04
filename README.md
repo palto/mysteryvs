@@ -50,6 +50,14 @@ you don't need a real Liveblocks account and don't touch the shared production
 room. It requires [Bun](https://bun.sh/) (`npm install -g bun`), or run it via
 Docker instead: `docker run -p 1153:1153 ghcr.io/liveblocks/cli dev`.
 
+**On Windows, use the Docker command above instead of `npx liveblocks dev`.**
+Native Windows hits a bug in the CLI (as of `liveblocks@1.6.2`) where a
+path-traversal safety check hardcodes a forward slash while
+`path.resolve` returns backslash-separated paths on Windows, so the check
+always fails — every room lookup throws `Error: Invalid internal ID`,
+regardless of room id or data state. Docker sidesteps this since it runs
+Linux internally.
+
 In one terminal:
 
 ```
