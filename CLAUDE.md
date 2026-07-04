@@ -35,11 +35,21 @@ npm run verify       # Run all validations (type-check + lint + format check)
 
 ### Environment Variables
 
-- `LIVEBLOCKS_SECRET`: Required for real-time collaboration. Set in `.env` file.
+- `LIVEBLOCKS_SECRET`: Set in `.env` file. Optional — defaults to `sk_localdev` when unset, which only works against the [local Liveblocks dev server](https://liveblocks.io/docs/tools/dev-server) (see `NEXT_PUBLIC_LIVEBLOCKS_BASE_URL` below). A real secret is required for Liveblocks cloud.
 - `SESSION_SECRET`: Required. Secret (>=32 chars) used to sign session cookies. Generate with `openssl rand -base64 32`.
 - `COMPOSIO_API_KEY`: Required for the AI assistant (used by `app/api/assistant/route.ts` to connect external Composio tools).
 - `NEXT_PUBLIC_LIVEBLOCKS_ROOM`: Optional. Overrides the room id (defaults to `hevilan:pti-2025-syksy`). Must keep the `hevilan:` prefix so the auth grant in `app/api/liveblocks-auth/route.ts` matches. Set a personal room (e.g. `hevilan:dev-<name>`) to avoid polluting the shared production room — the room is provisioned automatically the next time you start the server.
+- `NEXT_PUBLIC_LIVEBLOCKS_BASE_URL`: Optional. Points the Liveblocks client (`app/Room.tsx`) and node SDK (`app/liveblocks/liveblocks.ts`) — including the automatic room provisioning in `app/liveblocks/initRoom.ts` — at a [local Liveblocks dev server](https://liveblocks.io/docs/tools/dev-server) (`npx liveblocks dev`, defaults to `http://localhost:1153`) instead of Liveblocks cloud. Leave unset for cloud. See README for the full local setup.
 - The application validates environment variables at build time in `next.config.ts` and will exit if missing.
+
+### Verifying Changes Locally
+
+`npm run verify` only checks types/lint/formatting — it does not prove a feature works. To actually exercise a change end-to-end, run the app against the [local Liveblocks dev server](https://liveblocks.io/docs/tools/dev-server) instead of cloud (no real Liveblocks account needed, and it won't touch the shared production room):
+
+1. Start the dev server in one terminal: `npx liveblocks dev` (binds `http://localhost:1153`, requires [Bun](https://bun.sh/)) — or `docker compose up` if on Windows, which works around a Windows-only path bug in the CLI (see `docker-compose.yml` and the README's "Running Liveblocks locally" section for details).
+2. In `.env.local`, set `NEXT_PUBLIC_LIVEBLOCKS_BASE_URL=http://localhost:1153`. Leave `LIVEBLOCKS_SECRET` unset — it defaults to `sk_localdev`, the only secret the local dev server accepts.
+3. Run `npm run dev` in a second terminal. The room is created and seeded automatically on startup (`app/liveblocks/initRoom.ts`) — no manual seed step needed.
+4. Drive the actual feature rather than just reading the code: open `http://localhost:3000/login`, add/select a player, log in, and exercise the relevant flow (start a round, edit the description, call an MCP tool against `/api/mcp`, etc.). A headless browser (e.g. Playwright) works well for this in a non-interactive session.
 
 ## Architecture
 

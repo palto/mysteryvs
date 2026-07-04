@@ -1,0 +1,11 @@
+services:
+  liveblocks:
+    image: ghcr.io/liveblocks/cli
+    command: dev
+    ports:
+      - "1153:1153"
+    volumes:
+      - liveblocks-data:/app/.liveblocks
+
+volumes:
+  liveblocks-data:

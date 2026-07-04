@@ -19,6 +19,7 @@ export function Room({
   return (
     <LiveblocksProvider
       authEndpoint="/api/liveblocks-auth"
+      baseUrl={process.env.NEXT_PUBLIC_LIVEBLOCKS_BASE_URL || undefined}
       badgeLocation="bottom-left"
     >
       <RoomProvider id={room} initialStorage={initialStorage()}>

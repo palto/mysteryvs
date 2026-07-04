@@ -3,7 +3,7 @@ import z from "zod";
 
 const envValidationResult = z
   .object({
-    LIVEBLOCKS_SECRET: z.string(),
+    LIVEBLOCKS_SECRET: z.string().optional(),
     SESSION_SECRET: z.string().min(32),
   })
   .safeParse(process.env);

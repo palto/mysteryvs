@@ -1,5 +1,6 @@
 import { Liveblocks } from "@liveblocks/node";
 
 export const liveblocks = new Liveblocks({
-  secret: process.env.LIVEBLOCKS_SECRET!,
+  secret: process.env.LIVEBLOCKS_SECRET || "sk_localdev",
+  baseUrl: process.env.NEXT_PUBLIC_LIVEBLOCKS_BASE_URL || undefined,
 });
