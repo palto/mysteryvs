@@ -1,5 +1,5 @@
 import Link from "next/link";
-import { Bot, Settings } from "lucide-react";
+import { Bot } from "lucide-react";
 
 function GithubIcon({ size = 24 }: { size?: number }) {
   return (
@@ -44,13 +44,6 @@ export async function TopNav() {
           aria-label="MCP"
         >
           <Bot size={20} />
-        </Link>
-        <Link
-          href="/admin"
-          className="text-muted-foreground hover:text-foreground"
-          aria-label="Admin"
-        >
-          <Settings size={20} />
         </Link>
         {username && <AvatarMenu username={username} />}
       </div>
