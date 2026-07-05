@@ -115,14 +115,9 @@ app/
 │   ├── LoginClientPage.tsx     # Login UI (client component)
 │   ├── ParticipantLoginButton.tsx
 │   ├── NewPlayerDrawer.tsx     # Add-a-new-player UI
-│   ├── getSession.ts / getUsername.ts / getParticipants.ts
+│   ├── getSession.ts / getUsername.ts
 │   ├── session.ts              # Signed JWT session token logic
 │   └── actions.ts              # Login/logout server actions
-├── admin/                      # Admin interface
-│   ├── page.tsx                # Admin page server component
-│   ├── AdminPage.tsx           # Admin UI (client component)
-│   ├── TournamentNameEditor.tsx / TournamentDescriptionEditor.tsx / RoundLengthEditor.tsx
-│   └── actions.ts              # Participant/tournament management actions
 ├── api/
 │   ├── liveblocks-auth/        # Liveblocks authentication endpoint
 │   ├── assistant/              # AI assistant route (Vercel AI SDK + Composio + MCP)
@@ -147,12 +142,12 @@ components/
 
 ### Important Implementation Details
 
-- Round length is configurable (`roundLength` in storage; default `20 * 60 * 1000` ms) and editable from the admin page — it is **not** hardcoded in the timer.
+- Round length is configurable (`roundLength` in storage; default `20 * 60 * 1000` ms) and editable from the setup wizard — it is **not** hardcoded in the timer.
 - The host is filtered out of the participants list during rounds.
 - Times are stored as Unix timestamps (milliseconds since epoch).
 - Per-round points are derived via `calculateRoundPoints` / `useCurrentRoundPoints` in `app/mysteryhooks.ts`.
 - All state changes are atomic through Liveblocks mutations.
-- Admin page at `/admin` manages participants (incl. drag-to-reorder via dnd-kit) and tournament settings.
+- Participant management (incl. drag-to-reorder via dnd-kit), tournament name/description, and round length are all editable from the setup wizard (`app/SetupWizard.tsx`) and via MCP tools; there is no separate admin page.
 
 ### AI Assistant
 
