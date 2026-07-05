@@ -1,9 +1,5 @@
 "use client";
-import {
-  addParticipant,
-  removeParticipant,
-  reorderParticipants,
-} from "@/app/admin/actions";
+import { shallow, useMutation, useStorage } from "@liveblocks/react/suspense";
 import { Button } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
 import { Label } from "@/components/ui/label";
@@ -11,7 +7,7 @@ import { Input } from "@/components/ui/input";
 import { TournamentNameEditor } from "@/app/admin/TournamentNameEditor";
 import { TournamentDescriptionEditor } from "@/app/admin/TournamentDescriptionEditor";
 import { RoundLengthEditor } from "@/app/admin/RoundLengthEditor";
-import { useTransition, useState, useOptimistic } from "react";
+import { useState } from "react";
 import {
   DndContext,
   closestCenter,
@@ -25,7 +21,6 @@ import {
   SortableContext,
   verticalListSortingStrategy,
   useSortable,
-  arrayMove,
 } from "@dnd-kit/sortable";
 import { CSS } from "@dnd-kit/utilities";
 import { GripVertical } from "lucide-react";
@@ -39,6 +34,13 @@ function SortableParticipantCard({ participant }: { participant: string }) {
     transition,
     isDragging,
   } = useSortable({ id: participant });
+
+  const removeParticipant = useMutation(({ storage }, name: string) => {
+    const list = storage.get("participants");
+    const index = list.indexOf(name);
+    if (index !== -1) list.delete(index);
+    storage.get("hostRounds").delete(name);
+  }, []);
 
   return (
     <Card
@@ -72,58 +74,53 @@ function SortableParticipantCard({ participant }: { participant: string }) {
   );
 }
 
-export function AdminPage({
-  participants,
-  name,
-  description,
-  roundLength,
-}: {
-  participants: readonly string[];
-  name: string;
-  description: string;
-  roundLength: number;
-}) {
+export function AdminPage() {
   const [username, setUsername] = useState("");
-  const [isPending, startTransition] = useTransition();
-  const [optimisticItems, reorderOptimistic] = useOptimistic(
-    [...participants],
-    (_current, newOrder: string[]) => newOrder,
-  );
+  const participants = useStorage((root) => [...root.participants], shallow);
 
   const sensors = useSensors(useSensor(PointerSensor), useSensor(TouchSensor));
+
+  const moveParticipant = useMutation(
+    ({ storage }, fromIndex: number, toIndex: number) => {
+      storage.get("participants").move(fromIndex, toIndex);
+    },
+    [],
+  );
+
+  const addParticipant = useMutation(({ storage }, name: string) => {
+    const list = storage.get("participants");
+    if (list.indexOf(name) !== -1) {
+      throw new Error("Username already exists");
+    }
+    list.push(name);
+  }, []);
 
   function handleDragEnd(event: DragEndEvent) {
     const { active, over } = event;
     if (!over || active.id === over.id) return;
-    const oldIndex = optimisticItems.indexOf(active.id as string);
-    const newIndex = optimisticItems.indexOf(over.id as string);
-    const newItems = arrayMove(optimisticItems, oldIndex, newIndex);
-    startTransition(async () => {
-      reorderOptimistic(newItems);
-      await reorderParticipants(newItems);
-    });
+    const oldIndex = participants.indexOf(active.id as string);
+    const newIndex = participants.indexOf(over.id as string);
+    if (oldIndex === -1 || newIndex === -1) return;
+    moveParticipant(oldIndex, newIndex);
   }
 
   const trimmed = username.trim();
   const isDuplicate = participants.includes(trimmed);
-  const canSubmit = trimmed.length > 0 && !isDuplicate && !isPending;
+  const canSubmit = trimmed.length > 0 && !isDuplicate;
 
   function handleSubmit(e: React.SyntheticEvent<HTMLFormElement>) {
     e.preventDefault();
     if (!canSubmit) return;
-    const data = new FormData(e.currentTarget);
-    startTransition(async () => {
-      await addParticipant(data);
-      setUsername("");
-    });
+    addParticipant(trimmed);
+    setUsername("");
   }
 
   return (
     <div className="overflow-x-hidden">
       <h1 className="text-2xl font-bold mb-6">Hallintapaneeli</h1>
-      <TournamentNameEditor initialName={name} />
-      <TournamentDescriptionEditor initialDescription={description} />
-      <RoundLengthEditor initialMinutes={roundLength / 60 / 1000} />
+      <TournamentNameEditor />
+      <TournamentDescriptionEditor />
+      <RoundLengthEditor />
       <h2 className="mb-3">Osallistujat</h2>
       <DndContext
         sensors={sensors}
@@ -131,11 +128,11 @@ export function AdminPage({
         onDragEnd={handleDragEnd}
       >
         <SortableContext
-          items={optimisticItems}
+          items={participants}
           strategy={verticalListSortingStrategy}
         >
           <div className="flex flex-col gap-2 mb-6">
-            {optimisticItems.map((participant) => (
+            {participants.map((participant) => (
               <SortableParticipantCard
                 key={participant}
                 participant={participant}

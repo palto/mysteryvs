@@ -1,32 +1,29 @@
 "use client";
-import { setDescription } from "@/app/admin/actions";
+import { useMutation } from "@liveblocks/react/suspense";
+import { useDescription } from "@/app/mysteryhooks";
 import { Label } from "@/components/ui/label";
 import { Button } from "@/components/ui/button";
 import { Check, Save, X } from "lucide-react";
-import { useCallback, useEffect, useRef, useState, useTransition } from "react";
+import { useCallback, useEffect, useRef, useState } from "react";
 
-export function TournamentDescriptionEditor({
-  initialDescription,
-}: {
-  initialDescription: string;
-}) {
+export function TournamentDescriptionEditor() {
+  const initialDescription = useDescription();
   const [value, setValue] = useState(initialDescription);
   const [saved, setSaved] = useState(false);
-  const [isPending, startTransition] = useTransition();
-  const isDirty = value !== initialDescription && !isPending;
+  const isDirty = value !== initialDescription;
   const savedTimeoutRef = useRef<ReturnType<typeof setTimeout> | null>(null);
+
+  const setDescription = useMutation(({ storage }, description: string) => {
+    storage.set("description", description);
+  }, []);
 
   const handleSave = useCallback(() => {
     if (!isDirty) return;
-    const formData = new FormData();
-    formData.set("description", value);
-    startTransition(async () => {
-      await setDescription(formData);
-      setSaved(true);
-      if (savedTimeoutRef.current) clearTimeout(savedTimeoutRef.current);
-      savedTimeoutRef.current = setTimeout(() => setSaved(false), 2000);
-    });
-  }, [value, isDirty]);
+    setDescription(value);
+    setSaved(true);
+    if (savedTimeoutRef.current) clearTimeout(savedTimeoutRef.current);
+    savedTimeoutRef.current = setTimeout(() => setSaved(false), 2000);
+  }, [value, isDirty, setDescription]);
 
   const handleDiscard = useCallback(() => {
     setValue(initialDescription);
@@ -59,7 +56,6 @@ export function TournamentDescriptionEditor({
         value={value}
         onChange={(e) => setValue(e.target.value)}
         onKeyDown={handleKeyDown}
-        disabled={isPending}
         rows={6}
         className="w-full rounded-md border border-input bg-background px-3 py-2 text-sm font-mono shadow-sm focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-ring disabled:opacity-50 resize-y"
       />
@@ -77,7 +73,7 @@ export function TournamentDescriptionEditor({
         <Button
           size="sm"
           onClick={handleSave}
-          disabled={isPending || !isDirty}
+          disabled={!isDirty}
           title="Tallenna (Ctrl+Enter)"
           className={
             saved

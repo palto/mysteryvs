@@ -1,5 +1,6 @@
 "use client";
-import { setName } from "@/app/admin/actions";
+import { useMutation } from "@liveblocks/react/suspense";
+import { useName } from "@/app/mysteryhooks";
 import { Label } from "@/components/ui/label";
 import {
   InputGroup,
@@ -8,26 +9,26 @@ import {
   InputGroupInput,
 } from "@/components/ui/input-group";
 import { Check, Save, X } from "lucide-react";
-import { useCallback, useEffect, useRef, useState, useTransition } from "react";
+import { useCallback, useEffect, useRef, useState } from "react";
 
-export function TournamentNameEditor({ initialName }: { initialName: string }) {
+export function TournamentNameEditor() {
+  const initialName = useName();
   const [value, setValue] = useState(initialName);
   const [saved, setSaved] = useState(false);
-  const [isPending, startTransition] = useTransition();
-  const isDirty = value !== initialName && !isPending;
+  const isDirty = value !== initialName;
   const savedTimeoutRef = useRef<ReturnType<typeof setTimeout> | null>(null);
+
+  const setName = useMutation(({ storage }, name: string) => {
+    storage.set("name", name);
+  }, []);
 
   const handleSave = useCallback(() => {
     if (!value.trim() || !isDirty) return;
-    const formData = new FormData();
-    formData.set("name", value.trim());
-    startTransition(async () => {
-      await setName(formData);
-      setSaved(true);
-      if (savedTimeoutRef.current) clearTimeout(savedTimeoutRef.current);
-      savedTimeoutRef.current = setTimeout(() => setSaved(false), 2000);
-    });
-  }, [value, isDirty]);
+    setName(value.trim());
+    setSaved(true);
+    if (savedTimeoutRef.current) clearTimeout(savedTimeoutRef.current);
+    savedTimeoutRef.current = setTimeout(() => setSaved(false), 2000);
+  }, [value, isDirty, setName]);
 
   const handleDiscard = useCallback(() => {
     setValue(initialName);
@@ -61,7 +62,6 @@ export function TournamentNameEditor({ initialName }: { initialName: string }) {
           value={value}
           onChange={(e) => setValue(e.target.value)}
           onKeyDown={handleKeyDown}
-          disabled={isPending}
         />
         <InputGroupAddon align="inline-end">
           {isDirty && (
@@ -76,7 +76,7 @@ export function TournamentNameEditor({ initialName }: { initialName: string }) {
           <InputGroupButton
             size="icon-sm"
             onClick={handleSave}
-            disabled={isPending || !isDirty}
+            disabled={!isDirty}
             title="Tallenna (Enter)"
             className={
               saved

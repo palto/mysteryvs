@@ -115,14 +115,13 @@ app/
 │   ├── LoginClientPage.tsx     # Login UI (client component)
 │   ├── ParticipantLoginButton.tsx
 │   ├── NewPlayerDrawer.tsx     # Add-a-new-player UI
-│   ├── getSession.ts / getUsername.ts / getParticipants.ts
+│   ├── getSession.ts / getUsername.ts
 │   ├── session.ts              # Signed JWT session token logic
 │   └── actions.ts              # Login/logout server actions
 ├── admin/                      # Admin interface
-│   ├── page.tsx                # Admin page server component
-│   ├── AdminPage.tsx           # Admin UI (client component)
-│   ├── TournamentNameEditor.tsx / TournamentDescriptionEditor.tsx / RoundLengthEditor.tsx
-│   └── actions.ts              # Participant/tournament management actions
+│   ├── page.tsx                # Admin page server component (thin shell)
+│   ├── AdminPage.tsx           # Admin UI (client component, mutates Liveblocks storage directly)
+│   └── TournamentNameEditor.tsx / TournamentDescriptionEditor.tsx / RoundLengthEditor.tsx
 ├── api/
 │   ├── liveblocks-auth/        # Liveblocks authentication endpoint
 │   ├── assistant/              # AI assistant route (Vercel AI SDK + Composio + MCP)

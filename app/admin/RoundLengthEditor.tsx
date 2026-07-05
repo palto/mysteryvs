@@ -1,5 +1,6 @@
 "use client";
-import { setRoundLength } from "@/app/admin/actions";
+import { useMutation } from "@liveblocks/react/suspense";
+import { useRoundLength } from "@/app/mysteryhooks";
 import { Label } from "@/components/ui/label";
 import {
   InputGroup,
@@ -8,32 +9,28 @@ import {
   InputGroupInput,
 } from "@/components/ui/input-group";
 import { Check, Save, X } from "lucide-react";
-import { useCallback, useEffect, useRef, useState, useTransition } from "react";
+import { useCallback, useEffect, useRef, useState } from "react";
 
-export function RoundLengthEditor({
-  initialMinutes,
-}: {
-  initialMinutes: number;
-}) {
+export function RoundLengthEditor() {
+  const initialMinutes = useRoundLength() / 60 / 1000;
   const [value, setValue] = useState(String(initialMinutes));
   const [saved, setSaved] = useState(false);
-  const [isPending, startTransition] = useTransition();
-  const isDirty = value !== String(initialMinutes) && !isPending;
+  const isDirty = value !== String(initialMinutes);
   const savedTimeoutRef = useRef<ReturnType<typeof setTimeout> | null>(null);
 
   const isValid = Number.isFinite(Number(value)) && Number(value) > 0;
 
+  const setRoundLength = useMutation(({ storage }, minutes: number) => {
+    storage.set("roundLength", Math.round(minutes * 60 * 1000));
+  }, []);
+
   const handleSave = useCallback(() => {
     if (!isValid || !isDirty) return;
-    const formData = new FormData();
-    formData.set("roundLength", value);
-    startTransition(async () => {
-      await setRoundLength(formData);
-      setSaved(true);
-      if (savedTimeoutRef.current) clearTimeout(savedTimeoutRef.current);
-      savedTimeoutRef.current = setTimeout(() => setSaved(false), 2000);
-    });
-  }, [value, isDirty, isValid]);
+    setRoundLength(Number(value));
+    setSaved(true);
+    if (savedTimeoutRef.current) clearTimeout(savedTimeoutRef.current);
+    savedTimeoutRef.current = setTimeout(() => setSaved(false), 2000);
+  }, [value, isDirty, isValid, setRoundLength]);
 
   const handleDiscard = useCallback(() => {
     setValue(String(initialMinutes));
@@ -70,7 +67,6 @@ export function RoundLengthEditor({
           value={value}
           onChange={(e) => setValue(e.target.value)}
           onKeyDown={handleKeyDown}
-          disabled={isPending}
         />
         <InputGroupAddon align="inline-end">
           {isDirty && (
@@ -85,7 +81,7 @@ export function RoundLengthEditor({
           <InputGroupButton
             size="icon-sm"
             onClick={handleSave}
-            disabled={isPending || !isDirty || !isValid}
+            disabled={!isDirty || !isValid}
             title="Tallenna (Enter)"
             className={
               saved

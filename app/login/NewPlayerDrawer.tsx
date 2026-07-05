@@ -1,8 +1,8 @@
 "use client";
 
-import { useState, useTransition } from "react";
+import { useState } from "react";
 import { UserPlus } from "lucide-react";
-import { addParticipant } from "@/app/admin/actions";
+import { useMutation } from "@liveblocks/react/suspense";
 import { useParticipants } from "@/app/Participants";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -21,38 +21,40 @@ import {
 export function NewPlayerDrawer() {
   const [open, setOpen] = useState(false);
   const [username, setUsername] = useState("");
-  const [serverError, setServerError] = useState<string | null>(null);
-  const [isPending, startTransition] = useTransition();
+  const [error, setError] = useState<string | null>(null);
   const participants = useParticipants();
+
+  const addParticipant = useMutation(({ storage }, name: string) => {
+    const list = storage.get("participants");
+    if (list.indexOf(name) !== -1) {
+      throw new Error("Username already exists");
+    }
+    list.push(name);
+  }, []);
 
   const trimmed = username.trim();
   const isDuplicate = participants.some((p) => p.id === trimmed);
-  const canSubmit = trimmed.length > 0 && !isDuplicate && !isPending;
+  const canSubmit = trimmed.length > 0 && !isDuplicate;
 
   function handleOpenChange(value: boolean) {
     setOpen(value);
     if (!value) {
       setUsername("");
-      setServerError(null);
+      setError(null);
     }
   }
 
   function handleSubmit(e: React.FormEvent<HTMLFormElement>) {
     e.preventDefault();
     if (!canSubmit) return;
-    setServerError(null);
-    const data = new FormData(e.currentTarget);
-    startTransition(async () => {
-      try {
-        await addParticipant(data);
-        setOpen(false);
-        setUsername("");
-      } catch (err) {
-        setServerError(
-          err instanceof Error ? err.message : "Jokin meni pieleen.",
-        );
-      }
-    });
+    setError(null);
+    try {
+      addParticipant(trimmed);
+      setOpen(false);
+      setUsername("");
+    } catch (err) {
+      setError(err instanceof Error ? err.message : "Jokin meni pieleen.");
+    }
   }
 
   return (
@@ -83,7 +85,7 @@ export function NewPlayerDrawer() {
                 value={username}
                 onChange={(e) => {
                   setUsername(e.target.value);
-                  setServerError(null);
+                  setError(null);
                 }}
                 autoComplete="off"
                 autoFocus
@@ -93,13 +95,11 @@ export function NewPlayerDrawer() {
                   Pelaaja on jo olemassa.
                 </p>
               )}
-              {serverError && (
-                <p className="text-sm text-destructive">{serverError}</p>
-              )}
+              {error && <p className="text-sm text-destructive">{error}</p>}
             </div>
             <DrawerFooter className="px-0">
               <Button type="submit" disabled={!canSubmit}>
-                {isPending ? "Lisätään…" : "Lisää pelaaja"}
+                Lisää pelaaja
               </Button>
               <DrawerClose asChild>
                 <Button variant="outline" type="button">
