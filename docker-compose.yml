@@ -1,7 +1,8 @@
 services:
   liveblocks:
-    image: ghcr.io/liveblocks/cli
-    command: dev
+    build:
+      context: .
+      dockerfile: liveblocks-dev.Dockerfile
     ports:
       - "1153:1153"
     volumes:
