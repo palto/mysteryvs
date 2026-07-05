@@ -8,15 +8,13 @@ import {
   InputGroupButton,
   InputGroupInput,
 } from "@/components/ui/input-group";
-import { Check, Save, X } from "lucide-react";
-import { useCallback, useEffect, useRef, useState } from "react";
+import { Save, X } from "lucide-react";
+import { useCallback, useState } from "react";
 
 export function RoundLengthEditor() {
   const initialMinutes = useRoundLength() / 60 / 1000;
   const [value, setValue] = useState(String(initialMinutes));
-  const [saved, setSaved] = useState(false);
   const isDirty = value !== String(initialMinutes);
-  const savedTimeoutRef = useRef<ReturnType<typeof setTimeout> | null>(null);
 
   const isValid = Number.isFinite(Number(value)) && Number(value) > 0;
 
@@ -27,9 +25,6 @@ export function RoundLengthEditor() {
   const handleSave = useCallback(() => {
     if (!isValid || !isDirty) return;
     setRoundLength(Number(value));
-    setSaved(true);
-    if (savedTimeoutRef.current) clearTimeout(savedTimeoutRef.current);
-    savedTimeoutRef.current = setTimeout(() => setSaved(false), 2000);
   }, [value, isDirty, isValid, setRoundLength]);
 
   const handleDiscard = useCallback(() => {
@@ -48,12 +43,6 @@ export function RoundLengthEditor() {
     },
     [handleSave, handleDiscard],
   );
-
-  useEffect(() => {
-    return () => {
-      if (savedTimeoutRef.current) clearTimeout(savedTimeoutRef.current);
-    };
-  }, []);
 
   return (
     <div className="space-y-2">
@@ -83,13 +72,8 @@ export function RoundLengthEditor() {
             onClick={handleSave}
             disabled={!isDirty || !isValid}
             title="Tallenna (Enter)"
-            className={
-              saved
-                ? "bg-green-500 text-white hover:bg-green-500 hover:text-white transition-colors"
-                : "transition-colors"
-            }
           >
-            {saved ? <Check /> : <Save />}
+            <Save />
           </InputGroupButton>
         </InputGroupAddon>
       </InputGroup>

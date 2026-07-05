@@ -8,15 +8,13 @@ import {
   InputGroupButton,
   InputGroupInput,
 } from "@/components/ui/input-group";
-import { Check, Save, X } from "lucide-react";
-import { useCallback, useEffect, useRef, useState } from "react";
+import { Save, X } from "lucide-react";
+import { useCallback, useState } from "react";
 
 export function TournamentNameEditor() {
   const initialName = useName();
   const [value, setValue] = useState(initialName);
-  const [saved, setSaved] = useState(false);
   const isDirty = value !== initialName;
-  const savedTimeoutRef = useRef<ReturnType<typeof setTimeout> | null>(null);
 
   const setName = useMutation(({ storage }, name: string) => {
     storage.set("name", name);
@@ -25,9 +23,6 @@ export function TournamentNameEditor() {
   const handleSave = useCallback(() => {
     if (!value.trim() || !isDirty) return;
     setName(value.trim());
-    setSaved(true);
-    if (savedTimeoutRef.current) clearTimeout(savedTimeoutRef.current);
-    savedTimeoutRef.current = setTimeout(() => setSaved(false), 2000);
   }, [value, isDirty, setName]);
 
   const handleDiscard = useCallback(() => {
@@ -46,12 +41,6 @@ export function TournamentNameEditor() {
     },
     [handleSave, handleDiscard],
   );
-
-  useEffect(() => {
-    return () => {
-      if (savedTimeoutRef.current) clearTimeout(savedTimeoutRef.current);
-    };
-  }, []);
 
   return (
     <div className="space-y-2">
@@ -78,13 +67,8 @@ export function TournamentNameEditor() {
             onClick={handleSave}
             disabled={!isDirty}
             title="Tallenna (Enter)"
-            className={
-              saved
-                ? "bg-green-500 text-white hover:bg-green-500 hover:text-white transition-colors"
-                : "transition-colors"
-            }
           >
-            {saved ? <Check /> : <Save />}
+            <Save />
           </InputGroupButton>
         </InputGroupAddon>
       </InputGroup>

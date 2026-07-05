@@ -3,15 +3,13 @@ import { useMutation } from "@liveblocks/react/suspense";
 import { useDescription } from "@/app/mysteryhooks";
 import { Label } from "@/components/ui/label";
 import { Button } from "@/components/ui/button";
-import { Check, Save, X } from "lucide-react";
-import { useCallback, useEffect, useRef, useState } from "react";
+import { Save, X } from "lucide-react";
+import { useCallback, useState } from "react";
 
 export function TournamentDescriptionEditor() {
   const initialDescription = useDescription();
   const [value, setValue] = useState(initialDescription);
-  const [saved, setSaved] = useState(false);
   const isDirty = value !== initialDescription;
-  const savedTimeoutRef = useRef<ReturnType<typeof setTimeout> | null>(null);
 
   const setDescription = useMutation(({ storage }, description: string) => {
     storage.set("description", description);
@@ -20,9 +18,6 @@ export function TournamentDescriptionEditor() {
   const handleSave = useCallback(() => {
     if (!isDirty) return;
     setDescription(value);
-    setSaved(true);
-    if (savedTimeoutRef.current) clearTimeout(savedTimeoutRef.current);
-    savedTimeoutRef.current = setTimeout(() => setSaved(false), 2000);
   }, [value, isDirty, setDescription]);
 
   const handleDiscard = useCallback(() => {
@@ -41,12 +36,6 @@ export function TournamentDescriptionEditor() {
     },
     [handleSave, handleDiscard],
   );
-
-  useEffect(() => {
-    return () => {
-      if (savedTimeoutRef.current) clearTimeout(savedTimeoutRef.current);
-    };
-  }, []);
 
   return (
     <div className="space-y-2">
@@ -75,13 +64,8 @@ export function TournamentDescriptionEditor() {
           onClick={handleSave}
           disabled={!isDirty}
           title="Tallenna (Ctrl+Enter)"
-          className={
-            saved
-              ? "bg-green-500 text-white hover:bg-green-500 hover:text-white transition-colors"
-              : "transition-colors"
-          }
         >
-          {saved ? <Check /> : <Save />} Tallenna
+          <Save /> Tallenna
         </Button>
       </div>
     </div>
