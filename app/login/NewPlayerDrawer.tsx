@@ -2,7 +2,7 @@
 
 import { useState, useTransition } from "react";
 import { UserPlus } from "lucide-react";
-import { addParticipant } from "@/app/admin/actions";
+import { addParticipant } from "@/app/login/actions";
 import { useParticipants } from "@/app/Participants";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
