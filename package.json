@@ -13,8 +13,8 @@
     "env:pull": "npx vercel env pull --yes"
   },
   "dependencies": {
-    "@ai-sdk/mcp": "^1.0.59",
-    "@ai-sdk/react": "^3.0.222",
+    "@ai-sdk/mcp": "^1.0.61",
+    "@ai-sdk/react": "^3.0.224",
     "@blocknote/core": "^0.51.4",
     "@blocknote/react": "^0.51.4",
     "@blocknote/shadcn": "^0.51.4",
