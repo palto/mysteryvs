@@ -16,8 +16,6 @@ if (!envValidationResult.success) {
   process.exit(1);
 }
 
-const nextConfig: NextConfig = {
-  /* config options here */
-};
+const nextConfig: NextConfig = {/* config options here */};
 
 export default nextConfig;
