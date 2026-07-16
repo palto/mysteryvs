@@ -31,7 +31,7 @@ const TOOLS = [
   {
     name: "get_results",
     description:
-      "Returns per-participant results for the current or last round, sorted by finish time. Shows elapsed seconds, DNF status, and points earned this round.",
+      "Returns per-participant results and points for the current or last round. Time rounds show elapsed seconds and DNF status, sorted by finish time; score rounds show each participant's score, sorted by score descending.",
   },
   {
     name: "get_round_state",

@@ -124,7 +124,11 @@ function createMcpServer() {
 
   server.tool(
     "get_results",
-    "Get per-participant results for the current or last round, sorted by finish time. Shows elapsed seconds, DNF status, and points earned this round.",
+    "Get per-participant results for the current or last round, including the " +
+      "points earned this round. The other fields and the sort order depend on " +
+      "the round type: time rounds return elapsedSeconds and dnf status, sorted " +
+      "by finish time (DNF last); score rounds return score (no finish time / no " +
+      "dnf — those don't apply to score rounds), sorted by score descending.",
     {},
     async () => {
       const storage = await liveblocks.getStorageDocument(room, "json");
@@ -152,18 +156,38 @@ function createMcpServer() {
           )
         : {};
 
+      // Score rounds have no finish times, so reporting elapsedSeconds/dnf here
+      // would flag every player as DNF and mislead readers (see issue #281).
+      // Emit only the fields that apply to the round type.
+      if (roundType === "score") {
+        const results = participants
+          .map((username) => ({
+            username,
+            score: participantScores[username] ?? null,
+            points: points[username] ?? null,
+          }))
+          .sort((a, b) => {
+            if (a.score === null && b.score === null) return 0;
+            if (a.score === null) return 1;
+            if (b.score === null) return -1;
+            return b.score - a.score;
+          });
+
+        return {
+          content: [{ type: "text", text: JSON.stringify(results, null, 2) }],
+        };
+      }
+
       const results = participants.map((username) => {
         const finishTime = participantTimes[username] ?? null;
         const elapsedSeconds =
           finishTime !== null && startTime !== null
             ? Math.round((finishTime - startTime) / 1000)
             : null;
-        const score = participantScores[username] ?? null;
         return {
           username,
           elapsedSeconds,
           dnf: elapsedSeconds === null,
-          score,
           points: points[username] ?? null,
         };
       });
