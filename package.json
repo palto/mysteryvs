@@ -14,7 +14,7 @@
   },
   "dependencies": {
     "@ai-sdk/mcp": "^1.0.61",
-    "@ai-sdk/react": "^3.0.226",
+    "@ai-sdk/react": "^3.0.227",
     "@blocknote/core": "^0.51.4",
     "@blocknote/react": "^0.51.4",
     "@blocknote/shadcn": "^0.51.4",
@@ -48,7 +48,7 @@
     "@streamdown/math": "^1.0.2",
     "@streamdown/mermaid": "^1.0.2",
     "@tailwindcss/typography": "^0.5.20",
-    "@tiptap/suggestion": "^3.27.3",
+    "@tiptap/suggestion": "^3.27.4",
     "@vercel/oidc": "^3.8.0",
     "ai": "^6.0.208",
     "class-variance-authority": "^0.7.1",
@@ -91,7 +91,7 @@
     "eslint-config-next": "16.2.10",
     "eslint-config-prettier": "^10.1.8",
     "postcss": "^8",
-    "prettier": "3.9.4",
+    "prettier": "3.9.5",
     "tailwindcss": "^4.3.0",
     "typescript": "^6"
   }
