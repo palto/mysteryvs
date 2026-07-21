@@ -13,13 +13,13 @@
     "env:pull": "npx vercel env pull --yes"
   },
   "dependencies": {
-    "@ai-sdk/mcp": "^1.0.61",
-    "@ai-sdk/react": "^3.0.227",
+    "@ai-sdk/mcp": "^1.0.63",
+    "@ai-sdk/react": "^3.0.232",
     "@blocknote/core": "^0.51.4",
     "@blocknote/react": "^0.51.4",
     "@blocknote/shadcn": "^0.51.4",
     "@composio/core": "^0.13.1",
-    "@composio/vercel": "^0.11.0",
+    "@composio/vercel": "^0.11.1",
     "@dnd-kit/core": "^6.3.1",
     "@dnd-kit/sortable": "^10.0.0",
     "@dnd-kit/utilities": "^3.2.2",
@@ -55,7 +55,7 @@
     "clsx": "^2.1.1",
     "cmdk": "^1.1.1",
     "date-fns": "^4.4.0",
-    "immer": "^11.1.11",
+    "immer": "^11.1.15",
     "jose": "^6.2.3",
     "lodash": "^4.18.1",
     "lucide-react": "^1.24.0",
@@ -81,8 +81,8 @@
     "node": "24.x"
   },
   "devDependencies": {
-    "@tailwindcss/postcss": "^4.3.2",
-    "@tailwindcss/upgrade": "^4.3.2",
+    "@tailwindcss/postcss": "^4.3.3",
+    "@tailwindcss/upgrade": "^4.3.3",
     "@types/lodash": "^4.17.24",
     "@types/node": "^24",
     "@types/react": "19.2.17",
