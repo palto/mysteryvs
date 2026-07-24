@@ -13,8 +13,8 @@
     "env:pull": "npx vercel env pull --yes"
   },
   "dependencies": {
-    "@ai-sdk/mcp": "^1.0.63",
-    "@ai-sdk/react": "^3.0.232",
+    "@ai-sdk/mcp": "^1.0.64",
+    "@ai-sdk/react": "^3.0.234",
     "@blocknote/core": "^0.51.4",
     "@blocknote/react": "^0.51.4",
     "@blocknote/shadcn": "^0.51.4",
@@ -91,7 +91,7 @@
     "eslint-config-next": "16.2.10",
     "eslint-config-prettier": "^10.1.8",
     "postcss": "^8",
-    "prettier": "3.9.5",
+    "prettier": "3.9.6",
     "tailwindcss": "^4.3.0",
     "typescript": "^6"
   }
