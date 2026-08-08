@@ -34,9 +34,15 @@ updates:
           - "react-dom"
           - "@types/react"
           - "@types/react-dom"
+      ai-sdk:
+        patterns:
+          - "ai"
+          - "@ai-sdk/*"
       patch-updates:
         update-types:
           - "patch"
         exclude-patterns:
           - "@blocknote/*"
           - "@liveblocks/*"
+          - "ai"
+          - "@ai-sdk/*"
