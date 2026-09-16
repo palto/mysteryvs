@@ -75,7 +75,7 @@
     "use-stick-to-bottom": "^1.1.6",
     "usehooks-ts": "^3.1.1",
     "vaul": "^1.1.2",
-    "zod": "^4.4.3"
+    "zod": "^4.5.4"
   },
   "engines": {
     "node": "24.x"
