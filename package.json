@@ -27,7 +27,7 @@
     "@liveblocks/node": "^3.24.3",
     "@liveblocks/react": "^3.24.3",
     "@liveblocks/react-blocknote": "^3.24.3",
-    "@modelcontextprotocol/sdk": "^1.31.0",
+    "@modelcontextprotocol/sdk": "^1.32.1",
     "@radix-ui/react-alert-dialog": "^1.1.24",
     "@radix-ui/react-avatar": "^1.2.7",
     "@radix-ui/react-collapsible": "^1.1.21",
